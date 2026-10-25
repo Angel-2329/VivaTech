@@ -2,9 +2,9 @@ function PiePagina() {
   return (
     <footer className="vt-footer">
       <p>
-        <strong>Viva Tech</strong> · Educación digital accesible
+        <strong>Instituto Tecnológico de Oaxaca</strong> · Plataforma Educativa Viva Tech
       </p>
-      <p>Acompañamiento paciente y tecnología a tu propio ritmo.</p>
+      <p>Diseñado para la inclusión y la alfabetización digital accesible.</p>
     </footer>
   )
 }
