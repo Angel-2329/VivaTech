@@ -1,14 +1,43 @@
 import { useState } from 'react'
+import { Navigate } from 'react-router'
 import Encabezado from '../components/Encabezado.jsx'
 import PiePagina from '../components/PiePagina.jsx'
 import PasoTelefono from '../components/acceso/PasoTelefono.jsx'
 import PasoCodigo from '../components/acceso/PasoCodigo.jsx'
+import { useSesion } from '../context/SesionContext.jsx'
+import { rutaDeInicio } from '../utils/rutaDeInicio.js'
 import './Acceso.css'
 
+
+function PasoIndicador({ numero, titulo, estado }) {
+  const esActual = estado === 'actual'
+  const esListo = estado === 'listo'
+  const textoEstado = esActual ? 'Paso actual' : esListo ? 'Listo' : 'Pendiente'
+
+  return (
+    <li
+      className={esListo ? 'vt-stepper__item is-completed' : 'vt-stepper__item'}
+      aria-current={esActual ? 'step' : undefined}
+    >
+      <span className="vt-step-number" aria-hidden="true">
+        {esListo ? <span className="vt-icon">check</span> : numero}
+      </span>
+      <span>
+        <strong>{titulo}</strong>
+        <span className="vt-body-sm">{textoEstado}</span>
+      </span>
+    </li>
+  )
+}
+
 function Acceso() {
+  const { usuario } = useSesion()
   const [paso, setPaso] = useState(1)
   const [telefono, setTelefono] = useState('')
   const [moverFoco, setMoverFoco] = useState(false)
+
+ 
+  if (usuario) return <Navigate to={rutaDeInicio(usuario)} replace />
 
   function irAlPasoCodigo(numero) {
     setTelefono(numero)
@@ -31,39 +60,17 @@ function Acceso() {
 
       <main id="contenido" className="vt-main">
         <div className="vt-container acceso">
-          <div className="vt-stack acceso__intro">
-            <span className="vt-badge vt-badge-primary acceso__insignia">
-              <span className="vt-icon" aria-hidden="true">
-                verified_user
-              </span>
-              Acceso protegido y sin contraseñas
-            </span>
-            <h1 className="vt-headline-xl">
-              Bienvenida(o) a tu espacio de aprendizaje digital Viva Tech
-            </h1>
+          <div className="vt-stack vt-stack-sm acceso__intro">
+            <h1 className="vt-headline-xl">Entra a Viva Tech</h1>
             <p className="vt-body-lg vt-text-muted">
-              Aprende a usar la tecnología a tu propio ritmo, de forma fácil, segura y guiada
-              paso a paso.
+              Solo necesitas tu número de celular. No usamos contraseñas.
             </p>
           </div>
 
           <section className="vt-card vt-stack vt-stack-lg acceso__tarjeta" aria-labelledby="titulo-paso">
             <ol className="vt-stepper" aria-label="Pasos para entrar">
-              <li
-                className={paso > 1 ? 'vt-stepper__item is-completed' : 'vt-stepper__item'}
-                aria-current={paso === 1 ? 'step' : undefined}
-              >
-                <span className="vt-step-number" aria-hidden="true">
-                  1
-                </span>
-                <strong>Tu teléfono</strong>
-              </li>
-              <li className="vt-stepper__item" aria-current={paso === 2 ? 'step' : undefined}>
-                <span className="vt-step-number" aria-hidden="true">
-                  2
-                </span>
-                <strong>Código SMS</strong>
-              </li>
+              <PasoIndicador numero={1} titulo="Tu número" estado={paso === 1 ? 'actual' : 'listo'} />
+              <PasoIndicador numero={2} titulo="Código" estado={paso === 2 ? 'actual' : 'pendiente'} />
             </ol>
 
             {paso === 1 ? (
@@ -83,14 +90,11 @@ function Acceso() {
 
           <aside className="vt-alert vt-alert-info acceso__tarjeta">
             <span className="vt-icon" aria-hidden="true">
-              shield
+              support_agent
             </span>
             <div className="vt-alert__content">
-              <p className="vt-alert__title">Tu tranquilidad es nuestra prioridad</p>
-              <p>
-                Solo usamos tu número para que puedas entrar. No lo compartimos ni te enviaremos
-                publicidad.
-              </p>
+              <p className="vt-alert__title">¿Necesitas ayuda con tu teléfono?</p>
+              <p>Pide apoyo a tu maestra o maestro de Viva Tech. Te acompañará paso a paso.</p>
             </div>
           </aside>
         </div>

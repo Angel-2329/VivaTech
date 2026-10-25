@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { enviarCodigo } from '../../services/authService.js'
 
 const DIGITOS_TELEFONO = 10
 
@@ -13,6 +14,7 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
   // Si regresa desde el paso 2, ya había aceptado el aviso
   const [aceptaAviso, setAceptaAviso] = useState(telefonoInicial !== '')
   const [errores, setErrores] = useState({})
+  const [enviando, setEnviando] = useState(false)
 
   const tituloRef = useRef(null)
   const telefonoRef = useRef(null)
@@ -35,8 +37,9 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
     if (errores.aviso) setErrores({ ...errores, aviso: undefined })
   }
 
-  function manejarEnvio(evento) {
+  async function manejarEnvio(evento) {
     evento.preventDefault()
+    if (enviando) return
 
     const nuevosErrores = {}
     if (!telefonoCompleto) {
@@ -47,7 +50,6 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
     }
     setErrores(nuevosErrores)
 
-    // Lleva el cursor al primer dato que falta corregir
     if (nuevosErrores.telefono) {
       telefonoRef.current?.focus()
       return
@@ -57,7 +59,16 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
       return
     }
 
-    // TODO (Firebase): aquí se enviará el SMS. Por ahora solo pasamos al paso 2.
+    setEnviando(true)
+    const resultado = await enviarCodigo(telefono)
+    setEnviando(false)
+
+    if (!resultado.ok) {
+      setErrores({ telefono: resultado.mensaje })
+      telefonoRef.current?.focus()
+      return
+    }
+
     onContinuar(telefono)
   }
 
@@ -69,11 +80,12 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
 
       <div className="vt-field">
         <label className="vt-field-label" htmlFor={`${id}-telefono`}>
-          Número de teléfono celular (10 dígitos)
+          Número de celular (10 dígitos)
+          <span className="vt-field-required">Obligatorio</span>
         </label>
         <p id={`${id}-ayuda`} className="vt-field-help">
-          Ejemplo: 951 123 4567. Te enviaremos un código de seguridad por mensaje de texto
-          (SMS).
+          Usa el número donde puedas recibir mensajes de texto (SMS) en este momento. Ejemplo:
+          951 123 4567.
         </p>
 
         <div className="vt-input-group" data-invalid={errores.telefono ? 'true' : undefined}>
@@ -144,12 +156,26 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
         )}
       </div>
 
-      <button type="submit" className="vt-btn vt-btn-primary vt-btn-block">
-        <span className="vt-icon" aria-hidden="true">
-          sms
-        </span>
-        Enviar código SMS a mi celular
-      </button>
+      <div className="vt-stack vt-stack-sm">
+        <button
+          type="submit"
+          className="vt-btn vt-btn-primary vt-btn-block"
+          aria-busy={enviando}
+          aria-disabled={enviando}
+          aria-describedby={`${id}-nota`}
+        >
+          {enviando ? 'Enviando código…' : 'Enviar código por SMS'}
+          <span className="vt-icon" aria-hidden="true">
+            arrow_forward
+          </span>
+        </button>
+        <p id={`${id}-nota`} className="vt-field-help acceso__nota">
+          <span className="vt-icon" aria-hidden="true">
+            sms
+          </span>
+          Te llegará un mensaje con 6 números. Puede tardar hasta un minuto.
+        </p>
+      </div>
     </form>
   )
 }

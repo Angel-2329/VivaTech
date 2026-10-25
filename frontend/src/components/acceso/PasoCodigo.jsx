@@ -1,4 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { enviarCodigo, verificarCodigo } from '../../services/authService.js'
+import { useSesion } from '../../context/SesionContext.jsx'
+import { rutaDeInicio } from '../../utils/rutaDeInicio.js'
 
 const LARGO_CODIGO = 6
 const SEGUNDOS_PARA_REENVIAR = 60
@@ -20,6 +24,9 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [segundos, setSegundos] = useState(SEGUNDOS_PARA_REENVIAR)
+  const [revisando, setRevisando] = useState(false)
+  const { iniciarSesion } = useSesion()
+  const navigate = useNavigate()
 
   const tituloRef = useRef(null)
   const codigoRef = useRef(null)
@@ -41,16 +48,17 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
     if (error) setError('')
   }
 
-  function reenviarCodigo() {
+  async function reenviarCodigo() {
     if (segundos > 0) return
-    // TODO (Firebase): volver a enviar el SMS.
+    await enviarCodigo(telefono)
     setSegundos(SEGUNDOS_PARA_REENVIAR)
     setCodigo('')
     setMensaje('Te enviamos un código nuevo. Revisa tus mensajes.')
   }
 
-  function manejarEnvio(evento) {
+  async function manejarEnvio(evento) {
     evento.preventDefault()
+    if (revisando) return
 
     if (codigo.length !== LARGO_CODIGO) {
       setMensaje('')
@@ -59,30 +67,48 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
       return
     }
 
-    // TODO (Firebase): confirmar el código y después ir a la pantalla que corresponda al rol.
-    setMensaje('Simulación: el código tiene el formato correcto. La verificación real se conectará con Firebase.')
+    setRevisando(true)
+    const resultado = await verificarCodigo(telefono, codigo)
+    setRevisando(false)
+
+    if (!resultado.ok) {
+      setMensaje('')
+      setError(resultado.mensaje)
+      codigoRef.current?.focus()
+      return
+    }
+
+    iniciarSesion(resultado.usuario)
+    navigate(rutaDeInicio(resultado.usuario), { replace: true })
   }
 
   return (
     <form className="vt-stack vt-stack-lg" onSubmit={manejarEnvio} noValidate>
-      <div className="vt-cluster vt-cluster-between">
-        <p className="vt-field-success">
-          <span className="vt-icon" aria-hidden="true">
-            mark_email_read
-          </span>
-          Código enviado al +52 {formatearTelefono(telefono)}
-        </p>
-        <button type="button" className="vt-btn vt-btn-ghost vt-btn-sm" onClick={onCambiarNumero}>
-          <span className="vt-icon" aria-hidden="true">
-            edit
-          </span>
-          Cambiar número
-        </button>
-      </div>
-
       <h2 id="titulo-paso" ref={tituloRef} tabIndex={-1} className="vt-headline-md">
-        Paso 2: Escribe el código que recibiste por mensaje
+        Paso 2: Escribe tu código de seguridad
       </h2>
+
+      {/* Se muestra el número completo para que la persona confirme que lo escribió bien */}
+      <div className="vt-alert vt-alert-info vt-alert-soft">
+        <span className="vt-icon" aria-hidden="true">
+          sms
+        </span>
+        <div className="vt-alert__content">
+          <p>
+            Te enviamos un código al <strong>+52 {formatearTelefono(telefono)}</strong>
+          </p>
+          <button
+            type="button"
+            className="vt-btn vt-btn-ghost vt-btn-sm acceso__cambiar"
+            onClick={onCambiarNumero}
+          >
+            <span className="vt-icon" aria-hidden="true">
+              edit
+            </span>
+            Cambiar número
+          </button>
+        </div>
+      </div>
 
       <div className="vt-field">
         <label className="vt-field-label" htmlFor={`${id}-codigo`}>
@@ -144,12 +170,29 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
         )}
       </div>
 
-      <button type="submit" className="vt-btn vt-btn-success vt-btn-block">
+      <button
+        type="submit"
+        className="vt-btn vt-btn-primary vt-btn-block"
+        aria-busy={revisando}
+        aria-disabled={revisando}
+      >
+        {revisando ? 'Revisando código…' : 'Confirmar y entrar'}
         <span className="vt-icon" aria-hidden="true">
-          lock_open
+          arrow_forward
         </span>
-        Confirmar y entrar a mi cuenta
       </button>
+
+      <div className="vt-alert vt-alert-soft acceso__protegido">
+        <span className="vt-icon vt-text-success" aria-hidden="true">
+          verified_user
+        </span>
+        <div className="vt-alert__content">
+          <p className="vt-alert__title">Tus datos están protegidos</p>
+          <p className="vt-body-sm">
+            El código solo funciona una vez. Nunca te pediremos contraseñas ni datos de tu banco.
+          </p>
+        </div>
+      </div>
     </form>
   )
 }

@@ -1,5 +1,3 @@
-/* Estilos solo de la pantalla de acceso.
-   Todo lo general (botones, campos, alertas, colores) viene de viva-tech-design-system.css */
 
 .acceso {
   display: flex;
@@ -14,15 +12,26 @@
   text-align: center;
 }
 
-
-.acceso__insignia {
-  white-space: normal;
-}
-
 .acceso__tarjeta {
   width: min(100%, 36rem);
 }
 
 .acceso__aviso {
+  background-color: var(--vt-surface-low);
+}
+
+.acceso__nota {
+  justify-content: center;
+  text-align: center;
+}
+
+
+.acceso__cambiar {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+
+
+.acceso__protegido {
   background-color: var(--vt-surface-low);
 }
