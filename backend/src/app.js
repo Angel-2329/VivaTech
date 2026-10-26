@@ -5,7 +5,9 @@ const verificarTokenFirebase = require('./middlewares/verificar-token-firebase')
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN
+}));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
@@ -15,27 +17,29 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.get('/api/db-check', async (req, res) => {
-  try {
-    await pool.query('SELECT 1');
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api/db-check', async (req, res) => {
+    try {
+      await pool.query('SELECT 1');
 
-    res.json({
-      ok: true
-    });
-  } catch (error) {
-    console.error('Error al conectar con PostgreSQL:', error.message);
+      res.json({
+        ok: true
+      });
+    } catch (error) {
+      console.error('Error al conectar con PostgreSQL:', error.message);
 
-    res.status(503).json({
-      ok: false,
-      mensaje: 'No fue posible conectar con la base de datos'
-    });
-  }
-});
-
-app.get('/api/auth-check', verificarTokenFirebase, (req, res) => {
-  res.json({
-    ok: true,
-    uid: req.auth.uid
+      res.status(503).json({
+        ok: false,
+        mensaje: 'No fue posible conectar con la base de datos'
+      });
+    }
   });
-});
+
+  app.get('/api/auth-check', verificarTokenFirebase, (req, res) => {
+    res.json({
+      ok: true,
+      uid: req.auth.uid
+    });
+  });
+}
 module.exports = app;
