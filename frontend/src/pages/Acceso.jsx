@@ -1,11 +1,8 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router'
 import Encabezado from '../components/Encabezado.jsx'
 import PiePagina from '../components/PiePagina.jsx'
 import PasoTelefono from '../components/acceso/PasoTelefono.jsx'
 import PasoCodigo from '../components/acceso/PasoCodigo.jsx'
-import { useSesion } from '../context/SesionContext.jsx'
-import { rutaDeInicio } from '../utils/rutaDeInicio.js'
 import './Acceso.css'
 
 
@@ -31,23 +28,22 @@ function PasoIndicador({ numero, titulo, estado }) {
 }
 
 function Acceso() {
-  const { usuario } = useSesion()
   const [paso, setPaso] = useState(1)
   const [telefono, setTelefono] = useState('')
   const [moverFoco, setMoverFoco] = useState(false)
+  const [confirmacion, setConfirmacion] = useState(null)
 
- 
-  if (usuario) return <Navigate to={rutaDeInicio(usuario)} replace />
-
-  function irAlPasoCodigo(numero) {
-    setTelefono(numero)
-    setPaso(2)
-    setMoverFoco(true)
+  function irAlPasoCodigo(numero, nuevaConfirmacion) {
+  setTelefono(numero)
+  setConfirmacion(nuevaConfirmacion)
+  setPaso(2)
+  setMoverFoco(true)
   }
 
   function regresarAlPasoTelefono() {
-    setPaso(1)
-    setMoverFoco(true)
+  setConfirmacion(null)
+  setPaso(1)
+  setMoverFoco(true)
   }
 
   return (
@@ -82,6 +78,8 @@ function Acceso() {
             ) : (
               <PasoCodigo
                 telefono={telefono}
+                confirmacion={confirmacion}
+                onConfirmacionActualizada={setConfirmacion}
                 enfocarTitulo={moverFoco}
                 onCambiarNumero={regresarAlPasoTelefono}
               />

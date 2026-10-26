@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router'
 import './styles/viva-tech-design-system.css'
 import { SesionProvider } from './context/SesionContext.jsx'
 import App from './App.jsx'
+import './config/firebase.js'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

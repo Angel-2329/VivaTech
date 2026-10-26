@@ -1,5 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { enviarCodigo } from '../../services/authService.js'
+import {
+  crearVerificadorRecaptcha,
+  enviarCodigoFirebase,
+} from '../../services/firebaseAuthService.js'
 
 const DIGITOS_TELEFONO = 10
 
@@ -11,7 +14,9 @@ function limpiarTelefono(texto) {
 
 function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
   const [telefono, setTelefono] = useState(telefonoInicial)
-  // Si regresa desde el paso 2, ya había aceptado el aviso
+  const recaptchaContenedorRef = useRef(null)
+  const recaptchaVerificadorRef = useRef(null)
+  const solicitudEnCursoRef = useRef(false)
   const [aceptaAviso, setAceptaAviso] = useState(telefonoInicial !== '')
   const [errores, setErrores] = useState({})
   const [enviando, setEnviando] = useState(false)
@@ -27,6 +32,15 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
     if (enfocarTitulo) tituloRef.current?.focus()
   }, [enfocarTitulo])
 
+  useEffect(() => {
+  return () => {
+    if (recaptchaVerificadorRef.current) {
+      recaptchaVerificadorRef.current.clear()
+      recaptchaVerificadorRef.current = null
+    }
+  }
+}, [])
+
   function manejarCambioTelefono(evento) {
     setTelefono(limpiarTelefono(evento.target.value))
     if (errores.telefono) setErrores({ ...errores, telefono: undefined })
@@ -37,39 +51,91 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
     if (errores.aviso) setErrores({ ...errores, aviso: undefined })
   }
 
-  async function manejarEnvio(evento) {
-    evento.preventDefault()
-    if (enviando) return
+  
+async function manejarEnvio(evento) {
+  evento.preventDefault()
 
-    const nuevosErrores = {}
-    if (!telefonoCompleto) {
-      nuevosErrores.telefono = `Escribe los 10 números de tu celular. Llevas ${telefono.length}.`
-    }
-    if (!aceptaAviso) {
-      nuevosErrores.aviso = 'Para continuar, marca la casilla del Aviso de Privacidad.'
-    }
-    setErrores(nuevosErrores)
+  if (solicitudEnCursoRef.current) return
 
-    if (nuevosErrores.telefono) {
-      telefonoRef.current?.focus()
-      return
-    }
-    if (nuevosErrores.aviso) {
-      avisoRef.current?.focus()
-      return
+  const nuevosErrores = {}
+
+  if (!telefonoCompleto) {
+    nuevosErrores.telefono =
+      `Escribe los 10 números de tu celular. Llevas ${telefono.length}.`
+  }
+
+  if (!aceptaAviso) {
+    nuevosErrores.aviso =
+      'Para continuar, marca la casilla del Aviso de Privacidad.'
+  }
+
+  setErrores(nuevosErrores)
+
+  if (nuevosErrores.telefono) {
+    telefonoRef.current?.focus()
+    return
+  }
+
+  if (nuevosErrores.aviso) {
+    avisoRef.current?.focus()
+    return
+  }
+
+  solicitudEnCursoRef.current = true
+  setEnviando(true)
+
+  let confirmacion
+
+  try {
+    if (!recaptchaVerificadorRef.current) {
+      recaptchaVerificadorRef.current = crearVerificadorRecaptcha(
+        recaptchaContenedorRef.current
+      )
     }
 
-    setEnviando(true)
-    const resultado = await enviarCodigo(telefono)
+    confirmacion = await enviarCodigoFirebase(
+      telefono,
+      recaptchaVerificadorRef.current
+    )
+  } catch (error) {
+    if (recaptchaVerificadorRef.current) {
+      recaptchaVerificadorRef.current.clear()
+      recaptchaVerificadorRef.current = null
+    }
+
+    const mensajes = {
+      'auth/invalid-phone-number':
+        'Revisa los 10 números de tu celular e inténtalo nuevamente.',
+      'auth/too-many-requests':
+        'Se hicieron varios intentos. Espera unos minutos antes de volver a intentar.',
+      'auth/quota-exceeded':
+        'El servicio de acceso no está disponible por el momento. Intenta más tarde.',
+      'auth/network-request-failed':
+        'No pudimos conectarnos. Revisa tu conexión a internet e inténtalo nuevamente.',
+      'auth/captcha-check-failed':
+        'No pudimos completar la verificación de seguridad. Inténtalo nuevamente.',
+      'auth/invalid-app-credential':
+        'No pudimos verificar esta aplicación. Pide apoyo al equipo de Viva Tech.',
+      'auth/unauthorized-domain':
+        'Esta dirección todavía no está habilitada para el acceso. Pide apoyo al equipo de Viva Tech.',
+      'auth/operation-not-allowed':
+        'El acceso por teléfono no está disponible. Pide apoyo al equipo de Viva Tech.',
+    }
+
+    setErrores({
+      telefono:
+        mensajes[error.code] ||
+        'No pudimos solicitar el código. Inténtalo nuevamente o pide apoyo.',
+    })
+
+    telefonoRef.current?.focus()
+    return
+  } finally {
+    solicitudEnCursoRef.current = false
     setEnviando(false)
+  }
 
-    if (!resultado.ok) {
-      setErrores({ telefono: resultado.mensaje })
-      telefonoRef.current?.focus()
-      return
-    }
-
-    onContinuar(telefono)
+  onContinuar(telefono, confirmacion)
   }
 
   return (
@@ -99,6 +165,7 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
             type="tel"
             inputMode="numeric"
             autoComplete="tel-national"
+            readOnly={enviando}
             value={telefono}
             onChange={manejarCambioTelefono}
             aria-invalid={errores.telefono ? 'true' : undefined}
@@ -135,6 +202,7 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
             ref={avisoRef}
             id={`${id}-aviso`}
             type="checkbox"
+            disabled={enviando}
             checked={aceptaAviso}
             onChange={manejarCambioAviso}
             aria-invalid={errores.aviso ? 'true' : undefined}
@@ -155,10 +223,11 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
           </p>
         )}
       </div>
-
+        <div ref={recaptchaContenedorRef} />
       <div className="vt-stack vt-stack-sm">
         <button
           type="submit"
+          disabled={enviando}
           className="vt-btn vt-btn-primary vt-btn-block"
           aria-busy={enviando}
           aria-disabled={enviando}
