@@ -16,20 +16,15 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/db-check', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT current_database() AS database,
-             current_user AS user_name
-    `);
+    await pool.query('SELECT 1');
 
     res.json({
-      ok: true,
-      database: result.rows[0].database,
-      user: result.rows[0].user_name
+      ok: true
     });
   } catch (error) {
     console.error('Error al conectar con PostgreSQL:', error.message);
 
-    res.status(500).json({
+    res.status(503).json({
       ok: false,
       mensaje: 'No fue posible conectar con la base de datos'
     });
