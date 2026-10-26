@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const pool = require('./config/database');
+const verificarTokenFirebase = require('./middlewares/verificar-token-firebase');
 
 const app = express();
 
@@ -31,4 +32,10 @@ app.get('/api/db-check', async (req, res) => {
   }
 });
 
+app.get('/api/auth-check', verificarTokenFirebase, (req, res) => {
+  res.json({
+    ok: true,
+    uid: req.auth.uid
+  });
+});
 module.exports = app;
