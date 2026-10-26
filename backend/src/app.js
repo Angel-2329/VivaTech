@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const pool = require('./config/database');
 
 const app = express();
 
@@ -11,6 +12,23 @@ app.get('/api/health', (req, res) => {
     ok: true,
     servicio: 'Viva Tech Backend'
   });
+});
+
+app.get('/api/db-check', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+
+    res.json({
+      ok: true
+    });
+  } catch (error) {
+    console.error('Error al conectar con PostgreSQL:', error.message);
+
+    res.status(503).json({
+      ok: false,
+      mensaje: 'No fue posible conectar con la base de datos'
+    });
+  }
 });
 
 module.exports = app;
