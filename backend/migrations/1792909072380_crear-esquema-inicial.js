@@ -1,11 +1,10 @@
 /**
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
-export const shorthands = undefined;
+exports.shorthands = undefined;
 
-export const up = (pgm) => {
+exports.up = (pgm) => {
   pgm.sql(`
-    CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
     CREATE OR REPLACE FUNCTION fn_poner_fecha_actualizacion()
     RETURNS trigger AS $$
@@ -17,10 +16,9 @@ export const up = (pgm) => {
 
     CREATE TABLE usuarios (
       uid VARCHAR(128) PRIMARY KEY,
+      nombre_completo VARCHAR(100) NOT NULL,
       nombre_apodo VARCHAR(30),
       rol VARCHAR(20) NOT NULL DEFAULT 'estudiante',
-      nombre_completo VARCHAR(100),
-      personalizacion_completa BOOLEAN NOT NULL DEFAULT false,
       activo BOOLEAN NOT NULL DEFAULT true,
       fecha_registro TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
       fecha_actualizacion TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,11 +29,11 @@ export const up = (pgm) => {
       CONSTRAINT chk_usuarios_rol
         CHECK (rol IN ('estudiante', 'maestro', 'administrador')),
 
-      CONSTRAINT chk_usuarios_nombre
-        CHECK (nombre_apodo IS NULL OR length(trim(nombre_apodo)) > 0),
-
       CONSTRAINT chk_usuarios_nombre_completo
-        CHECK (nombre_completo IS NULL OR length(trim(nombre_completo)) > 0)
+        CHECK (length(trim(nombre_completo)) BETWEEN 3 AND 100),
+
+      CONSTRAINT chk_usuarios_apodo
+        CHECK (nombre_apodo IS NULL OR length(trim(nombre_apodo)) > 0)
     );
 
     CREATE TABLE grupos (
@@ -65,7 +63,7 @@ export const up = (pgm) => {
       CONSTRAINT fk_grupo_maestros_grupo
         FOREIGN KEY (id_grupo)
         REFERENCES grupos(id_grupo)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
 
       CONSTRAINT fk_grupo_maestros_maestro
         FOREIGN KEY (uid_maestro)
@@ -89,7 +87,7 @@ export const up = (pgm) => {
       CONSTRAINT fk_grupo_estudiantes_grupo
         FOREIGN KEY (id_grupo)
         REFERENCES grupos(id_grupo)
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
 
       CONSTRAINT fk_grupo_estudiantes_estudiante
         FOREIGN KEY (uid_estudiante)
@@ -279,14 +277,26 @@ export const up = (pgm) => {
         )
     );
 
+    CREATE SEQUENCE seq_folio_certificados;
+
     CREATE TABLE certificados (
       id_certificado BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-      folio VARCHAR(20) NOT NULL,
+      folio VARCHAR(20) NOT NULL DEFAULT (
+        'VT-' ||
+        to_char(
+          CURRENT_TIMESTAMP AT TIME ZONE 'America/Mexico_City',
+          'YYYY'
+        ) ||
+        '-' ||
+        lpad(nextval('seq_folio_certificados')::text, 6, '0')
+      ),
       codigo_verificacion UUID NOT NULL DEFAULT gen_random_uuid(),
       uid_estudiante VARCHAR(128) NOT NULL,
       id_curso BIGINT NOT NULL,
       nombre_en_certificado VARCHAR(100) NOT NULL,
       titulo_curso_en_certificado TEXT NOT NULL,
+      lecciones_en_certificado JSONB NOT NULL,
+      fecha_finalizacion_curso TIMESTAMPTZ NOT NULL,
       fecha_emision TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
       CONSTRAINT fk_certificados_estudiante
@@ -311,7 +321,15 @@ export const up = (pgm) => {
         CHECK (length(trim(nombre_en_certificado)) > 0),
 
       CONSTRAINT chk_certificados_titulo_curso
-        CHECK (length(trim(titulo_curso_en_certificado)) > 0)
+        CHECK (length(trim(titulo_curso_en_certificado)) > 0),
+
+      CONSTRAINT chk_certificados_lecciones CHECK (
+        jsonb_typeof(lecciones_en_certificado) = 'array'
+        AND jsonb_array_length(lecciones_en_certificado) > 0
+      ),
+
+      CONSTRAINT chk_certificados_fechas
+        CHECK (fecha_emision >= fecha_finalizacion_curso)
     );
 
     CREATE TRIGGER trg_usuarios_fecha
@@ -368,9 +386,10 @@ export const up = (pgm) => {
   `);
 };
 
-export const down = (pgm) => {
+exports.down = (pgm) => {
   pgm.sql(`
     DROP TABLE IF EXISTS certificados;
+    DROP SEQUENCE IF EXISTS seq_folio_certificados;
     DROP TABLE IF EXISTS progresos;
     DROP TABLE IF EXISTS pasos;
     DROP TABLE IF EXISTS lecciones;
