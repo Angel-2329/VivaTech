@@ -5,6 +5,22 @@ const cargarUsuario = require('../middlewares/cargar-usuario');
 
 const router = express.Router();
 
+function validarCuerpo(req, res, next) {
+  if (
+    req.body === null
+    || typeof req.body !== 'object'
+    || Array.isArray(req.body)
+  ) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Envía los datos del perfil como un objeto JSON',
+      codigo: 'cuerpo_invalido'
+    });
+  }
+
+  return next();
+}
+
 function convertirPerfil(usuario) {
   return {
     uid: usuario.uid,
@@ -16,6 +32,15 @@ function convertirPerfil(usuario) {
 
 function limpiarApodo(apodo) {
   return apodo?.trim() || null;
+}
+
+function apodoValido(apodo) {
+  return apodo === undefined
+    || apodo === null
+    || (
+      typeof apodo === 'string'
+      && apodo.trim().length <= 30
+    );
 }
 
 function nombreValido(nombre) {
@@ -33,7 +58,7 @@ router.get(
   }
 );
 
-router.post('/', verificarTokenFirebase, async (req, res) => {
+router.post('/', verificarTokenFirebase, validarCuerpo, async (req, res) => {
   const { nombreCompleto, apodo } = req.body;
 
   if (!nombreValido(nombreCompleto)) {
@@ -43,6 +68,14 @@ router.post('/', verificarTokenFirebase, async (req, res) => {
       codigo: 'nombre_completo_invalido'
     });
   }
+
+if (!apodoValido(apodo)) {
+  return res.status(400).json({
+    ok: false,
+    mensaje: 'El apodo debe ser texto de hasta 30 caracteres o null',
+    codigo: 'apodo_invalido'
+  });
+}
 
   try {
     const resultado = await pool.query(
@@ -81,14 +114,22 @@ router.patch(
   '/',
   verificarTokenFirebase,
   cargarUsuario,
+  validarCuerpo,
   async (req, res) => {
     const { nombreCompleto, apodo } = req.body;
 
-    const nuevoNombre = nombreCompleto === undefined
-      ? req.usuario.nombre_completo
-      : nombreCompleto;
+    const cambiarNombre = nombreCompleto !== undefined;
+    const cambiarApodo = apodo !== undefined;
 
-    if (!nombreValido(nuevoNombre)) {
+    if (!cambiarNombre && !cambiarApodo) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'Envía el nombre completo o el apodo para actualizar el perfil',
+        codigo: 'sin_campos_actualizables'
+      });
+    }
+
+    if (cambiarNombre && !nombreValido(nombreCompleto)) {
       return res.status(400).json({
         ok: false,
         mensaje: 'El nombre completo debe tener entre 3 y 100 caracteres',
@@ -96,25 +137,46 @@ router.patch(
       });
     }
 
-    const nuevoApodo = apodo === undefined
-      ? req.usuario.nombre_apodo
-      : limpiarApodo(apodo);
+    if (!apodoValido(apodo)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El apodo debe ser texto de hasta 30 caracteres o null',
+        codigo: 'apodo_invalido'
+      });
+    }
 
     try {
       const resultado = await pool.query(
         `
           UPDATE usuarios
-          SET nombre_completo = $1,
-              nombre_apodo = $2
-          WHERE uid = $3
+          SET nombre_completo = CASE
+                WHEN $1::boolean THEN $2::varchar
+                ELSE nombre_completo
+              END,
+              nombre_apodo = CASE
+                WHEN $3::boolean THEN $4::varchar
+                ELSE nombre_apodo
+              END
+          WHERE uid = $5
+            AND activo = true
           RETURNING uid, nombre_completo, nombre_apodo, rol
         `,
         [
-          nuevoNombre.trim(),
-          nuevoApodo,
+          cambiarNombre,
+          cambiarNombre ? nombreCompleto.trim() : null,
+          cambiarApodo,
+          cambiarApodo ? limpiarApodo(apodo) : null,
           req.auth.uid
         ]
       );
+
+      if (resultado.rowCount === 0) {
+        return res.status(409).json({
+          ok: false,
+          mensaje: 'El perfil cambió o ya no está disponible. Consulta tu perfil nuevamente',
+          codigo: 'perfil_no_actualizado'
+        });
+      }
 
       return res.json(convertirPerfil(resultado.rows[0]));
     } catch (error) {
