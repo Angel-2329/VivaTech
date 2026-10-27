@@ -1,0 +1,16 @@
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-lg);
+  max-width: var(--vt-reading-max-width);
+}
+
+.aviso__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+}
+
+.aviso__regresar {
+  align-self: flex-start;
+}

@@ -1,12 +1,11 @@
-
 export function rutaDeInicio(usuario) {
-  if (usuario.primerAcceso) return '/bienvenida'
+  if (!usuario.nombreCompleto) return '/bienvenida'
 
   switch (usuario.rol) {
     case 'maestro':
-      return '/maestro' 
+      return '/maestro'
     case 'administrador':
-      return '/admin' 
+      return '/admin'
     default:
       return '/estudiante'
   }
