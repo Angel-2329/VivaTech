@@ -8,7 +8,8 @@
     "start": "node src/server.js",
     "migrate:up": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js up",
     "migrate:down": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js down",
-    "test": "node --test"
+    "test": "node --test",
+    "crear-admin": "node -r dotenv/config scripts/crear-admin.js"
   },
   "keywords": [],
   "author": "",
