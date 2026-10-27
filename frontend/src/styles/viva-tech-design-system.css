@@ -1,0 +1,2459 @@
+/* ==========================================================================
+   SISTEMA DE DISEÑO REUTILIZABLE — VIVA TECH
+
+   Alcance cubierto:
+   - Interfaz responsiva con prioridad móvil ................... RF-06
+   - Acceso con número de celular y código SMS (60 s) ........ RF-01, RF-02
+   - Nombre o apodo y saludo en inicio ........................ RF-03, RF-07
+   - Categorías desplegables .................................. RF-08
+   - Opción visible para regresar / deshacer .................. RF-09
+   - Botones con texto (no solo iconos) ....................... RF-10
+   - Contraste WCAG 2.1 AA (4.5:1 y 3:1) ...................... RF-11
+   - Unidades relativas, texto base 18 px, ampliable 200 % .... RF-12
+   - Lecciones paso a paso y simuladores ...................... RF-13 a RF-17
+   - Retroalimentación positiva y errores comprensibles ....... RF-18, RF-19
+   - Roles: estudiante, maestro, administrador ................ RF-21 a RF-27
+     (gestión de contenido, grupos, tablas de progreso)
+   - Pérdida de conexión con opción de reintentar ............. RNF-04
+   - Aviso de privacidad antes del registro ................... RNF-07
+   - Certificado con folio y QR, y página pública de verificación
+    
+
+
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* -----------------------------------------------------------------------
+     1. SUPERFICIES 
+     ----------------------------------------------------------------------- */
+  --vt-background: #faf8ff;
+  --vt-surface: #faf8ff;
+  --vt-surface-bright: #faf8ff;
+  --vt-surface-dim: #d2d9f4;
+  --vt-surface-lowest: #ffffff;   /* surface-container-lowest */
+  --vt-surface-low: #f2f3ff;      /* surface-container-low */
+  --vt-surface-container: #eaedff;
+  --vt-surface-high: #e1e7ff;     /* surface-container-high */
+  --vt-surface-highest: #dae2fc;  /* surface-container-highest */
+  --vt-surface-variant: #dae2fc;
+
+  /* -----------------------------------------------------------------------
+     2. TEXTO, BORDES Y SUPERFICIES INVERSAS
+     ----------------------------------------------------------------------- */
+  --vt-on-surface: #131b2e;          /* 16.9:1 sobre blanco */
+  --vt-on-surface-variant: #40474f;  /* 9.4:1 sobre blanco, 8.5:1 sobre low */
+  --vt-outline: #717880;             /* 4.47:1 — SOLO bordes, no texto */
+  --vt-outline-variant: #c0c7d0;     /* 1.7:1 — solo divisores decorativos */
+  --vt-inverse-surface: #283044;
+  --vt-inverse-on-surface: #eef0ff;
+  --vt-inverse-primary: #93ccff;
+
+  /* -----------------------------------------------------------------------
+     3. PRIMARIO
+     ----------------------------------------------------------------------- */
+  --vt-primary: #004870;                /* azul oscuro (hover / énfasis) */
+  --vt-on-primary: #ffffff;             /* 9.7:1 */
+  --vt-primary-container: #006194;      /* azul de acción principal */
+  --vt-on-primary-container: #b2d9ff;   /* 4.55:1 — usar solo en texto grande */
+  --vt-primary-fixed: #cce5ff;
+  --vt-primary-fixed-dim: #93ccff;
+  --vt-on-primary-fixed: #001d31;
+  --vt-on-primary-fixed-variant: #004b73;
+  --vt-surface-tint: #076396;
+
+  /* Alias semánticos (usar estos en los componentes) */
+  --vt-action: var(--vt-primary-container);   /* #006194, 6.7:1 con blanco */
+  --vt-action-hover: var(--vt-primary);       /* #004870 */
+  --vt-on-action: #ffffff;
+
+  /* -----------------------------------------------------------------------
+     4. SECUNDARIO — éxito, progreso, lección terminada
+     ----------------------------------------------------------------------- */
+  --vt-secondary: #006c4a;                  /* 6.5:1 con blanco */
+  --vt-on-secondary: #ffffff;
+  --vt-secondary-container: #9af1c6;
+  --vt-on-secondary-container: #0b714e;     /* 4.52:1 — al límite */
+  --vt-secondary-fixed: #9df4c9;
+  --vt-secondary-fixed-dim: #81d8ae;
+  --vt-on-secondary-fixed: #002114;
+  --vt-on-secondary-fixed-variant: #005237; /* 7.0:1 sobre secondary-container */
+
+  /* -----------------------------------------------------------------------
+     5. TERCIARIO — advertencia, consejo, orientación
+     ----------------------------------------------------------------------- */
+  --vt-tertiary: #6b3700;
+  --vt-on-tertiary: #ffffff;
+  --vt-tertiary-container: #8d4b00;         /* 6.7:1 con blanco */
+  --vt-on-tertiary-container: #ffcba3;      /* 4.56:1 — al límite */
+  --vt-tertiary-fixed: #ffdcc3;
+  --vt-tertiary-fixed-dim: #ffb77d;
+  --vt-on-tertiary-fixed: #2f1500;
+  --vt-on-tertiary-fixed-variant: #6e3900;  /* 7.2:1 sobre tertiary-fixed */
+
+  /* -----------------------------------------------------------------------
+     6. ERROR Y ACCIONES DESTRUCTIVAS
+     ----------------------------------------------------------------------- */
+  --vt-error: #ba1a1a;                 /* 6.5:1 con blanco */
+  --vt-on-error: #ffffff;
+  --vt-error-container: #ffdad6;
+  --vt-on-error-container: #93000a;    /* 7.2:1 */
+
+  /* -----------------------------------------------------------------------
+     7. FOCO DE TECLADO (DESIGN.md: separador blanco 2 px + anillo 3 px)
+     ----------------------------------------------------------------------- */
+  --vt-focus-gap: #ffffff;
+  --vt-focus-ring: #006194;
+
+  /* -----------------------------------------------------------------------
+     8. FAMILIAS TIPOGRÁFICAS
+     Encabezados y etiquetas: Plus Jakarta Sans (600 y 700).
+     Lectura: Atkinson Hyperlegible Next.
+     ----------------------------------------------------------------------- */
+  --vt-font-heading:
+    "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --vt-font-body:
+    "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui,
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --vt-font-mono:
+    ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* -----------------------------------------------------------------------
+     9. ESCALA TIPOGRÁFICA 
+     Texto base = body-md = 18 px (RF-12). Mínimo absoluto: 16 px.
+     ----------------------------------------------------------------------- */
+  --vt-headline-xl: 2.5rem;          --vt-lh-headline-xl: 3rem;          /* 40/48 */
+  --vt-headline-xl-mobile: 2rem;     --vt-lh-headline-xl-mobile: 2.5rem; /* 32/40 */
+  --vt-headline-lg: 2rem;            --vt-lh-headline-lg: 2.5rem;        /* 32/40 */
+  --vt-headline-md: 1.5rem;          --vt-lh-headline-md: 2rem;          /* 24/32 */
+  --vt-headline-sm: 1.25rem;         --vt-lh-headline-sm: 1.75rem;       /* 20/28 */
+  --vt-body-lg: 1.25rem;             --vt-lh-body-lg: 1.875rem;          /* 20/30 */
+  --vt-body-md: 1.125rem;            --vt-lh-body-md: 1.75rem;           /* 18/28 */
+  --vt-body-sm: 1rem;                --vt-lh-body-sm: 1.5rem;            /* 16/24 */
+  --vt-label-lg: 1.125rem;           --vt-lh-label-lg: 1.5rem;           /* 18/24 */
+  --vt-label-md: 1rem;               --vt-lh-label-md: 1.5rem;           /* 16/24 */
+
+  /* -----------------------------------------------------------------------
+     10. ESPACIADO (rejilla de 8 px, )
+     ----------------------------------------------------------------------- */
+  --vt-space-2xs: 0.25rem;  /*  4 px — gap-1*/
+  --vt-space-xs: 0.5rem;    /*  8 px */
+  --vt-space-sm: 0.75rem;   /* 12 px */
+  --vt-space-md: 1rem;      /* 16 px */
+  --vt-space-lg: 1.5rem;    /* 24 px */
+  --vt-space-xl: 2.25rem;   /* 36 px */
+  --vt-space-2xl: 3rem;     /* 48 px */
+
+  --vt-gutter: 1.5rem;          /* 24 px */
+  --vt-gutter-mobile: 1rem;     /* 16 px */
+  --vt-margin: 2rem;            /* 32 px */
+  --vt-margin-tablet: 1.5rem;   /* 24 px */
+  --vt-margin-mobile: 1rem;     /* 16 px */
+
+  /* -----------------------------------------------------------------------
+     11. BORDES, RADIOS Y SOMBRAS
+     Se usa rounded-xl (12 px) en botones, campos, alertas y tarjetas.
+     Los botones con forma de píldora están prohibidos (DESIGN.md); el radio
+     "full" queda solo para insignias, avatares y barras de progreso.
+     ----------------------------------------------------------------------- */
+  --vt-border-thin: 1px;     /* tarjetas y divisores */
+  --vt-border: 1.5px;        /* botones de contorno, campos */
+  --vt-border-strong: 2px;   /* alertas, estado de error */
+
+  --vt-radius-sm: 0.25rem;   /*  4 px — rounded */
+  --vt-radius-md: 0.5rem;    /*  8 px — rounded-lg */
+  --vt-radius-lg: 0.75rem;   /* 12 px — rounded-xl: botones, campos, tarjetas */
+  --vt-radius-xl: 1rem;      /* 16 px — diálogos y certificado */
+  --vt-radius-full: 9999px;
+
+  --vt-shadow-xs: 0 1px 2px rgba(19, 27, 46, 0.05);
+  --vt-shadow-sm: 0 1px 3px rgba(19, 27, 46, 0.08), 0 1px 2px rgba(19, 27, 46, 0.04);
+  --vt-shadow-overlay: 0 4px 8px rgba(19, 27, 46, 0.08);   /* DESIGN.md */
+  --vt-shadow-dialog: 0 20px 40px rgba(19, 27, 46, 0.18);
+  --vt-scrim: rgba(40, 48, 68, 0.6);                        /* inverse-surface/60 */
+
+  /* -----------------------------------------------------------------------
+     12. MEDIDAS GENERALES
+     ----------------------------------------------------------------------- */
+  --vt-content-max-width: 75rem;   /* 1200 px */
+  --vt-reading-max-width: 45rem;   /* ~70 caracteres por línea */
+  --vt-touch-target: 3rem;         /* 48 px */
+  --vt-touch-target-mobile: 3.25rem; /* 52 px */
+  --vt-header-height: 5rem;        /* 80 px (h-20) */
+}
+
+/* ==========================================================================
+   ESCALA DE TEXTO (barra "A- Reducir texto / A+ Aumentar texto")
+
+   DESIGN.md: A- baja hasta 16 px y A+ sube hasta 130 %.
+   RF-12: el contenido debe seguir funcionando con el texto al 200 %. Ese
+   criterio se comprueba con el zoom del navegador (Ctrl/Cmd +), que este CSS
+   soporta porque todo está en rem.
+   ========================================================================== */
+
+html[data-vt-font-scale="90"]  { font-size: 88.889%; } /* body-md = 16 px */
+html[data-vt-font-scale="100"] { font-size: 100%; }
+html[data-vt-font-scale="115"] { font-size: 115%; }
+html[data-vt-font-scale="130"] { font-size: 130%; }
+
+/* ==========================================================================
+   RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Evita que el encabezado fijo tape el destino de los enlaces internos */
+  scroll-padding-top: calc(var(--vt-header-height) + var(--vt-space-md));
+}
+
+body,
+h1, h2, h3, h4, h5, h6,
+p, figure, blockquote, dl, dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding-inline-start: 1.5em;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  text-transform: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--vt-background);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-md);
+  line-height: var(--vt-lh-body-md);
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--vt-action);
+  text-decoration-thickness: 0.1em;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--vt-action-hover);
+}
+
+/* Iconos de Material Symbols: nunca como único medio de identificación (RF-10).
+   Los iconos decorativos deben llevar aria-hidden="true". */
+.vt-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  overflow: hidden; /* si la fuente no carga, no se desborda el nombre del icono */
+  font-family: "Material Symbols Outlined";
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ==========================================================================
+   FOCO ACCESIBLE GLOBAL
+   ========================================================================== */
+
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--vt-focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--vt-focus-gap);
+}
+
+/* ==========================================================================
+   UTILIDADES DE ACCESIBILIDAD
+   ========================================================================== */
+
+.vt-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.vt-skip-link {
+  position: fixed;
+  top: var(--vt-space-sm);
+  left: var(--vt-space-sm);
+  z-index: 9999;
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-inverse-surface);
+  color: var(--vt-inverse-on-surface);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.vt-skip-link:focus {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   TIPOGRAFÍA
+   ========================================================================== */
+
+.vt-headline-xl,
+.vt-headline-lg,
+.vt-headline-md,
+.vt-headline-sm {
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  overflow-wrap: anywhere;
+}
+
+.vt-headline-xl {
+  font-size: var(--vt-headline-xl-mobile);
+  line-height: var(--vt-lh-headline-xl-mobile);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.vt-headline-lg {
+  font-size: var(--vt-headline-lg);
+  line-height: var(--vt-lh-headline-lg);
+  font-weight: 700;
+}
+
+.vt-headline-md {
+  font-size: var(--vt-headline-md);
+  line-height: var(--vt-lh-headline-md);
+  font-weight: 600;
+}
+
+.vt-headline-sm {
+  font-size: var(--vt-headline-sm);
+  line-height: var(--vt-lh-headline-sm);
+  font-weight: 600;
+}
+
+@media (min-width: 40rem) {
+  .vt-headline-xl {
+    font-size: var(--vt-headline-xl);
+    line-height: var(--vt-lh-headline-xl);
+  }
+}
+
+.vt-body-lg {
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-lg);
+  line-height: var(--vt-lh-body-lg);
+}
+
+.vt-body-md {
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-md);
+  line-height: var(--vt-lh-body-md);
+}
+
+/* 16 px: solo metadatos y textos de apoyo, nunca el contenido de lectura. */
+.vt-body-sm {
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-label-lg {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  line-height: var(--vt-lh-label-lg);
+  font-weight: 600;
+}
+
+.vt-label-md {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  line-height: var(--vt-lh-label-md);
+  font-weight: 600;
+}
+
+/* Sobretítulo ("MÓDULO 2 · SERVICIOS BÁSICOS", "LECCIÓN TERMINADA").
+ usa 12 px en el certificado; aquí se fija en 16 px (mínimo de DESIGN.md). */
+.vt-eyebrow {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  line-height: var(--vt-lh-label-md);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vt-action);
+}
+
+.vt-text-muted   { color: var(--vt-on-surface-variant); }
+.vt-text-action  { color: var(--vt-action); }
+.vt-text-success { color: var(--vt-secondary); }
+.vt-text-warning { color: var(--vt-tertiary-container); }
+.vt-text-error   { color: var(--vt-error); }
+.vt-text-mono    { font-family: var(--vt-font-mono); letter-spacing: 0.04em; }
+
+/* ==========================================================================
+   ESTRUCTURA Y REJILLA
+   Móvil < 640 px (4 col) · Tableta 640–1023 px (8 col) · Escritorio ≥ 1024 px (12 col)
+   ========================================================================== */
+
+.vt-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.vt-main {
+  flex: 1;
+}
+
+.vt-container {
+  width: 100%;
+  max-width: var(--vt-content-max-width);
+  margin-inline: auto;
+  padding: var(--vt-space-lg) var(--vt-margin-mobile);
+}
+
+.vt-container-narrow {
+  max-width: var(--vt-reading-max-width);
+}
+
+.vt-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-md);
+}
+
+.vt-stack-sm { gap: var(--vt-space-xs); }
+.vt-stack-lg { gap: var(--vt-space-lg); }
+
+.vt-cluster {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+}
+
+.vt-cluster-between {
+  justify-content: space-between;
+}
+
+.vt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--vt-gutter-mobile);
+  align-items: start;
+}
+
+.vt-grid > * {
+  grid-column: 1 / -1;
+}
+
+/* Tarjetas automáticas (estadísticas, cursos, grupos) */
+.vt-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--vt-gutter-mobile);
+}
+
+@media (min-width: 40rem) {
+  .vt-container {
+    padding-inline: var(--vt-margin-tablet);
+  }
+
+  .vt-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: var(--vt-gutter);
+  }
+
+  .vt-grid-auto {
+    gap: var(--vt-gutter);
+  }
+}
+
+@media (min-width: 64rem) {
+  .vt-container {
+    padding: var(--vt-space-xl) var(--vt-margin);
+  }
+
+  .vt-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .vt-col-4 { grid-column: span 4; }
+  .vt-col-5 { grid-column: span 5; }
+  .vt-col-6 { grid-column: span 6; }
+  .vt-col-7 { grid-column: span 7; }
+  .vt-col-8 { grid-column: span 8; }
+}
+
+/* ==========================================================================
+   BARRA DE ACCESIBILIDAD (persistente arriba)
+   ========================================================================== */
+
+.vt-a11y-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+  padding: var(--vt-space-xs) var(--vt-margin-mobile);
+  background-color: var(--vt-surface-low);
+  border-bottom: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.vt-a11y-bar__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+}
+
+.vt-font-controls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+}
+
+/* Estado presionado de A-/A+ (aria-pressed) */
+.vt-font-controls .vt-btn[aria-pressed="true"] {
+  background-color: var(--vt-primary-fixed);
+  border-color: var(--vt-action);
+  color: var(--vt-on-primary-fixed);
+}
+
+@media (min-width: 64rem) {
+  .vt-a11y-bar {
+    padding-inline: var(--vt-margin);
+  }
+}
+
+/* ==========================================================================
+   ENCABEZADO Y NAVEGACIÓN
+   lo dibuja "fixed"; aquí se usa "sticky" con altura flexible para que
+   no tape contenido ni se recorte al ampliar el texto.
+   ========================================================================== */
+
+.vt-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  min-height: var(--vt-header-height);
+  padding: var(--vt-space-sm) var(--vt-margin-mobile);
+  background-color: var(--vt-surface-lowest);
+  border-bottom: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.vt-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  min-width: 0;
+  color: var(--vt-on-surface);
+  text-decoration: none;
+}
+
+.vt-header__logo {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: var(--vt-radius-md);
+  background-color: var(--vt-action);
+  color: var(--vt-on-action);
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+}
+
+.vt-header__name {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-sm);
+  line-height: var(--vt-lh-headline-sm);
+  font-weight: 700;
+}
+
+.vt-header__name small {
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+  font-weight: 400;
+  color: var(--vt-on-surface-variant);
+}
+
+.vt-nav,
+.vt-header__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+}
+
+.vt-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vt-space-xs);
+  min-height: var(--vt-touch-target);
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  color: var(--vt-on-surface-variant);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  line-height: var(--vt-lh-label-lg);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.vt-nav-link:hover {
+  background-color: var(--vt-surface-container);
+  color: var(--vt-on-surface);
+}
+
+.vt-nav-link[aria-current="page"],
+.vt-nav-link.is-active {
+  background-color: var(--vt-action);
+  color: var(--vt-on-action);
+}
+
+/* Usuario en sesión: "Rosa · Estudiante", "Prof. Luis Ramírez" */
+.vt-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+}
+
+.vt-user-chip small {
+  display: block;
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-sm);
+  font-weight: 400;
+  color: var(--vt-on-surface-variant);
+}
+
+@media (max-width: 39.99rem) {
+  .vt-nav,
+  .vt-header__actions {
+    width: 100%;
+  }
+
+  .vt-nav-link {
+    flex: 1 1 auto;
+  }
+}
+
+@media (min-width: 64rem) {
+  .vt-header {
+    padding-inline: var(--vt-margin);
+  }
+}
+
+/* Enlace "Regresar" / "Volver a Mis cursos" (RF-09) */
+.vt-back-link {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  min-height: var(--vt-touch-target);
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  border: var(--vt-border) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vt-back-link:hover {
+  background-color: var(--vt-surface-low);
+  color: var(--vt-on-surface);
+}
+
+/* ==========================================================================
+   PIE DE PÁGINA
+   ========================================================================== */
+
+.vt-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-lg) var(--vt-margin-mobile);
+  background-color: var(--vt-surface-low);
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-footer strong {
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+}
+
+@media (min-width: 64rem) {
+  .vt-footer {
+    padding-inline: var(--vt-margin);
+  }
+}
+
+/* ==========================================================================
+   BOTONES
+   - Alto mínimo: 48 px (escritorio) / 52 px (móvil).
+   - Siempre con texto visible (RF-10). Prohibidos los botones solo-icono.
+   - Radio 12 px, nunca píldora.
+   ========================================================================== */
+
+.vt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vt-space-xs);
+  min-height: var(--vt-touch-target-mobile);
+  min-width: var(--vt-touch-target);
+  padding: var(--vt-space-xs) var(--vt-space-lg);
+  border: var(--vt-border) solid transparent;
+  border-radius: var(--vt-radius-lg);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  line-height: var(--vt-lh-label-lg);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+@media (min-width: 64rem) {
+  .vt-btn {
+    min-height: var(--vt-touch-target);
+  }
+}
+
+.vt-btn-sm {
+  min-height: var(--vt-touch-target);
+  padding-inline: var(--vt-space-md);
+  font-size: var(--vt-label-md);
+  line-height: var(--vt-lh-label-md);
+}
+
+.vt-btn-block {
+  width: 100%;
+}
+
+/* Principal: "Enviar código por SMS", "Continuar lección", "Reintentar" */
+.vt-btn-primary {
+  background-color: var(--vt-action);
+  border-color: var(--vt-action);
+  color: var(--vt-on-action);
+}
+
+.vt-btn-primary:hover {
+  background-color: var(--vt-action-hover);
+  border-color: var(--vt-action-hover);
+  color: var(--vt-on-action);
+}
+
+/* Secundario / Regresar / Cancelar */
+.vt-btn-secondary {
+  background-color: var(--vt-surface-low);
+  border-color: var(--vt-outline-variant);
+  color: var(--vt-on-surface);
+}
+
+.vt-btn-secondary:hover {
+  background-color: var(--vt-surface-container);
+  border-color: var(--vt-outline);
+}
+
+/* Contorno: "Ver temario completo", "Copiar enlace del certificado" */
+.vt-btn-outline {
+  background-color: var(--vt-surface-lowest);
+  border-color: var(--vt-outline);
+  color: var(--vt-action);
+}
+
+.vt-btn-outline:hover {
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed);
+}
+
+/* Éxito / Confirmar: "Agregar al grupo", "Publicar" */
+.vt-btn-success {
+  background-color: var(--vt-secondary);
+  border-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+}
+
+.vt-btn-success:hover {
+  background-color: var(--vt-on-secondary-fixed-variant);
+  border-color: var(--vt-on-secondary-fixed-variant);
+}
+
+/* Destructivo sólido: "Sí, eliminar grupo" */
+.vt-btn-danger {
+  background-color: var(--vt-error);
+  border-color: var(--vt-error);
+  color: var(--vt-on-error);
+}
+
+.vt-btn-danger:hover {
+  background-color: var(--vt-on-error-container);
+  border-color: var(--vt-on-error-container);
+}
+
+/* Destructivo suave: "Eliminar", "Retirar del grupo" (primer paso) */
+.vt-btn-danger-soft {
+  background-color: var(--vt-error-container);
+  border-color: var(--vt-error-container);
+  color: var(--vt-on-error-container);
+}
+
+.vt-btn-danger-soft:hover {
+  background-color: var(--vt-error);
+  border-color: var(--vt-error);
+  color: var(--vt-on-error);
+}
+
+/* Texto (sin fondo): "Cambiar número", "Ocultar cursos" */
+.vt-btn-ghost {
+  background-color: transparent;
+  color: var(--vt-action);
+  padding-inline: var(--vt-space-sm);
+}
+
+.vt-btn-ghost:hover {
+  background-color: var(--vt-surface-container);
+}
+
+.vt-btn:disabled,
+.vt-btn[aria-disabled="true"] {
+  background-color: var(--vt-surface-high);
+  border-color: var(--vt-surface-high);
+  color: var(--vt-on-surface-variant);
+  cursor: not-allowed;
+}
+
+.vt-btn[aria-busy="true"] {
+  cursor: progress;
+}
+
+/* Explicación junto a un botón deshabilitado
+   ("Corrige los 12 dígitos para activar el botón"). Enlazar con aria-describedby. */
+.vt-btn-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+/* Grupo de acciones: en móvil los botones ocupan todo el ancho */
+.vt-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--vt-space-sm);
+}
+
+.vt-actions .vt-btn {
+  width: 100%;
+}
+
+@media (min-width: 40rem) {
+  .vt-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .vt-actions .vt-btn {
+    width: auto;
+  }
+
+  .vt-actions-between {
+    justify-content: space-between;
+  }
+}
+
+/* ==========================================================================
+   TARJETAS
+   Fondo blanco o #F2F3FF, borde 1 px outline-variant, radio 12 px.
+   Hover/foco en tarjetas interactivas: el borde cambia al azul de acción,
+   sin elevarse (DESIGN.md).
+   ========================================================================== */
+
+.vt-card {
+  min-width: 0;
+  padding: var(--vt-space-md);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  box-shadow: var(--vt-shadow-xs);
+}
+
+@media (min-width: 40rem) {
+  .vt-card {
+    padding: var(--vt-space-lg);
+  }
+}
+
+.vt-card-subtle {
+  background-color: var(--vt-surface-low);
+  box-shadow: none;
+}
+
+.vt-card-flat {
+  box-shadow: none;
+}
+
+.vt-card-interactive {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vt-card-interactive:hover,
+.vt-card-interactive:focus-within {
+  border-color: var(--vt-action);
+  box-shadow: inset 0 0 0 1px var(--vt-action);
+}
+
+/* Elemento destacado: "Siguiente recomendada" */
+.vt-card-highlight {
+  border-color: var(--vt-action);
+  border-inline-start-width: 4px;
+  background-color: var(--vt-surface-low);
+}
+
+.vt-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  margin-bottom: var(--vt-space-md);
+}
+
+/* ==========================================================================
+   INSIGNIAS Y ESTADOS
+   Siempre con texto (y, si ayuda, icono). Nunca solo color.
+   ========================================================================== */
+
+.vt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-2xs);
+  max-width: 100%;
+  padding: 0.125rem var(--vt-space-sm);
+  border-radius: var(--vt-radius-full);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  line-height: var(--vt-lh-label-md);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vt-badge .vt-icon {
+  font-size: 1.125rem;
+}
+
+/* "Terminada", "Publicado", "Curso completado con éxito" */
+.vt-badge-success {
+  background-color: var(--vt-secondary-container);
+  color: var(--vt-on-secondary-fixed-variant);
+}
+
+/* "En curso", "Maestro", "Aplicaciones bancarias" */
+.vt-badge-primary {
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed);
+}
+
+/* "Borrador", "Pendiente de comenzar" */
+.vt-badge-warning {
+  background-color: var(--vt-tertiary-fixed);
+  color: var(--vt-on-tertiary-fixed-variant);
+}
+
+/* "Sin iniciar", "Modo consulta: solo lectura" */
+.vt-badge-neutral {
+  background-color: var(--vt-surface-container);
+  color: var(--vt-on-surface-variant);
+}
+
+.vt-badge-error {
+  background-color: var(--vt-error-container);
+  color: var(--vt-on-error-container);
+}
+
+/* ==========================================================================
+   AVATAR CON INICIAL
+   ========================================================================== */
+
+.vt-avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed);
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+}
+
+.vt-avatar-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: var(--vt-headline-sm);
+}
+
+/* ==========================================================================
+   FORMULARIOS
+   Etiqueta visible siempre arriba (nunca solo placeholder).
+   Borde del campo: outline (#717880, 4.5:1) para cumplir WCAG 1.4.11.
+   ========================================================================== */
+
+.vt-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+  min-width: 0;
+}
+
+.vt-field-label {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  line-height: var(--vt-lh-label-lg);
+  font-weight: 600;
+}
+
+/* "Obligatorio" escrito, además del asterisco */
+.vt-field-required {
+  color: var(--vt-on-surface-variant);
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-sm);
+  font-weight: 400;
+}
+
+.vt-field-help,
+.vt-field-error,
+.vt-field-success {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-xs);
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-field-help    { color: var(--vt-on-surface-variant); }
+.vt-field-error   { color: var(--vt-on-error-container); font-weight: 700; }
+.vt-field-success { color: var(--vt-secondary); font-weight: 700; }
+
+/* Contador: "10 de 12 números escritos" */
+.vt-field-counter {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+  color: var(--vt-on-surface-variant);
+}
+
+.vt-field-counter.is-invalid {
+  color: var(--vt-error);
+}
+
+.vt-input,
+.vt-select,
+.vt-textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--vt-touch-target-mobile);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border: var(--vt-border) solid var(--vt-outline);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-body);
+  font-size: var(--vt-body-md);
+  line-height: var(--vt-lh-body-md);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+@media (min-width: 64rem) {
+  .vt-input,
+  .vt-select {
+    min-height: var(--vt-touch-target);
+  }
+}
+
+.vt-textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.vt-input:hover,
+.vt-select:hover,
+.vt-textarea:hover {
+  border-color: var(--vt-on-surface-variant);
+}
+
+.vt-input:focus,
+.vt-select:focus,
+.vt-textarea:focus {
+  border-color: var(--vt-action);
+}
+
+/* Se usa placeholder:text-outline (4.47:1, no cumple). Se corrige. */
+.vt-input::placeholder,
+.vt-textarea::placeholder {
+  color: var(--vt-on-surface-variant);
+  opacity: 1;
+}
+
+.vt-input[aria-invalid="true"],
+.vt-select[aria-invalid="true"],
+.vt-textarea[aria-invalid="true"] {
+  border-width: var(--vt-border-strong);
+  border-color: var(--vt-error);
+}
+
+.vt-input:disabled,
+.vt-select:disabled,
+.vt-textarea:disabled {
+  background-color: var(--vt-surface-high);
+  color: var(--vt-on-surface-variant);
+  cursor: not-allowed;
+}
+
+/* Campo con prefijo: "+52 | 951 123 45", buscador con icono */
+.vt-input-group {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--vt-touch-target-mobile);
+  border: var(--vt-border) solid var(--vt-outline);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  overflow: hidden;
+}
+
+.vt-input-group:focus-within {
+  border-color: var(--vt-action);
+  outline: 3px solid var(--vt-focus-ring);
+  outline-offset: 2px;
+}
+
+.vt-input-group[data-invalid="true"] {
+  border-width: var(--vt-border-strong);
+  border-color: var(--vt-error);
+}
+
+.vt-input-group__addon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-2xs);
+  padding-inline: var(--vt-space-md);
+  background-color: var(--vt-surface-low);
+  border-inline-end: var(--vt-border-thin) solid var(--vt-outline-variant);
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vt-input-group .vt-input {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.vt-input-group .vt-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   CASILLAS Y AVISO DE PRIVACIDAD (RNF-07)
+   Glifo 24 px; área táctil ≥ 48 px incluyendo la etiqueta.
+   ========================================================================== */
+
+.vt-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-sm);
+  min-height: var(--vt-touch-target);
+  padding: var(--vt-space-sm);
+  border-radius: var(--vt-radius-lg);
+  cursor: pointer;
+}
+
+.vt-check:hover {
+  background-color: var(--vt-surface-low);
+}
+
+.vt-check input[type="checkbox"],
+.vt-check input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.125rem 0 0;
+  flex-shrink: 0;
+  accent-color: var(--vt-action);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   CÓDIGO SMS (RF-02)
+   Se usa 6 casillas. La lógica debe permitir pegar el código completo,
+   retroceder entre casillas y autocompletar (autocomplete="one-time-code"
+   en la primera). Alternativa más robusta: un solo input con .vt-otp-single.
+   ========================================================================== */
+
+.vt-otp {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--vt-space-xs);
+  width: min(100%, 26rem);
+}
+
+.vt-otp__box {
+  width: 100%;
+  min-width: 0;
+  height: 3.5rem;
+  padding: 0;
+  border: var(--vt-border) solid var(--vt-outline);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-lg);
+  font-weight: 700;
+  text-align: center;
+}
+
+.vt-otp__box:focus {
+  border-color: var(--vt-action);
+}
+
+.vt-otp__box[aria-invalid="true"] {
+  border-width: var(--vt-border-strong);
+  border-color: var(--vt-error);
+  background-color: var(--vt-error-container);
+}
+
+.vt-otp-single {
+  width: min(100%, 20rem);
+  font-family: var(--vt-font-mono);
+  font-size: var(--vt-headline-lg);
+  line-height: 1.2;
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+/* Fila "Puedes pedir otro código en 0:42  [Reenviar código]" */
+.vt-resend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-low);
+}
+
+.vt-resend__timer {
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   PASOS DEL REGISTRO ("Paso 1 Tu número / Paso 2 Código")
+   ========================================================================== */
+
+.vt-stepper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--vt-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vt-stepper__item {
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-low);
+  color: var(--vt-on-surface-variant);
+}
+
+.vt-stepper__item strong {
+  display: block;
+  font-family: var(--vt-font-heading);
+  color: var(--vt-on-surface);
+}
+
+.vt-stepper__item[aria-current="step"] {
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed);
+}
+
+.vt-stepper__item.is-completed {
+  background-color: var(--vt-secondary-container);
+  color: var(--vt-on-secondary-fixed-variant);
+}
+
+/* Círculo numerado: pasos, lecciones, contenido del certificado */
+.vt-step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 2.25rem;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-surface-high);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+}
+
+.vt-step-number.is-current,
+[aria-current="step"] > .vt-step-number {
+  background-color: var(--vt-action);
+  color: var(--vt-on-action);
+}
+
+.vt-step-number.is-completed,
+.is-completed > .vt-step-number {
+  background-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+}
+
+/* ==========================================================================
+   PROGRESO DE LA LECCIÓN EN SEGMENTOS (RF-15)
+   "1. Destinatario  2. Cantidad  3. Motivo  4. Revisión  5. Envío"
+   ========================================================================== */
+
+.vt-step-track {
+  display: grid;
+  grid-template-columns: repeat(var(--vt-steps, 5), minmax(0, 1fr));
+  gap: var(--vt-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vt-step-track li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-2xs);
+  min-width: 0;
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-step-track li::before {
+  content: "";
+  display: block;
+  height: 0.375rem;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-surface-highest);
+}
+
+.vt-step-track li.is-completed::before {
+  background-color: var(--vt-secondary);
+}
+
+.vt-step-track li[aria-current="step"] {
+  color: var(--vt-on-surface);
+  font-weight: 700;
+}
+
+.vt-step-track li[aria-current="step"]::before {
+  background-color: var(--vt-action);
+}
+
+/* En móvil se ocultan los nombres y se muestra "Paso 2 de 5" aparte */
+@media (max-width: 39.99rem) {
+  .vt-step-track li span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* ==========================================================================
+   BARRA DE PROGRESO
+   Usar <progress> o role="progressbar" con aria-valuenow/min/max,
+   y siempre texto visible: "2 de 4 lecciones completadas (50 %)".
+   ========================================================================== */
+
+.vt-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+}
+
+.vt-progress__label {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-progress__label strong {
+  color: var(--vt-secondary);
+  font-family: var(--vt-font-heading);
+}
+
+.vt-progress__track {
+  width: 100%;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-surface-highest);
+}
+
+.vt-progress__fill {
+  width: 0;
+  height: 100%;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-secondary);
+  transition: width 0.3s ease;
+}
+
+.vt-progress__fill.is-action {
+  background-color: var(--vt-action);
+}
+
+.vt-progress-sm .vt-progress__track {
+  height: 0.5rem;
+}
+
+/* ==========================================================================
+   CATEGORÍAS DESPLEGABLES (RF-08)
+   Usar <details>/<summary> o botón con aria-expanded.
+   ========================================================================== */
+
+.vt-accordion {
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  overflow: hidden;
+}
+
+.vt-accordion + .vt-accordion {
+  margin-top: var(--vt-space-md);
+}
+
+.vt-accordion__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  min-height: var(--vt-touch-target-mobile);
+  padding: var(--vt-space-md);
+  cursor: pointer;
+  list-style: none;
+}
+
+.vt-accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.vt-accordion__summary:hover {
+  background-color: var(--vt-surface-low);
+}
+
+.vt-accordion__title {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Texto visible "Mostrar cursos / Ocultar cursos" (RF-10) */
+.vt-accordion__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-2xs);
+  color: var(--vt-action);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vt-accordion__toggle .is-open,
+details[open] .vt-accordion__toggle .is-closed {
+  display: none;
+}
+
+details[open] .vt-accordion__toggle .is-open {
+  display: inline;
+}
+
+.vt-accordion__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+  padding: 0 var(--vt-space-md) var(--vt-space-md);
+}
+
+/* Icono de categoría (cuadro de color) */
+.vt-category-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: var(--vt-radius-md);
+  background-color: var(--vt-action);
+  color: var(--vt-on-action);
+}
+
+.vt-category-icon.is-warning {
+  background-color: var(--vt-tertiary-container);
+}
+
+/* ==========================================================================
+   LISTA DE LECCIONES
+   "1  Conoce la pantalla de tu banco · Terminada · 10 min   [Repasar]"
+   ========================================================================== */
+
+.vt-lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vt-lesson {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm) var(--vt-space-md);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-lesson__body {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.vt-lesson__title {
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+}
+
+.vt-lesson__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-2xs) var(--vt-space-sm);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-lesson[aria-current="step"],
+.vt-lesson.is-current {
+  border-color: var(--vt-action);
+  border-inline-start-width: 4px;
+  background-color: var(--vt-surface-low);
+}
+
+/* Lista de verificación "Ahora sabes" / "Habilidades que practicaste" */
+.vt-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vt-checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-checklist li > .vt-icon {
+  color: var(--vt-secondary);
+}
+
+/* ==========================================================================
+   ALERTAS Y RETROALIMENTACIÓN (RF-18, RF-19, RNF-04)
+   Borde 2 px en el color semántico + fondo pálido + texto oscuro.
+   Usar role="status" (avisos) o role="alert" (errores).
+   ========================================================================== */
+
+.vt-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-strong) solid transparent;
+  border-radius: var(--vt-radius-lg);
+}
+
+.vt-alert > .vt-icon {
+  margin-top: 0.125rem;
+}
+
+.vt-alert__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-2xs);
+  min-width: 0;
+  flex: 1;
+}
+
+.vt-alert__title {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  line-height: var(--vt-lh-label-lg);
+  font-weight: 700;
+}
+
+.vt-alert-success {
+  background-color: #eafbf2;
+  border-color: var(--vt-secondary);
+  color: var(--vt-on-secondary-fixed);
+}
+
+.vt-alert-success > .vt-icon { color: var(--vt-secondary); }
+
+.vt-alert-warning {
+  background-color: #fff3ea;
+  border-color: var(--vt-tertiary-container);
+  color: var(--vt-on-tertiary-fixed);
+}
+
+.vt-alert-warning > .vt-icon { color: var(--vt-tertiary-container); }
+
+.vt-alert-error {
+  background-color: var(--vt-error-container);
+  border-color: var(--vt-error);
+  color: var(--vt-on-error-container);
+}
+
+.vt-alert-info {
+  background-color: var(--vt-surface-low);
+  border-color: var(--vt-primary-fixed-dim);
+  color: var(--vt-on-surface);
+}
+
+.vt-alert-info > .vt-icon { color: var(--vt-action); }
+
+/* Aviso sin borde (consejo lateral, "Tu avance se guarda solo") */
+.vt-alert-soft {
+  border-color: transparent;
+}
+
+/* Insignia de autoguardado (RF-20) */
+.vt-autosave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-2xs);
+  color: var(--vt-secondary);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+}
+
+/* Encabezado de logro: "¡Muy bien, Rosa! Terminaste la lección" */
+.vt-success-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-md);
+}
+
+.vt-success-hero__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: var(--vt-radius-full);
+  background-color: var(--vt-secondary-container);
+  color: var(--vt-on-secondary-fixed-variant);
+}
+
+/* ==========================================================================
+   DIÁLOGO / PÉRDIDA DE CONEXIÓN (RNF-04)
+   Usar <dialog> o role="dialog" aria-modal="true" con foco atrapado.
+   Debe ofrecer "Reintentar" y "Volver a inicio"; no promete funcionamiento
+   sin conexión.
+   ========================================================================== */
+
+.vt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--vt-margin-mobile);
+  overflow-y: auto;
+  background-color: var(--vt-scrim);
+}
+
+.vt-dialog {
+  width: min(100%, 38rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: var(--vt-space-lg);
+  border: 0;
+  border-radius: var(--vt-radius-xl);
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  box-shadow: var(--vt-shadow-dialog);
+}
+
+.vt-dialog::backdrop {
+  background-color: var(--vt-scrim);
+}
+
+.vt-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-md);
+  margin-bottom: var(--vt-space-md);
+}
+
+.vt-dialog__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex-shrink: 0;
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-tertiary-fixed);
+  color: var(--vt-tertiary-container);
+}
+
+@media (min-width: 40rem) {
+  .vt-dialog {
+    padding: var(--vt-space-xl);
+  }
+}
+
+/* ==========================================================================
+   SIMULADOR (RF-13, RF-14)
+   Siempre con la leyenda visible "Simulación: aquí no se mueve dinero real".
+   ========================================================================== */
+
+.vt-simulator {
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+  box-shadow: var(--vt-shadow-overlay);
+}
+
+.vt-simulator__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  background-color: var(--vt-action);
+  color: var(--vt-on-action);
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+}
+
+.vt-simulator__notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vt-space-xs);
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  background-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+  text-align: center;
+}
+
+.vt-simulator__content {
+  min-width: 0;
+  padding: var(--vt-space-md);
+}
+
+/* Instrucción del paso (panel lateral) */
+.vt-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-low);
+}
+
+/* Teclado numérico guiado */
+.vt-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--vt-space-xs);
+}
+
+.vt-keypad__key {
+  min-height: var(--vt-touch-target);
+  border: var(--vt-border) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-md);
+  background-color: var(--vt-surface-low);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vt-keypad__key:hover {
+  background-color: var(--vt-surface-container);
+}
+
+/* Tecla sugerida por la guía: además del color, añadir texto oculto
+   o aria-describedby ("tecla sugerida") */
+.vt-keypad__key.is-hint {
+  background-color: var(--vt-action);
+  border-color: var(--vt-action);
+  color: var(--vt-on-action);
+}
+
+/* Elemento resaltado dentro del simulador ("Escribe aquí") */
+.vt-sim-highlight {
+  outline: 3px dashed var(--vt-tertiary-container);
+  outline-offset: 3px;
+  border-radius: var(--vt-radius-md);
+}
+
+/* ==========================================================================
+   BARRA DE NAVEGACIÓN DE LECCIÓN
+   "Paso anterior · Deshacer · ¡Cantidad lista! · Siguiente paso"
+   En móvil deja de ser fija para no tapar contenido al ampliar el texto.
+   ========================================================================== */
+
+.vt-lesson-nav {
+  position: static;
+  width: 100%;
+  padding: var(--vt-space-md) var(--vt-margin-mobile);
+  background-color: var(--vt-surface-lowest);
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.vt-lesson-nav__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+  max-width: var(--vt-content-max-width);
+  margin-inline: auto;
+}
+
+.vt-lesson-nav .vt-btn {
+  width: 100%;
+}
+
+@media (min-width: 40rem) {
+  .vt-lesson-nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    box-shadow: var(--vt-shadow-overlay);
+  }
+
+  .vt-lesson-nav__inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .vt-lesson-nav .vt-btn {
+    width: auto;
+  }
+}
+
+@media (min-width: 64rem) {
+  .vt-lesson-nav {
+    padding-inline: var(--vt-margin);
+  }
+}
+
+/* ==========================================================================
+   CERTIFICADO Y VERIFICACIÓN PÚBLICA
+   - Folio con formato "VT-2026-000123".
+   - QR con texto visible ("Validar código") y explicación de qué abre.
+   - Leyenda "Sin validez oficial" visible.
+   ========================================================================== */
+
+.vt-certificate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-md);
+  padding: var(--vt-space-lg);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-top: 6px solid var(--vt-action);
+  border-radius: var(--vt-radius-xl);
+  background-color: var(--vt-surface-lowest);
+  box-shadow: var(--vt-shadow-sm);
+}
+
+.vt-certificate__top {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+}
+
+.vt-certificate__folio {
+  font-family: var(--vt-font-mono);
+  font-size: var(--vt-label-lg);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--vt-on-surface);
+}
+
+.vt-certificate__name {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-lg);
+  line-height: var(--vt-lh-headline-lg);
+  font-weight: 700;
+  color: var(--vt-action);
+}
+
+.vt-certificate__course {
+  display: inline-block;
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  border-radius: var(--vt-radius-md);
+  background-color: var(--vt-surface-low);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-sm);
+  font-weight: 600;
+}
+
+.vt-certificate__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-md);
+  padding-top: var(--vt-space-md);
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.vt-certificate__disclaimer {
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  padding: var(--vt-space-sm);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-md);
+  background-color: #ffffff;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 600;
+  text-align: center;
+}
+
+.vt-qr img,
+.vt-qr svg,
+.vt-qr canvas {
+  width: 7rem;
+  height: 7rem;
+}
+
+/* Lista de datos (categoría, fecha, folio, estudiante...) */
+.vt-meta-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--vt-space-sm) var(--vt-space-lg);
+}
+
+.vt-meta-list dt {
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-meta-list dd {
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+}
+
+.vt-meta-list-boxed > div {
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-low);
+}
+
+/* Encabezado de verificación: "Certificado verificado" */
+.vt-verify-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-md);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-strong) solid var(--vt-secondary);
+  border-radius: var(--vt-radius-lg);
+  background-color: #eafbf2;
+}
+
+.vt-verify-status.is-invalid {
+  border-color: var(--vt-error);
+  background-color: var(--vt-error-container);
+}
+
+/* ==========================================================================
+   PANEL DEL MAESTRO / ADMINISTRADOR (RF-21 a RF-27)
+   ========================================================================== */
+
+/* Indicador de rol en el encabezado ("Maestro", "Administrador") */
+.vt-role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem var(--vt-space-sm);
+  border-radius: var(--vt-radius-sm);
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+}
+
+/* Tarjeta de estadística: "Lecciones terminadas 5", "Promedio de avance 61.5 %" */
+.vt-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-2xs);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-stat__label {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--vt-space-xs);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-stat__value {
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-lg);
+  line-height: var(--vt-lh-headline-lg);
+  font-weight: 700;
+}
+
+.vt-stat-subtle {
+  background-color: var(--vt-surface-low);
+  border-color: transparent;
+}
+
+/* Pestañas: "Estudiantes 12 / Maestros 2"
+   Requiere role="tablist", role="tab", aria-selected y aria-controls. */
+.vt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+  border-bottom: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.vt-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  min-height: var(--vt-touch-target);
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--vt-on-surface-variant);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vt-tab:hover {
+  color: var(--vt-on-surface);
+  background-color: var(--vt-surface-low);
+}
+
+.vt-tab[aria-selected="true"] {
+  border-bottom-color: var(--vt-action);
+  color: var(--vt-action);
+  font-weight: 700;
+}
+
+/* Barra de herramientas: buscador + filtro */
+.vt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+}
+
+.vt-toolbar > * {
+  flex: 1 1 14rem;
+}
+
+/* Tabla de estudiantes / progreso.
+   En móvil cada fila se convierte en tarjeta: añadir data-label a cada <td>. */
+.vt-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-table {
+  width: 100%;
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+.vt-table caption {
+  padding: var(--vt-space-md);
+  text-align: start;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-headline-sm);
+  font-weight: 600;
+}
+
+.vt-table th {
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  background-color: var(--vt-surface-low);
+  color: var(--vt-on-surface);
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.vt-table td {
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+  vertical-align: middle;
+}
+
+.vt-table tbody tr:hover {
+  background-color: var(--vt-surface-low);
+}
+
+.vt-table__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs);
+}
+
+@media (max-width: 47.99rem) {
+  .vt-table-responsive thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .vt-table-responsive,
+  .vt-table-responsive tbody,
+  .vt-table-responsive tr,
+  .vt-table-responsive td {
+    display: block;
+    width: 100%;
+  }
+
+  .vt-table-responsive tr {
+    padding: var(--vt-space-sm) 0;
+    border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+  }
+
+  .vt-table-responsive td {
+    display: grid;
+    grid-template-columns: minmax(7rem, 40%) 1fr;
+    gap: var(--vt-space-sm);
+    border-top: 0;
+    padding-block: var(--vt-space-2xs);
+  }
+
+  .vt-table-responsive td::before {
+    content: attr(data-label);
+    color: var(--vt-on-surface-variant);
+    font-family: var(--vt-font-heading);
+    font-weight: 600;
+  }
+}
+
+/* Paginación: "Anterior / Siguiente" */
+.vt-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+}
+
+/* Árbol de contenido (Gestión de contenido, RF-22):
+   Categoría > Curso > Lección, con estado Publicado/Borrador */
+.vt-content-tree {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vt-content-tree .vt-content-tree {
+  margin-top: var(--vt-space-xs);
+  padding-inline-start: var(--vt-space-lg);
+  border-inline-start: 2px solid var(--vt-outline-variant);
+}
+
+.vt-content-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-xs) var(--vt-space-md);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border: var(--vt-border-thin) solid var(--vt-outline-variant);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-content-item__title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+}
+
+/* Confirmación de acción destructiva ("¿Eliminar grupo?") */
+.vt-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-md);
+  border: var(--vt-border-strong) solid var(--vt-error);
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-lowest);
+}
+
+.vt-confirm__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  color: var(--vt-error);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   MEDIOS (imágenes y video de apoyo, RF-17)
+   ========================================================================== */
+
+.vt-media {
+  overflow: hidden;
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-high);
+}
+
+.vt-media img,
+.vt-media video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.vt-media figcaption {
+  padding: var(--vt-space-xs) var(--vt-space-md);
+  color: var(--vt-on-surface-variant);
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+}
+
+/* ==========================================================================
+   REDUCCIÓN DE MOVIMIENTO
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   CONTRASTE FORZADO (modo de alto contraste del sistema)
+   ========================================================================== */
+
+@media (forced-colors: active) {
+  .vt-btn,
+  .vt-input,
+  .vt-select,
+  .vt-textarea,
+  .vt-input-group,
+  .vt-card,
+  .vt-alert,
+  .vt-badge,
+  .vt-stepper__item,
+  .vt-otp__box,
+  .vt-keypad__key {
+    border: 2px solid CanvasText;
+  }
+
+  .vt-nav-link[aria-current="page"],
+  .vt-tab[aria-selected="true"],
+  .vt-stepper__item[aria-current="step"],
+  .vt-keypad__key.is-hint {
+    outline: 3px solid Highlight;
+  }
+
+  .vt-progress__fill,
+  .vt-step-track li.is-completed::before,
+  .vt-step-track li[aria-current="step"]::before {
+    background-color: Highlight;
+  }
+}
+
+/* ==========================================================================
+   IMPRESIÓN (útil para imprimir el certificado)
+   ========================================================================== */
+
+@media print {
+  .vt-a11y-bar,
+  .vt-header,
+  .vt-footer,
+  .vt-lesson-nav,
+  .vt-skip-link,
+  .vt-btn {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .vt-card,
+  .vt-certificate,
+  .vt-simulator,
+  .vt-alert {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
