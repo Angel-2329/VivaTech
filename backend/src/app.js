@@ -3,6 +3,8 @@ const cors = require('cors');
 const pool = require('./config/database');
 const verificarTokenFirebase = require('./middlewares/verificar-token-firebase');
 const perfilRouter = require('./routes/perfil');
+const manejarJsonInvalido =
+  require('./middlewares/manejar-json-invalido');
 
 const app = express();
 
@@ -44,4 +46,7 @@ if (process.env.NODE_ENV !== 'production') {
     });
   });
 }
+
+app.use(manejarJsonInvalido);
+
 module.exports = app;
