@@ -1,0 +1,37 @@
+
+.acceso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vt-space-lg);
+}
+
+.acceso__intro {
+  max-width: var(--vt-reading-max-width);
+  align-items: center;
+  text-align: center;
+}
+
+.acceso__tarjeta {
+  width: min(100%, 36rem);
+}
+
+.acceso__aviso {
+  background-color: var(--vt-surface-low);
+}
+
+.acceso__nota {
+  justify-content: center;
+  text-align: center;
+}
+
+
+.acceso__cambiar {
+  align-self: flex-start;
+  padding-inline: 0;
+}
+
+
+.acceso__protegido {
+  background-color: var(--vt-surface-low);
+}
