@@ -8,8 +8,14 @@ function RutaProtegida({ roles }) {
 
   if (!usuario) return <Navigate to="/acceso" replace />
 
-  if (roles && !roles.includes(usuario.rol)) {
-    return <Navigate to={rutaDeInicio({ ...usuario, primerAcceso: false })} replace />
+  if (roles) {
+    
+    if (!usuario.nombreCompleto) return <Navigate to="/bienvenida" replace />
+
+    
+    if (!roles.includes(usuario.rol)) {
+      return <Navigate to={rutaDeInicio(usuario)} replace />
+    }
   }
 
   return <Outlet />

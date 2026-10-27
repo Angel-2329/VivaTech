@@ -1,39 +1,86 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Navigate, useNavigate } from 'react-router'
 import Encabezado from '../components/Encabezado.jsx'
 import PiePagina from '../components/PiePagina.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
+import { guardarPerfil } from '../services/perfilService.js'
+import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
 import { rutaDeInicio } from '../utils/rutaDeInicio.js'
 import './PrimerAcceso.css'
 
-const LARGO_MAXIMO = 30
+const LARGO_MINIMO_NOMBRE = 3
+const LARGO_MAXIMO_NOMBRE = 100
+const LARGO_MAXIMO_APODO = 30
+
+
+function limpiarTexto(texto) {
+  return texto.trim().replace(/\s+/g, ' ')
+}
 
 function PrimerAcceso() {
-  const { usuario, guardarNombre, cerrarSesion } = useSesion()
-  const [nombre, setNombre] = useState(usuario.nombre ?? '')
+  const { usuario, iniciarSesion, cerrarSesion } = useSesion()
+  const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto ?? '')
+  const [apodo, setApodo] = useState(usuario.apodo ?? '')
+  const [errorNombre, setErrorNombre] = useState('')
+  const [errorGuardado, setErrorGuardado] = useState('')
+  const [guardando, setGuardando] = useState(false)
   const navigate = useNavigate()
   const tituloRef = useRef(null)
+  const nombreRef = useRef(null)
   const id = useId()
 
-  const nombreLimpio = nombre.trim()
-  const saludo = nombreLimpio ? `¡Hola, ${nombreLimpio}!` : '¡Hola!'
+ 
+  const nombreDelSaludo = nombreParaSaludo({
+    nombreCompleto: limpiarTexto(nombreCompleto),
+    apodo: limpiarTexto(apodo) || null,
+  })
+  const saludo = nombreDelSaludo ? `¡Hola, ${nombreDelSaludo}!` : '¡Hola!'
 
-  
   useEffect(() => {
     tituloRef.current?.focus()
   }, [])
 
-  function continuar(nombreElegido) {
-    // TODO (backend): guardar el nombre también en la base de datos
-    guardarNombre(nombreElegido)
-    navigate(rutaDeInicio({ ...usuario, primerAcceso: false }), { replace: true })
+
+  if (usuario.nombreCompleto) {
+    return <Navigate to={rutaDeInicio(usuario)} replace />
   }
 
-  function manejarEnvio(evento) {
+  function manejarCambioNombre(evento) {
+    setNombreCompleto(evento.target.value)
+    if (errorNombre) setErrorNombre('')
+  }
+
+  async function manejarEnvio(evento) {
     evento.preventDefault()
-    continuar(nombreLimpio)
-  }
+    if (guardando) return
 
+    const nombreLimpio = limpiarTexto(nombreCompleto)
+    const apodoLimpio = limpiarTexto(apodo) || null 
+
+    if (nombreLimpio.length < LARGO_MINIMO_NOMBRE) {
+      setErrorNombre('Escribe tu nombre completo para continuar.')
+      nombreRef.current?.focus()
+      return
+    }
+
+    setErrorGuardado('')
+    setGuardando(true)
+
+    const resultado = await guardarPerfil({
+      nombreCompleto: nombreLimpio,
+      apodo: apodoLimpio,
+    })
+
+    if (!resultado.ok) {
+      setErrorGuardado(resultado.mensaje)
+      setGuardando(false)
+      return
+    }
+
+    const usuarioActualizado = { ...usuario, ...resultado.usuario }
+    iniciarSesion(usuarioActualizado)
+    navigate(rutaDeInicio(usuarioActualizado), { replace: true })
+  }
 
   function entrarConOtroNumero() {
     cerrarSesion()
@@ -63,35 +110,76 @@ function PrimerAcceso() {
                 <span className="vt-icon" aria-hidden="true">
                   badge
                 </span>
-                Último paso (opcional): personaliza tu saludo
+                Último paso: tus datos
               </p>
               <h1 ref={tituloRef} tabIndex={-1} className="vt-headline-xl">
-                ¿Cómo quieres que te llamemos?
+                ¿Cuál es tu nombre completo?
               </h1>
-              <p className="vt-text-muted">Lo verás en tu pantalla de inicio. Puedes cambiarlo después.</p>
+              <p className="vt-text-muted">
+                Así aparecerá en tus certificados. Tu maestra o maestro también lo usará para
+                encontrarte.
+              </p>
             </div>
 
+            {/* Campo 1: nombre completo (obligatorio) */}
             <div className="vt-field">
               <label className="vt-field-label" htmlFor={`${id}-nombre`}>
-                Tu nombre o apodo (opcional)
+                Nombre completo
+                <span className="vt-field-required">Obligatorio</span>
               </label>
-              <input
-                id={`${id}-nombre`}
-                className="vt-input"
-                type="text"
-                autoComplete="given-name"
-                placeholder="Rosa"
-                maxLength={LARGO_MAXIMO}
-                value={nombre}
-                onChange={(evento) => setNombre(evento.target.value)}
-                aria-describedby={`${id}-ayuda`}
-              />
-              <p id={`${id}-ayuda`} className="vt-field-help">
+              <p id={`${id}-ayuda-nombre`} className="vt-field-help">
                 <span className="vt-icon" aria-hidden="true">
                   info
                 </span>
-                Por ejemplo: Rosa, Don Carlos o Tere. Solo se usará para saludarte en la plataforma.
+                Escribe tu nombre y apellidos. Ejemplo: Rosa María Pérez Díaz.
               </p>
+              <input
+                ref={nombreRef}
+                id={`${id}-nombre`}
+                className="vt-input"
+                type="text"
+                autoComplete="name"
+                maxLength={LARGO_MAXIMO_NOMBRE}
+                readOnly={guardando}
+                value={nombreCompleto}
+                onChange={manejarCambioNombre}
+                aria-required="true"
+                aria-invalid={errorNombre ? 'true' : undefined}
+                aria-describedby={`${id}-ayuda-nombre${errorNombre ? ` ${id}-error-nombre` : ''}`}
+              />
+              {errorNombre && (
+                <p id={`${id}-error-nombre`} className="vt-field-error" role="alert">
+                  <span className="vt-icon" aria-hidden="true">
+                    error
+                  </span>
+                  {errorNombre}
+                </p>
+              )}
+            </div>
+
+            {/* Campo 2: apodo (opcional) */}
+            <div className="vt-field">
+              <label className="vt-field-label" htmlFor={`${id}-apodo`}>
+                ¿Cómo quieres que te saludemos? (opcional)
+              </label>
+              <p id={`${id}-ayuda-apodo`} className="vt-field-help">
+                <span className="vt-icon" aria-hidden="true">
+                  info
+                </span>
+                Por ejemplo: Rosa, Don Carlos o Tere. Si lo dejas vacío, te saludaremos con tu
+                primer nombre.
+              </p>
+              <input
+                id={`${id}-apodo`}
+                className="vt-input"
+                type="text"
+                autoComplete="nickname"
+                maxLength={LARGO_MAXIMO_APODO}
+                readOnly={guardando}
+                value={apodo}
+                onChange={(evento) => setApodo(evento.target.value)}
+                aria-describedby={`${id}-ayuda-apodo`}
+              />
             </div>
 
             {/* Se actualiza mientras la persona escribe */}
@@ -107,21 +195,29 @@ function PrimerAcceso() {
               </div>
             </div>
 
-            <div className="vt-stack vt-stack-sm">
-              <button type="submit" className="vt-btn vt-btn-primary vt-btn-block">
-                Guardar y continuar
+            {errorGuardado && (
+              <div className="vt-alert vt-alert-error" role="alert">
                 <span className="vt-icon" aria-hidden="true">
-                  arrow_forward
+                  error
                 </span>
-              </button>
-              <button
-                type="button"
-                className="vt-btn vt-btn-secondary vt-btn-block"
-                onClick={() => continuar('')}
-              >
-                Omitir este paso
-              </button>
-            </div>
+                <div className="vt-alert__content">
+                  <p className="vt-alert__title">No pudimos guardar tus datos</p>
+                  <p>{errorGuardado}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={guardando}
+              className="vt-btn vt-btn-primary vt-btn-block"
+              aria-busy={guardando}
+            >
+              {guardando ? 'Guardando…' : 'Guardar y continuar'}
+              <span className="vt-icon" aria-hidden="true">
+                arrow_forward
+              </span>
+            </button>
           </form>
 
           <aside className="vt-alert vt-alert-info vt-alert-soft">

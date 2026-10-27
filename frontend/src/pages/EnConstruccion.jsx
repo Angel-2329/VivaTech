@@ -2,10 +2,12 @@
 import Encabezado from '../components/Encabezado.jsx'
 import PiePagina from '../components/PiePagina.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
+import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
 
 function EnConstruccion({ titulo }) {
   const { usuario } = useSesion()
-  const saludo = usuario.nombre ? `¡Hola, ${usuario.nombre}!` : '¡Hola!'
+  const nombre = nombreParaSaludo(usuario)
+  const saludo = nombre ? `¡Hola, ${nombre}!` : '¡Hola!'
 
   return (
     <div className="vt-page">

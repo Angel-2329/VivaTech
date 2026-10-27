@@ -1,14 +1,27 @@
-// SIMULACIÓN del acceso con SMS.
 
 const CODIGO_DE_PRUEBA = '123456'
 
-// Números de prueba para ver cómo entra cada rol.
-const USUARIOS_DE_PRUEBA = {
-  '9511111111': { nombre: 'Rosa', rol: 'estudiante' },
-  '9512222222': { nombre: 'Luis Ramírez', rol: 'maestro' },
-  '9513333333': { nombre: 'Ana', rol: 'administrador' },
-}
 
+const USUARIOS_DE_PRUEBA = {
+  '9511111111': {
+    uid: 'prueba-estudiante',
+    nombreCompleto: 'Rosa María Pérez Díaz',
+    apodo: 'Rosa',
+    rol: 'estudiante',
+  },
+  '9512222222': {
+    uid: 'prueba-maestro',
+    nombreCompleto: 'Luis Ramírez López',
+    apodo: null,
+    rol: 'maestro',
+  },
+  '9513333333': {
+    uid: 'prueba-administrador',
+    nombreCompleto: 'Ana Martínez Ruiz',
+    apodo: 'Ana',
+    rol: 'administrador',
+  },
+}
 
 function esperar(milisegundos) {
   return new Promise((resolver) => setTimeout(resolver, milisegundos))
@@ -30,15 +43,20 @@ export async function verificarCodigo(telefono, codigo) {
     }
   }
 
- 
   const existente = USUARIOS_DE_PRUEBA[telefono]
 
   if (existente) {
-    return { ok: true, usuario: { telefono, ...existente, primerAcceso: false } }
+    return { ok: true, usuario: { ...existente } }
   }
 
+  
   return {
     ok: true,
-    usuario: { telefono, nombre: '', rol: 'estudiante', primerAcceso: true },
+    usuario: {
+      uid: `prueba-${telefono}`,
+      nombreCompleto: null,
+      apodo: null,
+      rol: 'estudiante',
+    },
   }
 }

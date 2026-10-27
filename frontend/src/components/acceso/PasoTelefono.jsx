@@ -1,9 +1,10 @@
+import { Link } from 'react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 import { enviarCodigo } from '../../services/authService.js'
 
 const DIGITOS_TELEFONO = 10
 
-// Deja solo los números. Si la persona pega "+52 951 123 4567", quita el +52.
+
 function limpiarTelefono(texto) {
   const sinLada = texto.trim().startsWith('+52') ? texto.trim().slice(3) : texto
   return sinLada.replace(/\D/g, '').slice(0, DIGITOS_TELEFONO)
@@ -11,7 +12,6 @@ function limpiarTelefono(texto) {
 
 function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
   const [telefono, setTelefono] = useState(telefonoInicial)
-  // Si regresa desde el paso 2, ya había aceptado el aviso
   const [aceptaAviso, setAceptaAviso] = useState(telefonoInicial !== '')
   const [errores, setErrores] = useState({})
   const [enviando, setEnviando] = useState(false)
@@ -140,9 +140,9 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
             aria-invalid={errores.aviso ? 'true' : undefined}
             aria-describedby={errores.aviso ? `${id}-error-aviso` : undefined}
           />
-          {/* TODO: convertir en enlaces cuando existan las páginas del Aviso y los Términos */}
           <span>
-            He leído y acepto el Aviso de Privacidad y los Términos de Servicio de Viva Tech.
+            He leído y acepto el{' '}
+            <Link to="/aviso-de-privacidad">Aviso de Privacidad</Link> de Viva Tech.
           </span>
         </label>
 

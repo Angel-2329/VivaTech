@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useSesion } from '../context/SesionContext.jsx'
 import { rutaDeInicio } from '../utils/rutaDeInicio.js'
+import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
 
-const ESCALAS = ['90', '100', '115', '130']
+const ESCALAS = ['100', '115', '130']
 const CLAVE_GUARDADO = 'vt-escala-texto'
 
 function leerEscalaGuardada() {
@@ -48,7 +49,7 @@ function Encabezado({ variante = 'acceso' }) {
 
   const mostrarUsuario = variante !== 'acceso' && usuario
   const conSesion = variante === 'sesion' && usuario
-  const nombre = usuario?.nombre
+  const nombre = nombreParaSaludo(usuario)
 
   return (
     <header className="vt-header">
@@ -65,10 +66,9 @@ function Encabezado({ variante = 'acceso' }) {
 
         {conSesion && (
           <nav className="vt-nav" aria-label="Menú principal">
-            <NavLink className="vt-nav-link" to={rutaDeInicio({ ...usuario, primerAcceso: false })} end>
+            <NavLink className="vt-nav-link" to={rutaDeInicio(usuario)} end>
               Inicio
             </NavLink>
-            {/* TODO: crear la pantalla "Mis cursos" (por ahora regresa al inicio) */}
             {usuario.rol === 'estudiante' && (
               <NavLink className="vt-nav-link" to="/estudiante/cursos">
                 Mis cursos
