@@ -1,0 +1,13 @@
+
+.personalizacion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-lg);
+  max-width: 36rem;
+}
+
+.personalizacion__paso {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+}
