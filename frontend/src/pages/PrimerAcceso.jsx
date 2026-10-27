@@ -18,7 +18,7 @@ function limpiarTexto(texto) {
 }
 
 function PrimerAcceso() {
-  const { usuario, iniciarSesion, cerrarSesion } = useSesion()
+  const { usuario, refrescarPerfil, cerrarSesion } = useSesion()
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto ?? '')
   const [apodo, setApodo] = useState(usuario.apodo ?? '')
   const [errorNombre, setErrorNombre] = useState('')
@@ -55,36 +55,73 @@ function PrimerAcceso() {
     if (guardando) return
 
     const nombreLimpio = limpiarTexto(nombreCompleto)
-    const apodoLimpio = limpiarTexto(apodo) || null 
+    const apodoLimpio = limpiarTexto(apodo) || null
 
-    if (nombreLimpio.length < LARGO_MINIMO_NOMBRE) {
-      setErrorNombre('Escribe tu nombre completo para continuar.')
+    if (
+      nombreLimpio.length < LARGO_MINIMO_NOMBRE
+      || nombreLimpio.length > LARGO_MAXIMO_NOMBRE
+    ) {
+      setErrorNombre('Escribe tu nombre completo, de 3 a 100 caracteres.')
       nombreRef.current?.focus()
       return
     }
 
-    setErrorGuardado('')
-    setGuardando(true)
-
-    const resultado = await guardarPerfil({
-      nombreCompleto: nombreLimpio,
-      apodo: apodoLimpio,
-    })
-
-    if (!resultado.ok) {
-      setErrorGuardado(resultado.mensaje)
-      setGuardando(false)
+    if (apodoLimpio && apodoLimpio.length > LARGO_MAXIMO_APODO) {
+      setErrorGuardado('El apodo debe tener como máximo 30 caracteres.')
       return
     }
 
-    const usuarioActualizado = { ...usuario, ...resultado.usuario }
-    iniciarSesion(usuarioActualizado)
-    navigate(rutaDeInicio(usuarioActualizado), { replace: true })
+    setErrorNombre('')
+    setErrorGuardado('')
+    setGuardando(true)
+
+    try {
+      const resultado = await guardarPerfil({
+        nombreCompleto: nombreLimpio,
+        apodo: apodoLimpio,
+      })
+
+      if (
+        !resultado.ok
+        && !(
+          resultado.estado === 409
+          && resultado.codigo === 'perfil_existente'
+        )
+      ) {
+        setErrorGuardado(resultado.mensaje)
+        return
+      }
+
+      const perfil = await refrescarPerfil()
+
+      if (perfil?.nombreCompleto) {
+        navigate(rutaDeInicio(perfil), { replace: true })
+      }
+    } catch {
+      setErrorGuardado(
+        'No pudimos completar el registro. Inténtalo nuevamente.'
+      )
+    } finally {
+      setGuardando(false)
+    }
   }
 
-  function entrarConOtroNumero() {
-    cerrarSesion()
-    navigate('/acceso', { replace: true })
+  async function entrarConOtroNumero() {
+    if (guardando) return
+
+    setErrorGuardado('')
+    setGuardando(true)
+
+    try {
+      await cerrarSesion()
+      navigate('/acceso', { replace: true })
+    } catch {
+      setErrorGuardado(
+        'No pudimos cerrar la sesión. Inténtalo nuevamente.'
+      )
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -97,7 +134,7 @@ function PrimerAcceso() {
 
       <main id="contenido" className="vt-main">
         <div className="vt-container personalizacion">
-          <button type="button" className="vt-back-link" onClick={entrarConOtroNumero}>
+          <button type="button" className="vt-back-link" onClick={entrarConOtroNumero} disabled={guardando}>
             <span className="vt-icon" aria-hidden="true">
               arrow_back
             </span>

@@ -1,6 +1,9 @@
 import { Link } from 'react-router'
 import { useEffect, useId, useRef, useState } from 'react'
-import { enviarCodigo } from '../../services/authService.js'
+import {
+  crearVerificadorRecaptcha,
+  enviarCodigoFirebase,
+} from '../../services/firebaseAuthService.js'
 
 const DIGITOS_TELEFONO = 10
 
@@ -10,15 +13,24 @@ function limpiarTelefono(texto) {
   return sinLada.replace(/\D/g, '').slice(0, DIGITOS_TELEFONO)
 }
 
-function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
+function PasoTelefono({
+  telefonoInicial,
+  aceptaAviso,
+  onCambiarAceptacion,
+  enfocarTitulo,
+  onContinuar,
+}) {  
   const [telefono, setTelefono] = useState(telefonoInicial)
-  const [aceptaAviso, setAceptaAviso] = useState(telefonoInicial !== '')
   const [errores, setErrores] = useState({})
   const [enviando, setEnviando] = useState(false)
 
   const tituloRef = useRef(null)
   const telefonoRef = useRef(null)
   const avisoRef = useRef(null)
+  const recaptchaContenedorRef = useRef(null)
+  const verificadorRef = useRef(null)
+  const componenteActivoRef = useRef(true)
+  const envioEnCursoRef = useRef(false)
   const id = useId()
 
   const telefonoCompleto = telefono.length === DIGITOS_TELEFONO
@@ -27,49 +39,93 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
     if (enfocarTitulo) tituloRef.current?.focus()
   }, [enfocarTitulo])
 
+  useEffect(() => {
+    componenteActivoRef.current = true
+
+    return () => {
+      componenteActivoRef.current = false
+      verificadorRef.current?.clear()
+      verificadorRef.current = null
+    }
+  }, [])
+
   function manejarCambioTelefono(evento) {
     setTelefono(limpiarTelefono(evento.target.value))
     if (errores.telefono) setErrores({ ...errores, telefono: undefined })
   }
 
   function manejarCambioAviso(evento) {
-    setAceptaAviso(evento.target.checked)
-    if (errores.aviso) setErrores({ ...errores, aviso: undefined })
+    onCambiarAceptacion(evento.target.checked)
+
+    if (errores.aviso) {
+      setErrores({ ...errores, aviso: undefined })
+    }
   }
 
   async function manejarEnvio(evento) {
     evento.preventDefault()
-    if (enviando) return
+    if (envioEnCursoRef.current) return
 
     const nuevosErrores = {}
+
     if (!telefonoCompleto) {
-      nuevosErrores.telefono = `Escribe los 10 números de tu celular. Llevas ${telefono.length}.`
+      nuevosErrores.telefono =
+        `Escribe los 10 números de tu celular. Llevas ${telefono.length}.`
     }
+
     if (!aceptaAviso) {
-      nuevosErrores.aviso = 'Para continuar, marca la casilla del Aviso de Privacidad.'
+      nuevosErrores.aviso =
+        'Para continuar, marca la casilla del Aviso de Privacidad.'
     }
+
     setErrores(nuevosErrores)
 
     if (nuevosErrores.telefono) {
       telefonoRef.current?.focus()
       return
     }
+
     if (nuevosErrores.aviso) {
       avisoRef.current?.focus()
       return
     }
 
+    envioEnCursoRef.current = true
     setEnviando(true)
-    const resultado = await enviarCodigo(telefono)
-    setEnviando(false)
 
-    if (!resultado.ok) {
-      setErrores({ telefono: resultado.mensaje })
-      telefonoRef.current?.focus()
-      return
+    try {
+      verificadorRef.current?.clear()
+      verificadorRef.current = null
+
+      const verificador = crearVerificadorRecaptcha(
+        recaptchaContenedorRef.current
+      )
+
+      verificadorRef.current = verificador
+
+      const confirmacion = await enviarCodigoFirebase(
+        telefono,
+        verificador
+      )
+
+      if (componenteActivoRef.current) {
+        onContinuar(telefono, confirmacion)
+      }
+    } catch (error) {
+      if (!componenteActivoRef.current) return
+
+      const mensaje = error.code === 'auth/too-many-requests'
+        ? 'Hubo demasiados intentos. Espera un momento antes de volver a intentar.'
+        : 'No pudimos enviar el código. Revisa tu conexión y la verificación de seguridad e inténtalo nuevamente.'
+
+      setErrores({ envio: mensaje })
+    } finally {
+      envioEnCursoRef.current = false
+
+      if (componenteActivoRef.current) {
+        setEnviando(false)
+      }
     }
-
-    onContinuar(telefono)
   }
 
   return (
@@ -97,6 +153,7 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
             id={`${id}-telefono`}
             className="vt-input"
             type="tel"
+            readOnly={enviando}
             inputMode="numeric"
             autoComplete="tel-national"
             value={telefono}
@@ -135,6 +192,7 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
             ref={avisoRef}
             id={`${id}-aviso`}
             type="checkbox"
+            disabled={enviando}
             checked={aceptaAviso}
             onChange={manejarCambioAviso}
             aria-invalid={errores.aviso ? 'true' : undefined}
@@ -156,12 +214,21 @@ function PasoTelefono({ telefonoInicial, enfocarTitulo, onContinuar }) {
         )}
       </div>
 
+        <div ref={recaptchaContenedorRef} />
+
+        {errores.envio && (
+          <p className="vt-field-error" role="alert">
+            {errores.envio}
+          </p>
+        )}
+
       <div className="vt-stack vt-stack-sm">
         <button
           type="submit"
           className="vt-btn vt-btn-primary vt-btn-block"
           aria-busy={enviando}
           aria-disabled={enviando}
+          disabled={enviando}
           aria-describedby={`${id}-nota`}
         >
           {enviando ? 'Enviando código…' : 'Enviar código por SMS'}

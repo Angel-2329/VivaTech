@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
-import { enviarCodigo, verificarCodigo } from '../../services/authService.js'
-import { useSesion } from '../../context/SesionContext.jsx'
-import { rutaDeInicio } from '../../utils/rutaDeInicio.js'
+import {
+  crearVerificadorRecaptcha,
+  enviarCodigoFirebase,
+  confirmarCodigoFirebase,
+} from '../../services/firebaseAuthService.js'
 
 const LARGO_CODIGO = 6
 const SEGUNDOS_PARA_REENVIAR = 60
@@ -19,22 +20,43 @@ function formatearTiempo(segundos) {
   return `${minutos}:${resto}`
 }
 
-function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
+function PasoCodigo({
+  telefono,
+  confirmacion,
+  onConfirmacionActualizada,
+  enfocarTitulo,
+  onCambiarNumero,
+}) {
   const [codigo, setCodigo] = useState('')
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [segundos, setSegundos] = useState(SEGUNDOS_PARA_REENVIAR)
   const [revisando, setRevisando] = useState(false)
-  const { iniciarSesion } = useSesion()
-  const navigate = useNavigate()
 
   const tituloRef = useRef(null)
   const codigoRef = useRef(null)
+  const recaptchaContenedorRef = useRef(null)
+  const verificadorRef = useRef(null)
+  const componenteActivoRef = useRef(true)
+  const operacionEnCursoRef = useRef(false)
+  const [reenviando, setReenviando] = useState(false)
+
+  const ocupado = revisando || reenviando
   const id = useId()
 
   useEffect(() => {
     if (enfocarTitulo) tituloRef.current?.focus()
   }, [enfocarTitulo])
+
+  useEffect(() => {
+    componenteActivoRef.current = true
+
+    return () => {
+      componenteActivoRef.current = false
+      verificadorRef.current?.clear()
+      verificadorRef.current = null
+    }
+  }, [])
 
   // Cuenta regresiva para poder pedir otro código
   useEffect(() => {
@@ -49,37 +71,108 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
   }
 
   async function reenviarCodigo() {
-    if (segundos > 0) return
-    await enviarCodigo(telefono)
-    setSegundos(SEGUNDOS_PARA_REENVIAR)
-    setCodigo('')
-    setMensaje('Te enviamos un código nuevo. Revisa tus mensajes.')
+    if (segundos > 0 || operacionEnCursoRef.current) return
+
+    operacionEnCursoRef.current = true
+    setReenviando(true)
+    setError('')
+    setMensaje('')
+
+    try {
+      verificadorRef.current?.clear()
+      verificadorRef.current = null
+
+      const verificador = crearVerificadorRecaptcha(
+        recaptchaContenedorRef.current
+      )
+
+      verificadorRef.current = verificador
+
+      const nuevaConfirmacion = await enviarCodigoFirebase(
+        telefono,
+        verificador
+      )
+
+      if (!componenteActivoRef.current) return
+
+      onConfirmacionActualizada(nuevaConfirmacion)
+      setSegundos(SEGUNDOS_PARA_REENVIAR)
+      setCodigo('')
+      setMensaje('Te enviamos un código nuevo. Revisa tus mensajes.')
+      codigoRef.current?.focus()
+    } catch (errorFirebase) {
+      if (!componenteActivoRef.current) return
+
+      setError(
+        errorFirebase.code === 'auth/too-many-requests'
+          ? 'Hubo demasiados intentos. Espera un momento antes de volver a intentar.'
+          : 'No pudimos reenviar el código. Revisa tu conexión e inténtalo nuevamente.'
+      )
+    } finally {
+      operacionEnCursoRef.current = false
+
+      if (componenteActivoRef.current) {
+        setReenviando(false)
+      }
+    }
   }
 
   async function manejarEnvio(evento) {
     evento.preventDefault()
-    if (revisando) return
+    if (operacionEnCursoRef.current) return
+
+    setMensaje('')
+    setError('')
 
     if (codigo.length !== LARGO_CODIGO) {
-      setMensaje('')
-      setError('El código tiene 6 números. Revisa el mensaje e inténtalo de nuevo.')
+      setError(
+        'El código tiene 6 números. Revisa el mensaje e inténtalo de nuevo.'
+      )
       codigoRef.current?.focus()
       return
     }
 
+    if (!confirmacion) {
+      setError('Solicita nuevamente tu código para continuar.')
+      return
+    }
+
+    operacionEnCursoRef.current = true
     setRevisando(true)
-    const resultado = await verificarCodigo(telefono, codigo)
-    setRevisando(false)
 
-    if (!resultado.ok) {
-      setMensaje('')
-      setError(resultado.mensaje)
+    try {
+      await confirmarCodigoFirebase(confirmacion, codigo)
+
+      // SesionContext observará la sesión de Firebase,
+      // consultará el perfil y permitirá la navegación.
+    } catch (errorFirebase) {
+      if (!componenteActivoRef.current) return
+
+      let mensajeError =
+        'No pudimos confirmar el código. Revisa tu conexión e inténtalo nuevamente.'
+
+      if (errorFirebase.code === 'auth/invalid-verification-code') {
+        mensajeError =
+          'El código no coincide. Revisa el mensaje e inténtalo otra vez.'
+      } else if (
+        errorFirebase.code === 'auth/code-expired'
+        || errorFirebase.code === 'auth/session-expired'
+      ) {
+        mensajeError = 'El código venció. Solicita uno nuevo.'
+      } else if (errorFirebase.code === 'auth/too-many-requests') {
+        mensajeError =
+          'Hubo demasiados intentos. Espera un momento antes de volver a intentar.'
+      }
+
+      setError(mensajeError)
       codigoRef.current?.focus()
-      return
-    }
+    } finally {
+      operacionEnCursoRef.current = false
 
-    iniciarSesion(resultado.usuario)
-    navigate(rutaDeInicio(resultado.usuario), { replace: true })
+      if (componenteActivoRef.current) {
+        setRevisando(false)
+      }
+    }
   }
 
   return (
@@ -101,6 +194,7 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
             type="button"
             className="vt-btn vt-btn-ghost vt-btn-sm acceso__cambiar"
             onClick={onCambiarNumero}
+            disabled={ocupado}
           >
             <span className="vt-icon" aria-hidden="true">
               edit
@@ -125,6 +219,7 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
           inputMode="numeric"
           autoComplete="one-time-code"
           value={codigo}
+          readOnly={ocupado}
           onChange={manejarCambioCodigo}
           aria-invalid={error ? 'true' : undefined}
           aria-describedby={`${id}-ayuda${error ? ` ${id}-error` : ''}`}
@@ -139,6 +234,8 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
         )}
       </div>
 
+      <div ref={recaptchaContenedorRef} />
+
       <div className="vt-resend">
         {segundos > 0 ? (
           <p>
@@ -152,9 +249,11 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
           type="button"
           className="vt-btn vt-btn-outline vt-btn-sm"
           onClick={reenviarCodigo}
-          aria-disabled={segundos > 0}
+          disabled={segundos > 0 || ocupado}
+          aria-disabled={segundos > 0 || ocupado}
+          aria-busy={reenviando}
         >
-          Reenviar código
+          {reenviando ? 'Reenviando código…' : 'Reenviar código'}
         </button>
       </div>
 
@@ -174,7 +273,8 @@ function PasoCodigo({ telefono, enfocarTitulo, onCambiarNumero }) {
         type="submit"
         className="vt-btn vt-btn-primary vt-btn-block"
         aria-busy={revisando}
-        aria-disabled={revisando}
+        aria-disabled={ocupado}
+        disabled={ocupado}
       >
         {revisando ? 'Revisando código…' : 'Confirmar y entrar'}
         <span className="vt-icon" aria-hidden="true">
