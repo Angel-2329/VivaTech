@@ -18,6 +18,8 @@ function leerEscalaGuardada() {
 
 function Encabezado({ variante = 'acceso' }) {
   const [escala, setEscala] = useState(leerEscalaGuardada)
+  const [saliendo, setSaliendo] = useState(false)
+  const [errorSalida, setErrorSalida] = useState('')
   const { usuario, cerrarSesion } = useSesion()
   const navigate = useNavigate()
 
@@ -42,9 +44,22 @@ function Encabezado({ variante = 'acceso' }) {
     if (!esLaMasGrande) setEscala(ESCALAS[posicion + 1])
   }
 
-  function salir() {
-    cerrarSesion()
-    navigate('/acceso', { replace: true })
+  async function salir() {
+    if (saliendo) return
+
+    setErrorSalida('')
+    setSaliendo(true)
+
+    try {
+      await cerrarSesion()
+      navigate('/acceso', { replace: true })
+    } catch {
+      setErrorSalida(
+        'No pudimos cerrar la sesión. Inténtalo nuevamente.'
+      )
+    } finally {
+      setSaliendo(false)
+    }
   }
 
   const mostrarUsuario = variante !== 'acceso' && usuario
@@ -108,9 +123,21 @@ function Encabezado({ variante = 'acceso' }) {
         )}
 
         {conSesion && (
-          <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" onClick={salir}>
-            Cerrar sesión
-          </button>
+          <div className="vt-stack vt-stack-sm">
+            <button
+              type="button"
+              className="vt-btn vt-btn-secondary vt-btn-sm"
+              onClick={salir}
+              disabled={saliendo}
+              aria-busy={saliendo}
+            >
+              {saliendo ? 'Cerrando sesión…' : 'Cerrar sesión'}
+            </button>
+
+            {errorSalida && (
+              <p role="alert">{errorSalida}</p>
+            )}
+          </div>
         )}
       </div>
     </header>

@@ -6,6 +6,7 @@ import PasoTelefono from '../components/acceso/PasoTelefono.jsx'
 import PasoCodigo from '../components/acceso/PasoCodigo.jsx'
 import { useSesion } from '../context/SesionContext.jsx'
 import { rutaDeInicio } from '../utils/rutaDeInicio.js'
+import EstadoSesion from '../components/EstadoSesion.jsx'
 import './Acceso.css'
 
 
@@ -31,24 +32,37 @@ function PasoIndicador({ numero, titulo, estado }) {
 }
 
 function Acceso() {
-  const { usuario } = useSesion()
+  const {
+    usuario,
+    cargando,
+    errorSesion,
+    mensajeSesion,
+  } = useSesion()
   const [paso, setPaso] = useState(1)
   const [telefono, setTelefono] = useState('')
   const [moverFoco, setMoverFoco] = useState(false)
+  const [confirmacion, setConfirmacion] = useState(null)
+  const [aceptaAviso, setAceptaAviso] = useState(false)
 
- 
+  if (cargando || errorSesion) {
+    return <EstadoSesion />
+  }
+
   if (usuario) return <Navigate to={rutaDeInicio(usuario)} replace />
 
-  function irAlPasoCodigo(numero) {
+  function irAlPasoCodigo(numero, nuevaConfirmacion) {
     setTelefono(numero)
+    setConfirmacion(nuevaConfirmacion)
     setPaso(2)
     setMoverFoco(true)
   }
 
   function regresarAlPasoTelefono() {
+    setConfirmacion(null)
     setPaso(1)
     setMoverFoco(true)
   }
+
 
   return (
     <div className="vt-page">
@@ -60,6 +74,11 @@ function Acceso() {
 
       <main id="contenido" className="vt-main">
         <div className="vt-container acceso">
+          {mensajeSesion && (
+            <div className="vt-alert vt-alert-error" role="alert">
+              <p>{mensajeSesion}</p>
+            </div>
+          )}
           <div className="vt-stack vt-stack-sm acceso__intro">
             <h1 className="vt-headline-xl">Entra a Viva Tech</h1>
             <p className="vt-body-lg vt-text-muted">
@@ -76,12 +95,16 @@ function Acceso() {
             {paso === 1 ? (
               <PasoTelefono
                 telefonoInicial={telefono}
+                aceptaAviso={aceptaAviso}
+                onCambiarAceptacion={setAceptaAviso}
                 enfocarTitulo={moverFoco}
                 onContinuar={irAlPasoCodigo}
               />
             ) : (
               <PasoCodigo
                 telefono={telefono}
+                confirmacion={confirmacion}
+                onConfirmacionActualizada={setConfirmacion}
                 enfocarTitulo={moverFoco}
                 onCambiarNumero={regresarAlPasoTelefono}
               />
