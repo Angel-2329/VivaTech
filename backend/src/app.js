@@ -3,6 +3,8 @@ const cors = require('cors');
 const pool = require('./config/database');
 const verificarTokenFirebase = require('./middlewares/verificar-token-firebase');
 const perfilRouter = require('./routes/perfil');
+const estudiantesRouter = require('./routes/estudiantes');
+const adminUsuariosRouter = require('./routes/admin-usuarios');
 const manejarJsonInvalido =
   require('./middlewares/manejar-json-invalido');
 
@@ -13,7 +15,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/api/perfil', perfilRouter);
-
+app.use('/api/estudiantes', estudiantesRouter);
+app.use('/api/admin/usuarios', adminUsuariosRouter);
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
