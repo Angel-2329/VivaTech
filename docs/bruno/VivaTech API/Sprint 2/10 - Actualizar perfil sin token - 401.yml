@@ -1,0 +1,22 @@
+info:
+  name: 10 - Actualizar perfil sin token - 401
+  type: http
+  seq: 10
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "Estudiante de Prueba",
+        "apodo": "Prueba Bruno"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
