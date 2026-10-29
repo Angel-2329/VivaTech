@@ -1,0 +1,21 @@
+info:
+  name: 55 — Cambiar estado sin token — 401
+  type: http
+  seq: 48
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidEstudiante}}/activo"
+  body:
+    type: json
+    data: |-
+      {
+        "activo": true
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

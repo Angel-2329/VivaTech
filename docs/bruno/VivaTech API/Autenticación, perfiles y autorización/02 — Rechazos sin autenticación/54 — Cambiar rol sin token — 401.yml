@@ -1,0 +1,21 @@
+info:
+  name: 54 — Cambiar rol sin token — 401
+  type: http
+  seq: 47
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidEstudiante}}/rol"
+  body:
+    type: json
+    data: |-
+      {
+        "rol": "estudiante"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

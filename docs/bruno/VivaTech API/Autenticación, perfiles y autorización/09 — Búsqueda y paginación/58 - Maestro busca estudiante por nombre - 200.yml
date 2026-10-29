@@ -1,0 +1,28 @@
+info:
+  name: 58 - Maestro busca estudiante por nombre - 200
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/estudiantes?buscar=ESTUDIANTE&limite=10&desplazamiento=0"
+  params:
+    - name: buscar
+      value: ESTUDIANTE
+      type: query
+    - name: limite
+      value: "10"
+      type: query
+    - name: desplazamiento
+      value: "0"
+      type: query
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

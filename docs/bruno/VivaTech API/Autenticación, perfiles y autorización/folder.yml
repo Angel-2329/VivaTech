@@ -1,0 +1,7 @@
+info:
+  name: Autenticación, perfiles y autorización
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

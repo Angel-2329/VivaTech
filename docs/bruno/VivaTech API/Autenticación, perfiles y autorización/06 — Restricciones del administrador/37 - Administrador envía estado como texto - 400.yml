@@ -1,0 +1,21 @@
+info:
+  name: 37 - Administrador envía estado como texto - 400
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidNuevo}}/activo"
+  body:
+    type: json
+    data: '{"activo":"false"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
