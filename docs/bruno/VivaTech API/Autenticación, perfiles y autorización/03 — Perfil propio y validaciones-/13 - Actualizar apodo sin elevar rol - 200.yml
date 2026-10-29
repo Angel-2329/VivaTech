@@ -1,0 +1,25 @@
+info:
+  name: 13 - Actualizar apodo sin elevar rol - 200
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "apodo": "Prueba Bruno",
+        "rol": "administrador"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

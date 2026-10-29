@@ -1,0 +1,27 @@
+info:
+  name: 28 - Crear perfil nuevo sin aceptar privilegios - 201
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "  Maestro de Prueba  ",
+        "apodo": "  Docente  ",
+        "rol": "administrador",
+        "activo": false
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

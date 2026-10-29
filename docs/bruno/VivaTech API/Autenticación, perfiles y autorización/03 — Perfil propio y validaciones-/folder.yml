@@ -1,0 +1,7 @@
+info:
+  name: "03 — Perfil propio y validaciones\t"
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
