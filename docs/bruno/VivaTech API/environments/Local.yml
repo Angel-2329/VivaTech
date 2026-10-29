@@ -1,0 +1,22 @@
+name: Local
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+  - secret: true
+    name: tokenEstudiante
+    description: ""
+  - secret: true
+    name: uidEstudiante
+    description: ""
+  - secret: true
+    name: tokenAdministrador
+    description: ""
+  - secret: true
+    name: uidAdministrador
+    description: ""
+  - secret: true
+    name: tokenNuevo
+    description: ""
+  - secret: true
+    name: uidNuevo
+    description: ""

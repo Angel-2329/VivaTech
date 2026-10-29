@@ -1,0 +1,24 @@
+info:
+  name: 56 - Perfil con JSON mal formado - 400
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/perfil"
+  headers:
+    - name: ""
+      value: application/json
+  body:
+    type: text
+    data: '{"nombreCompleto":'
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
