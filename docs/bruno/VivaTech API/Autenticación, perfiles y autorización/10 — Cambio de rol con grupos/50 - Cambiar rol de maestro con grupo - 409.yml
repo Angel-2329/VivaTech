@@ -1,0 +1,24 @@
+info:
+  name: 50 - Cambiar rol de maestro con grupo - 409
+  type: http
+  seq: 1
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidNuevo}}/rol"
+  body:
+    type: json
+    data: |-
+      {
+        "rol": "estudiante"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

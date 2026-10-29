@@ -1,0 +1,24 @@
+info:
+  name: 26 - Administrador no puede modificar su propio estado - 403
+  type: http
+  seq: 2
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidAdministrador}}/activo"
+  body:
+    type: json
+    data: |-
+      {
+        "activo": true
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

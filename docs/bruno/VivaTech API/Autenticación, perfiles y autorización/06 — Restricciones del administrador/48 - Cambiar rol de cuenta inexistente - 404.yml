@@ -1,0 +1,24 @@
+info:
+  name: 48 - Cambiar rol de cuenta inexistente - 404
+  type: http
+  seq: 20
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/uid-inexistente-prueba-bruno/rol"
+  body:
+    type: json
+    data: |-
+      {
+        "rol": "maestro"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,7 @@
+info:
+  name: 08 — Desactivación y reactivación
+  type: folder
+  seq: 8
+
+request:
+  auth: inherit
