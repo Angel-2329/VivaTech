@@ -4,6 +4,7 @@ import Acceso from './pages/Acceso.jsx'
 import PrimerAcceso from './pages/PrimerAcceso.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import EnConstruccion from './pages/EnConstruccion.jsx'
+import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
 
       {/* Solo estudiantes */}
       <Route element={<RutaProtegida roles={['estudiante']} />}>
-        <Route path="/estudiante" element={<EnConstruccion titulo="Inicio del estudiante" />} />
+        <Route path="/estudiante" element={<InicioEstudiante />} />
         <Route path="/estudiante/cursos" element={<EnConstruccion titulo="Mis cursos" />} />
       </Route>
 
