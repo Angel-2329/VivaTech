@@ -21,16 +21,22 @@ function App() {
       {/* Solo estudiantes */}
       <Route element={<RutaProtegida roles={['estudiante']} />}>
         <Route path="/estudiante" element={<EnConstruccion titulo="Inicio del estudiante" />} />
+        <Route path="/estudiante/cursos" element={<EnConstruccion titulo="Mis cursos" />} />
       </Route>
 
       {/* Solo maestros */}
       <Route element={<RutaProtegida roles={['maestro']} />}>
-        <Route path="/maestro" element={<EnConstruccion titulo="Panel del maestro" />} />
+        <Route path="/maestro" element={<EnConstruccion titulo="Mis grupos" />} />
+        <Route path="/maestro/grupos/:idGrupo" element={<EnConstruccion titulo="Detalle del grupo" />} />
       </Route>
 
       {/* Solo administradores */}
       <Route element={<RutaProtegida roles={['administrador']} />}>
-        <Route path="/admin" element={<EnConstruccion titulo="Panel del administrador" />} />
+        <Route path="/admin" element={<EnConstruccion titulo="Inicio del administrador" />} />
+        <Route path="/admin/usuarios" element={<EnConstruccion titulo="Cuentas y roles" />} />
+        <Route path="/admin/grupos" element={<EnConstruccion titulo="Grupos" />} />
+        <Route path="/admin/grupos/:idGrupo" element={<EnConstruccion titulo="Detalle del grupo" />} />
+        <Route path="/admin/progreso" element={<EnConstruccion titulo="Progreso general" />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
