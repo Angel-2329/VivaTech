@@ -1,0 +1,22 @@
+info:
+  name: 47 — Desplazamiento negativo — 400
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/estudiantes?desplazamiento=-1"
+  params:
+    - name: desplazamiento
+      value: "-1"
+      type: query
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

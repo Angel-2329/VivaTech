@@ -1,0 +1,15 @@
+info:
+  name: 53 — Listar cuentas sin token — 401
+  type: http
+  seq: 46
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

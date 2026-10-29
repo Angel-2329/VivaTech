@@ -1,0 +1,25 @@
+info:
+  name: 45 — Cuentas segunda página — 200
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios?limite=1&desplazamiento=1"
+  params:
+    - name: limite
+      value: "1"
+      type: query
+    - name: desplazamiento
+      value: "1"
+      type: query
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

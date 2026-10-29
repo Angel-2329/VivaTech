@@ -1,0 +1,24 @@
+info:
+  name: 35 - Maestro no puede cambiar estado - 403
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidEstudiante}}/activo"
+  body:
+    type: json
+    data: |-
+      {
+        "activo": false
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

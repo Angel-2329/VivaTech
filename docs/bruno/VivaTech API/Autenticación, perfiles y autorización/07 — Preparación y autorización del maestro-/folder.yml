@@ -1,0 +1,7 @@
+info:
+  name: "07 — Preparación y autorización del maestro\t"
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit

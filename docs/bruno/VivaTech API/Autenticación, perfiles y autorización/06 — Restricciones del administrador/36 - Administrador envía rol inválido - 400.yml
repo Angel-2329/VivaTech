@@ -1,0 +1,21 @@
+info:
+  name: 36 - Administrador envía rol inválido - 400
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidNuevo}}/rol"
+  body:
+    type: json
+    data: '{"rol":"superusuario"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
