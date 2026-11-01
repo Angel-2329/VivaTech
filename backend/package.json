@@ -9,7 +9,8 @@
     "migrate:up": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js up",
     "migrate:down": "node -r dotenv/config ./node_modules/node-pg-migrate/bin/node-pg-migrate.js down",
     "test": "node --test",
-    "crear-admin": "node -r dotenv/config scripts/crear-admin.js"
+    "crear-admin": "node -r dotenv/config scripts/crear-admin.js",
+    "cargar-categorias": "node -r dotenv/config scripts/cargar-categorias.js"
   },
   "keywords": [],
   "author": "",
