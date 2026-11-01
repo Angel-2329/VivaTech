@@ -1,0 +1,18 @@
+info:
+  name: 79 - Administrador elimina grupo vacío - 204
+  type: http
+  seq: 79
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

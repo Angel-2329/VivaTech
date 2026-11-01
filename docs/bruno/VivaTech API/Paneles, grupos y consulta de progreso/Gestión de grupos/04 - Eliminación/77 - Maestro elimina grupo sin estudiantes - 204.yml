@@ -1,0 +1,18 @@
+info:
+  name: 77 - Maestro elimina grupo sin estudiantes - 204
+  type: http
+  seq: 77
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
