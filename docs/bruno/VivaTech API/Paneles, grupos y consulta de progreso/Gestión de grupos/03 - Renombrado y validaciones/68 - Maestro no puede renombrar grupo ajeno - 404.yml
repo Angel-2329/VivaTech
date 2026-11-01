@@ -1,0 +1,24 @@
+info:
+  name: 68 - Maestro no puede renombrar grupo ajeno - 404
+  type: http
+  seq: 68
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Cambio no permitido B02"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
