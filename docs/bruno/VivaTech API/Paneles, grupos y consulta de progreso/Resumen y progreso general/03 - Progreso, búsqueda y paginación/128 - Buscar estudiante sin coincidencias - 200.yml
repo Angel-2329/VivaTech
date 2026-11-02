@@ -1,0 +1,18 @@
+info:
+  name: 128 - Buscar estudiante sin coincidencias - 200
+  type: http
+  seq: 128
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/progreso?buscar=sin-coincidencias-prueba-b05-7482&limite=100&desplazamiento=0"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

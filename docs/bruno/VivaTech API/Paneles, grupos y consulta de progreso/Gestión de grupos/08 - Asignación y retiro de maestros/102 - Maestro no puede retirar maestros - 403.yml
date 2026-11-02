@@ -1,0 +1,18 @@
+info:
+  name: 102 - Maestro no puede retirar maestros - 403
+  type: http
+  seq: 102
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros/uid-prueba-b04"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

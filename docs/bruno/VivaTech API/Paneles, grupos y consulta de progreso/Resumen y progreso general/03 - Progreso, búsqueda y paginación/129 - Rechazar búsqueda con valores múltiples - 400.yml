@@ -1,0 +1,18 @@
+info:
+  name: 129 - Rechazar búsqueda con valores múltiples - 400
+  type: http
+  seq: 129
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/progreso?buscar=uno&buscar=dos"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

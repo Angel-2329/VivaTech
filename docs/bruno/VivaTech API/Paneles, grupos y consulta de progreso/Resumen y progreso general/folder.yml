@@ -1,0 +1,7 @@
+info:
+  name: Resumen y progreso general
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit

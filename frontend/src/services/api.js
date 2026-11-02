@@ -67,6 +67,10 @@ export async function solicitarApi(
     )
   }
 
+  if (respuesta.ok && respuesta.status === 204) {
+    return undefined
+  }
+
   const cuerpo = await respuesta.json().catch(() => null)
 
   if (!respuesta.ok) {

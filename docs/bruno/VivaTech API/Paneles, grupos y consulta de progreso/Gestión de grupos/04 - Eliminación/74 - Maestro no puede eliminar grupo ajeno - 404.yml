@@ -1,0 +1,18 @@
+info:
+  name: 74 - Maestro no puede eliminar grupo ajeno - 404
+  type: http
+  seq: 74
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
