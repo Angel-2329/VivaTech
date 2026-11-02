@@ -1,0 +1,7 @@
+.buscador {
+  align-items: flex-end;
+}
+
+.buscador .buscador__boton {
+  flex: 0 0 auto;
+}
