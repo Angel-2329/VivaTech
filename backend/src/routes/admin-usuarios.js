@@ -73,6 +73,27 @@ router.get('/', validarBusquedaUsuarios, async (req, res) => {
     desplazamiento
   } = req.busquedaUsuarios;
 
+  const valorRol = req.query.rol;
+  const rolesValidos = ['estudiante', 'maestro', 'administrador'];
+
+  if (valorRol !== undefined && typeof valorRol !== 'string') {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'El filtro de rol debe ser estudiante, maestro o administrador',
+      codigo: 'rol_invalido'
+    });
+  }
+
+  const rol = valorRol?.trim() || null;
+
+  if (rol !== null && !rolesValidos.includes(rol)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'El filtro de rol debe ser estudiante, maestro o administrador',
+      codigo: 'rol_invalido'
+    });
+  }
+
   try {
     const resultado = await pool.query(
       `
@@ -87,10 +108,11 @@ router.get('/', validarBusquedaUsuarios, async (req, res) => {
           lower(nombre_completo),
           lower($1::text)
         ) > 0
+          AND ($4::text IS NULL OR rol = $4::text)
         ORDER BY lower(nombre_completo), uid
         LIMIT $2 OFFSET $3
       `,
-      [buscar, limite, desplazamiento]
+      [buscar, limite, desplazamiento, rol]
     );
 
     return res.json(resultado.rows);

@@ -1,0 +1,21 @@
+info:
+  name: 96 - Administrador asigna en grupo del maestro - 201
+  type: http
+  seq: 96
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes"
+  body:
+    type: json
+    data: '{"uid":"{{uidEstudiante}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

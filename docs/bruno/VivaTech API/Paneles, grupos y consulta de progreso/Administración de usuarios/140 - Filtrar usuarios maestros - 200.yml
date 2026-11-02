@@ -1,0 +1,18 @@
+info:
+  name: 140 - Filtrar usuarios maestros - 200
+  type: http
+  seq: 140
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios?rol=maestro&limite=100&desplazamiento=0"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

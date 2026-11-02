@@ -1,0 +1,18 @@
+info:
+  name: 76 - Eliminar grupo inexistente - 404
+  type: http
+  seq: 76
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/9223372036854775807"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

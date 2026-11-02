@@ -1,0 +1,19 @@
+info:
+  name: 100 - Asignar maestro sin token - 401
+  type: http
+  seq: 100
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros"
+  body:
+    type: json
+    data: '{"uid":"uid-prueba-b04"}'
+  auth: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

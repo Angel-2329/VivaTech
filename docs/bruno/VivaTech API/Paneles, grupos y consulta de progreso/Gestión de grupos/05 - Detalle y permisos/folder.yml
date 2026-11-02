@@ -1,0 +1,7 @@
+info:
+  name: 05 - Detalle y permisos
+  type: folder
+  seq: 5
+
+request:
+  auth: inherit

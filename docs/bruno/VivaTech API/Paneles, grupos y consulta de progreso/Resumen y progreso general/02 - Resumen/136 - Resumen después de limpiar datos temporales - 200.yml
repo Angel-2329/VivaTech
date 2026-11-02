@@ -1,0 +1,18 @@
+info:
+  name: 136 - Resumen después de limpiar datos temporales - 200
+  type: http
+  seq: 136
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/resumen"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

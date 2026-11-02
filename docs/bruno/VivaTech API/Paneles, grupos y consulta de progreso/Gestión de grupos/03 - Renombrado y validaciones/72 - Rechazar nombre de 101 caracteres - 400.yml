@@ -1,0 +1,24 @@
+info:
+  name: 72 - Rechazar nombre de 101 caracteres - 400
+  type: http
+  seq: 72
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-1234567890X"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
