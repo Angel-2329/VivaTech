@@ -36,7 +36,93 @@ const CONSULTA_GRUPOS = `
   FROM grupos g
 `;
 
-async function ejecutarOperacion(uid, operacion) {
+const CONSULTA_ESTUDIANTES_GRUPO = `
+  SELECT
+    u.uid,
+    u.nombre_completo AS "nombreCompleto",
+    u.nombre_apodo AS apodo,
+    u.activo,
+    avance."leccionesCompletadas",
+    avance."ultimaActividad"
+  FROM grupo_estudiantes ge
+  JOIN usuarios u ON u.uid = ge.uid_estudiante
+  LEFT JOIN LATERAL (
+    SELECT
+      (count(*) FILTER (WHERE p.estado = 'completada'))::integer
+        AS "leccionesCompletadas",
+      max(p.fecha_actualizacion) AS "ultimaActividad"
+    FROM progresos p
+    JOIN lecciones l ON l.id_leccion = p.id_leccion
+    JOIN cursos c ON c.id_curso = l.id_curso
+    WHERE p.uid_estudiante = u.uid
+      AND l.estado_publicacion = 'publicado'
+      AND c.estado_publicacion = 'publicado'
+  ) avance ON true
+  WHERE ge.id_grupo = $1
+`;
+
+function validarSolicitante(usuario) {
+  if (!usuario) {
+    throw new ErrorOperacionGrupo(
+      404,
+      'El perfil todavía no está registrado',
+      'perfil_no_registrado'
+    );
+  }
+
+  if (!usuario.activo) {
+    throw new ErrorOperacionGrupo(
+      403,
+      'La cuenta está desactivada',
+      'cuenta_desactivada'
+    );
+  }
+
+  if (!['maestro', 'administrador'].includes(usuario.rol)) {
+    throw new ErrorOperacionGrupo(
+      403,
+      'No tienes permisos para realizar esta acción',
+      'rol_no_autorizado'
+    );
+  }
+}
+
+async function comprobarAccesoPrevio(cliente, uid, idGrupo) {
+  const solicitante = await cliente.query(
+    'SELECT uid, rol, activo FROM usuarios WHERE uid = $1',
+    [uid]
+  );
+
+  const usuario = solicitante.rows[0];
+  validarSolicitante(usuario);
+
+  const grupo = await cliente.query(
+    `
+      SELECT g.id_grupo
+      FROM grupos g
+      WHERE g.id_grupo = $1
+        AND (
+          $2::text = 'administrador'
+          OR EXISTS (
+            SELECT 1
+            FROM grupo_maestros gm
+            WHERE gm.id_grupo = g.id_grupo AND gm.uid_maestro = $3
+          )
+        )
+    `,
+    [idGrupo, usuario.rol, usuario.uid]
+  );
+
+  if (grupo.rowCount !== 1) {
+    throw new ErrorOperacionGrupo(
+      404,
+      'El grupo no está disponible',
+      'grupo_no_encontrado'
+    );
+  }
+}
+
+async function ejecutarOperacion(uid, operacion, opciones = {}) {
   const cliente = await pool.connect();
   let transaccionActiva = false;
   let errorAlRevertir;
@@ -45,43 +131,41 @@ async function ejecutarOperacion(uid, operacion) {
     await cliente.query('BEGIN');
     transaccionActiva = true;
 
-    const resultado = await cliente.query(
-      `
-        SELECT uid, rol, activo
-        FROM usuarios
-        WHERE uid = $1
-        FOR SHARE
-      `,
-      [uid]
+    let resultado;
+
+    if (opciones.uidDestino !== undefined) {
+      await comprobarAccesoPrevio(cliente, uid, opciones.idGrupo);
+
+      resultado = await cliente.query(
+        `
+          SELECT uid, rol, activo
+          FROM usuarios
+          WHERE uid IN ($1, $2)
+          ORDER BY uid
+          FOR UPDATE
+        `,
+        [uid, opciones.uidDestino]
+      );
+    } else {
+      resultado = await cliente.query(
+        `
+          SELECT uid, rol, activo
+          FROM usuarios
+          WHERE uid = $1
+          FOR SHARE
+        `,
+        [uid]
+      );
+    }
+
+    const usuario = resultado.rows.find((fila) => fila.uid === uid);
+    validarSolicitante(usuario);
+
+    const destinatario = resultado.rows.find(
+      (fila) => fila.uid === opciones.uidDestino
     );
 
-    const usuario = resultado.rows[0];
-
-    if (!usuario) {
-      throw new ErrorOperacionGrupo(
-        404,
-        'El perfil todavía no está registrado',
-        'perfil_no_registrado'
-      );
-    }
-
-    if (!usuario.activo) {
-      throw new ErrorOperacionGrupo(
-        403,
-        'La cuenta está desactivada',
-        'cuenta_desactivada'
-      );
-    }
-
-    if (!['maestro', 'administrador'].includes(usuario.rol)) {
-      throw new ErrorOperacionGrupo(
-        403,
-        'No tienes permisos para realizar esta acción',
-        'rol_no_autorizado'
-      );
-    }
-
-    const respuesta = await operacion(cliente, usuario);
+    const respuesta = await operacion(cliente, usuario, destinatario);
 
     await cliente.query('COMMIT');
     transaccionActiva = false;
@@ -239,10 +323,143 @@ async function eliminarGrupo(uid, idGrupo) {
   });
 }
 
+async function obtenerDetalleGrupo(uid, idGrupo) {
+  return ejecutarOperacion(uid, async (cliente, usuario) => {
+    await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+    const resultado = await cliente.query(
+      `
+        WITH estudiantes AS (
+          ${CONSULTA_ESTUDIANTES_GRUPO}
+        )
+        SELECT
+          base."idGrupo",
+          base.nombre,
+          (
+            SELECT count(*)::integer
+            FROM lecciones l
+            JOIN cursos c ON c.id_curso = l.id_curso
+            WHERE l.estado_publicacion = 'publicado'
+              AND c.estado_publicacion = 'publicado'
+          ) AS "totalLeccionesPublicadas",
+          base.maestros,
+          COALESCE(
+            (
+              SELECT json_agg(
+                row_to_json(e)
+                ORDER BY lower(e."nombreCompleto"), e.uid
+              )
+              FROM estudiantes e
+            ),
+            '[]'::json
+          ) AS estudiantes
+        FROM (
+          ${CONSULTA_GRUPOS}
+          WHERE g.id_grupo = $1
+        ) base
+      `,
+      [idGrupo]
+    );
+
+    return resultado.rows[0];
+  });
+}
+
+async function asignarEstudiante(uid, idGrupo, uidEstudiante) {
+  return ejecutarOperacion(
+    uid,
+    async (cliente, usuario, estudiante) => {
+      await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+      if (!estudiante) {
+        throw new ErrorOperacionGrupo(
+          404,
+          'No existe la cuenta solicitada',
+          'usuario_no_encontrado'
+        );
+      }
+
+      if (estudiante.rol !== 'estudiante') {
+        throw new ErrorOperacionGrupo(
+          400,
+          'La cuenta debe tener el rol de estudiante',
+          'usuario_no_es_estudiante'
+        );
+      }
+
+      if (!estudiante.activo) {
+        throw new ErrorOperacionGrupo(
+          403,
+          'La cuenta está desactivada',
+          'cuenta_desactivada'
+        );
+      }
+
+      const asignacion = await cliente.query(
+        `
+          INSERT INTO grupo_estudiantes (
+            id_grupo, uid_estudiante, asignado_por
+          )
+          VALUES ($1, $2, $3)
+          ON CONFLICT (id_grupo, uid_estudiante) DO NOTHING
+          RETURNING uid_estudiante
+        `,
+        [idGrupo, uidEstudiante, usuario.uid]
+      );
+
+      if (asignacion.rowCount !== 1) {
+        throw new ErrorOperacionGrupo(
+          409,
+          'El estudiante ya está asignado al grupo',
+          'estudiante_ya_asignado'
+        );
+      }
+
+      const resultado = await cliente.query(
+        `${CONSULTA_ESTUDIANTES_GRUPO} AND u.uid = $2`,
+        [idGrupo, uidEstudiante]
+      );
+
+      return resultado.rows[0];
+    },
+    { idGrupo, uidDestino: uidEstudiante }
+  );
+}
+
+async function retirarEstudiante(uid, idGrupo, uidEstudiante) {
+  return ejecutarOperacion(
+    uid,
+    async (cliente, usuario) => {
+      await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+      const resultado = await cliente.query(
+        `
+          DELETE FROM grupo_estudiantes
+          WHERE id_grupo = $1 AND uid_estudiante = $2
+          RETURNING uid_estudiante
+        `,
+        [idGrupo, uidEstudiante]
+      );
+
+      if (resultado.rowCount !== 1) {
+        throw new ErrorOperacionGrupo(
+          404,
+          'La asignación no existe en este grupo',
+          'asignacion_no_encontrada'
+        );
+      }
+    },
+    { idGrupo, uidDestino: uidEstudiante }
+  );
+}
+
 module.exports = {
   ErrorOperacionGrupo,
   listarGrupos,
   crearGrupo,
   renombrarGrupo,
-  eliminarGrupo
+  eliminarGrupo,
+  obtenerDetalleGrupo,
+  asignarEstudiante,
+  retirarEstudiante
 };

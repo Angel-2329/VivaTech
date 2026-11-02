@@ -7,7 +7,10 @@ const {
   listarGrupos,
   crearGrupo,
   renombrarGrupo,
-  eliminarGrupo
+  eliminarGrupo,
+  obtenerDetalleGrupo,
+  asignarEstudiante,
+  retirarEstudiante
 } = require('../services/grupos');
 
 const router = express.Router();
@@ -57,6 +60,40 @@ function validarNombre(req, res, next) {
   }
 
   req.nombreGrupo = nombre;
+  return next();
+}
+
+function validarUidEstudiante(req, res, next) {
+  if (
+    req.method === 'POST'
+    && (
+      req.body === null
+      || typeof req.body !== 'object'
+      || Array.isArray(req.body)
+    )
+  ) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Envía los datos como un objeto JSON',
+      codigo: 'cuerpo_invalido'
+    });
+  }
+
+  const uid = req.method === 'POST' ? req.body.uid : req.params.uid;
+
+  if (
+    typeof uid !== 'string'
+    || uid.length > 128
+    || uid.trim().length === 0
+  ) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'El identificador de la cuenta no es válido',
+      codigo: 'uid_invalido'
+    });
+  }
+
+  req.uidEstudiante = uid;
   return next();
 }
 
@@ -123,5 +160,50 @@ router.delete('/:idGrupo', validarIdGrupo, async (req, res) => {
     return responderError(error, res);
   }
 });
+
+router.get('/:idGrupo', validarIdGrupo, async (req, res) => {
+  try {
+    const grupo = await obtenerDetalleGrupo(req.auth.uid, req.params.idGrupo);
+    return res.json(grupo);
+  } catch (error) {
+    return responderError(error, res);
+  }
+});
+
+router.post(
+  '/:idGrupo/estudiantes',
+  validarIdGrupo,
+  validarUidEstudiante,
+  async (req, res) => {
+    try {
+      const estudiante = await asignarEstudiante(
+        req.auth.uid,
+        req.params.idGrupo,
+        req.uidEstudiante
+      );
+      return res.status(201).json(estudiante);
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
+
+router.delete(
+  '/:idGrupo/estudiantes/:uid',
+  validarIdGrupo,
+  validarUidEstudiante,
+  async (req, res) => {
+    try {
+      await retirarEstudiante(
+        req.auth.uid,
+        req.params.idGrupo,
+        req.uidEstudiante
+      );
+      return res.status(204).end();
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
 
 module.exports = router;

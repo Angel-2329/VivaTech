@@ -1,0 +1,18 @@
+info:
+  name: 91 - Maestro retira estudiante desactivado - 204
+  type: http
+  seq: 91
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes/{{uidEstudiante}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,18 @@
+info:
+  name: 95 - Maestro no puede retirar en grupo ajeno - 404
+  type: http
+  seq: 95
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/estudiantes/uid-inexistente-prueba-b03"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

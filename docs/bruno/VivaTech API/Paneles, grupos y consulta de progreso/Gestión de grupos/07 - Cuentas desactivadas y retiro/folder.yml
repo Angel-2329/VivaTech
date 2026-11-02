@@ -1,0 +1,7 @@
+info:
+  name: 07 - Cuentas desactivadas y retiro
+  type: folder
+  seq: 7
+
+request:
+  auth: inherit
