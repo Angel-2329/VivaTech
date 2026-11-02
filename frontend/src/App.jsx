@@ -39,8 +39,8 @@ function App() {
       <Route element={<RutaProtegida roles={['administrador']} />}>
         <Route path="/admin" element={<EnConstruccion titulo="Inicio del administrador" />} />
         <Route path="/admin/usuarios" element={<UsuariosRoles />} />
-        <Route path="/admin/grupos" element={<EnConstruccion titulo="Grupos" />} />
-        <Route path="/admin/grupos/:idGrupo" element={<EnConstruccion titulo="Detalle del grupo" />} />
+        <Route path="/admin/grupos" element={<ListaGrupos />} />
+        <Route path="/admin/grupos/:idGrupo" element={<DetalleGrupo />} />
         <Route path="/admin/progreso" element={<EnConstruccion titulo="Progreso general" />} />
       </Route>
 
