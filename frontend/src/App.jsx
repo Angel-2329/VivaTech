@@ -7,6 +7,7 @@ import EnConstruccion from './pages/EnConstruccion.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
 import ListaGrupos from './pages/grupos/ListaGrupos.jsx'
+import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
       {/* Solo maestros */}
       <Route element={<RutaProtegida roles={['maestro']} />}>
         <Route path="/maestro" element={<ListaGrupos />} />
-        <Route path="/maestro/grupos/:idGrupo" element={<EnConstruccion titulo="Detalle del grupo" />} />
+        <Route path="/maestro/grupos/:idGrupo" element={<DetalleGrupo />} />
       </Route>
 
       {/* Solo administradores */}
