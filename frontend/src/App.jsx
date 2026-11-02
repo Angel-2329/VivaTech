@@ -8,6 +8,7 @@ import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
 import ListaGrupos from './pages/grupos/ListaGrupos.jsx'
 import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
+import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
       {/* Solo administradores */}
       <Route element={<RutaProtegida roles={['administrador']} />}>
         <Route path="/admin" element={<EnConstruccion titulo="Inicio del administrador" />} />
-        <Route path="/admin/usuarios" element={<EnConstruccion titulo="Cuentas y roles" />} />
+        <Route path="/admin/usuarios" element={<UsuariosRoles />} />
         <Route path="/admin/grupos" element={<EnConstruccion titulo="Grupos" />} />
         <Route path="/admin/grupos/:idGrupo" element={<EnConstruccion titulo="Detalle del grupo" />} />
         <Route path="/admin/progreso" element={<EnConstruccion titulo="Progreso general" />} />
