@@ -1,0 +1,21 @@
+info:
+  name: 106 - Rechazar cuenta con otro rol - 400
+  type: http
+  seq: 106
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros"
+  body:
+    type: json
+    data: '{"uid":"{{uidEstudiante}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

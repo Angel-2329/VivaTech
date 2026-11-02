@@ -1,0 +1,21 @@
+info:
+  name: 109 - Rechazar asignación de maestro desactivado - 403
+  type: http
+  seq: 109
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros"
+  body:
+    type: json
+    data: '{"uid":"{{uidNuevo}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

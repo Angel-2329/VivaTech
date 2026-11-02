@@ -61,7 +61,7 @@ const CONSULTA_ESTUDIANTES_GRUPO = `
   WHERE ge.id_grupo = $1
 `;
 
-function validarSolicitante(usuario) {
+function validarSolicitante(usuario, rolesPermitidos = ['maestro', 'administrador']) {
   if (!usuario) {
     throw new ErrorOperacionGrupo(
       404,
@@ -78,7 +78,7 @@ function validarSolicitante(usuario) {
     );
   }
 
-  if (!['maestro', 'administrador'].includes(usuario.rol)) {
+  if (!rolesPermitidos.includes(usuario.rol)) {
     throw new ErrorOperacionGrupo(
       403,
       'No tienes permisos para realizar esta acción',
@@ -87,14 +87,14 @@ function validarSolicitante(usuario) {
   }
 }
 
-async function comprobarAccesoPrevio(cliente, uid, idGrupo) {
+async function comprobarAccesoPrevio(cliente, uid, idGrupo, rolesPermitidos) {
   const solicitante = await cliente.query(
     'SELECT uid, rol, activo FROM usuarios WHERE uid = $1',
     [uid]
   );
 
   const usuario = solicitante.rows[0];
-  validarSolicitante(usuario);
+  validarSolicitante(usuario, rolesPermitidos);
 
   const grupo = await cliente.query(
     `
@@ -134,7 +134,12 @@ async function ejecutarOperacion(uid, operacion, opciones = {}) {
     let resultado;
 
     if (opciones.uidDestino !== undefined) {
-      await comprobarAccesoPrevio(cliente, uid, opciones.idGrupo);
+      await comprobarAccesoPrevio(
+        cliente,
+        uid,
+        opciones.idGrupo,
+        opciones.rolesPermitidos
+      );
 
       resultado = await cliente.query(
         `
@@ -159,7 +164,7 @@ async function ejecutarOperacion(uid, operacion, opciones = {}) {
     }
 
     const usuario = resultado.rows.find((fila) => fila.uid === uid);
-    validarSolicitante(usuario);
+    validarSolicitante(usuario, opciones.rolesPermitidos);
 
     const destinatario = resultado.rows.find(
       (fila) => fila.uid === opciones.uidDestino
@@ -453,6 +458,106 @@ async function retirarEstudiante(uid, idGrupo, uidEstudiante) {
   );
 }
 
+async function asignarMaestro(uid, idGrupo, uidMaestro) {
+  return ejecutarOperacion(
+    uid,
+    async (cliente, usuario, maestro) => {
+      await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+      if (!maestro) {
+        throw new ErrorOperacionGrupo(
+          404,
+          'No existe la cuenta solicitada',
+          'usuario_no_encontrado'
+        );
+      }
+
+      if (maestro.rol !== 'maestro') {
+        throw new ErrorOperacionGrupo(
+          400,
+          'La cuenta debe tener el rol de maestro',
+          'usuario_no_es_maestro'
+        );
+      }
+
+      if (!maestro.activo) {
+        throw new ErrorOperacionGrupo(
+          403,
+          'La cuenta está desactivada',
+          'cuenta_desactivada'
+        );
+      }
+
+      const asignacion = await cliente.query(
+        `
+          INSERT INTO grupo_maestros (
+            id_grupo, uid_maestro, asignado_por
+          )
+          VALUES ($1, $2, $3)
+          ON CONFLICT (id_grupo, uid_maestro) DO NOTHING
+          RETURNING uid_maestro
+        `,
+        [idGrupo, uidMaestro, usuario.uid]
+      );
+
+      if (asignacion.rowCount !== 1) {
+        throw new ErrorOperacionGrupo(
+          409,
+          'El maestro ya está asignado al grupo',
+          'maestro_ya_asignado'
+        );
+      }
+
+      const resultado = await cliente.query(
+        `
+          SELECT uid, nombre_completo AS "nombreCompleto"
+          FROM usuarios
+          WHERE uid = $1
+        `,
+        [uidMaestro]
+      );
+
+      return resultado.rows[0];
+    },
+    {
+      idGrupo,
+      uidDestino: uidMaestro,
+      rolesPermitidos: ['administrador']
+    }
+  );
+}
+
+async function retirarMaestro(uid, idGrupo, uidMaestro) {
+  return ejecutarOperacion(
+    uid,
+    async (cliente, usuario) => {
+      await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+      const resultado = await cliente.query(
+        `
+          DELETE FROM grupo_maestros
+          WHERE id_grupo = $1 AND uid_maestro = $2
+          RETURNING uid_maestro
+        `,
+        [idGrupo, uidMaestro]
+      );
+
+      if (resultado.rowCount !== 1) {
+        throw new ErrorOperacionGrupo(
+          404,
+          'La asignación no existe en este grupo',
+          'asignacion_no_encontrada'
+        );
+      }
+    },
+    {
+      idGrupo,
+      uidDestino: uidMaestro,
+      rolesPermitidos: ['administrador']
+    }
+  );
+}
+
 module.exports = {
   ErrorOperacionGrupo,
   listarGrupos,
@@ -461,5 +566,7 @@ module.exports = {
   eliminarGrupo,
   obtenerDetalleGrupo,
   asignarEstudiante,
-  retirarEstudiante
+  retirarEstudiante,
+  asignarMaestro,
+  retirarMaestro
 };

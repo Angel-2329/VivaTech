@@ -1,0 +1,18 @@
+info:
+  name: 111 - Administrador retira maestro desactivado - 204
+  type: http
+  seq: 111
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros/{{uidNuevo}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
