@@ -1,6 +1,7 @@
 import { useCallback, useId, useState } from 'react'
 import DialogoConfirmacion from '../../components/panel/DialogoConfirmacion.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
+import Paginacion from '../../components/panel/Paginacion.jsx'
 import {
   EstadoCarga,
   EstadoError,
@@ -10,10 +11,11 @@ import {
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { buscarCuentas, cambiarActivo, cambiarRol } from '../../services/adminService.js'
-import { NOMBRE_DEL_ROL, ordenarPorNombre } from '../../utils/formato.js'
+import { NOMBRE_DEL_ROL } from '../../utils/formato.js'
 import './Admin.css'
 
 const ROLES = ['estudiante', 'maestro', 'administrador']
+const CUENTAS_POR_PAGINA = 20
 
 
 function UsuariosRoles() {
@@ -24,9 +26,16 @@ function UsuariosRoles() {
   const [texto, setTexto] = useState('')
   const [rolFiltro, setRolFiltro] = useState('')
   const [criterios, setCriterios] = useState({ buscar: '', rol: '' })
+  const [pagina, setPagina] = useState(0)
 
-  const cargar = useCallback(() => buscarCuentas(criterios), [criterios])
-  const { datos: cuentas, cargando, error, reintentar, setDatos } = useDatos(cargar)
+  const cargar = useCallback(() => buscarCuentas({
+    ...criterios,
+    limite: CUENTAS_POR_PAGINA + 1,
+    desplazamiento: pagina * CUENTAS_POR_PAGINA,
+  }), [criterios, pagina])
+  const { datos: resultados, cargando, error, reintentar } = useDatos(cargar)
+  const cuentas = resultados?.slice(0, CUENTAS_POR_PAGINA)
+  const haySiguiente = (resultados?.length ?? 0) > CUENTAS_POR_PAGINA
   const [mensaje, setMensaje] = useState('')
 
   
@@ -36,8 +45,16 @@ function UsuariosRoles() {
 
   function manejarBusqueda(evento) {
     evento.preventDefault()
+    if (guardando) return
     setMensaje('')
+    setPagina(0)
     setCriterios({ buscar: texto.trim(), rol: rolFiltro })
+  }
+
+  function cambiarPagina(nuevaPagina) {
+    if (cargando || guardando) return
+    setMensaje('')
+    setPagina(nuevaPagina)
   }
 
   function pedirConfirmacion(tipo, cuenta, valor) {
@@ -46,6 +63,7 @@ function UsuariosRoles() {
   }
 
   async function confirmarCambio() {
+    if (guardando || !cambio) return
     setGuardando(true)
     setErrorCambio('')
 
@@ -55,15 +73,14 @@ function UsuariosRoles() {
       const actualizada =
         tipo === 'rol' ? await cambiarRol(cuenta.uid, valor) : await cambiarActivo(cuenta.uid, valor)
 
-      setDatos((anteriores) =>
-        anteriores.map((actual) => (actual.uid === cuenta.uid ? { ...actual, ...actualizada } : actual))
-      )
       setMensaje(
         tipo === 'rol'
-          ? `${cuenta.nombreCompleto} ahora tiene el rol de ${NOMBRE_DEL_ROL[valor].toLowerCase()}.`
-          : `La cuenta de ${cuenta.nombreCompleto} quedó ${valor ? 'activa' : 'desactivada'}.`
+          ? `${actualizada.nombreCompleto} ahora tiene el rol de ${NOMBRE_DEL_ROL[actualizada.rol].toLowerCase()}.`
+          : `La cuenta de ${actualizada.nombreCompleto} quedó ${actualizada.activo ? 'activa' : 'desactivada'}.`
       )
       setCambio(null)
+      setPagina(0)
+      reintentar()
     } catch (errorAlGuardar) {
       setErrorCambio(errorAlGuardar.message)
     } finally {
@@ -87,6 +104,8 @@ function UsuariosRoles() {
             id={`${id}-buscar`}
             className="vt-input"
             type="search"
+            maxLength={100}
+            disabled={guardando}
             value={texto}
             onChange={(evento) => setTexto(evento.target.value)}
           />
@@ -98,6 +117,7 @@ function UsuariosRoles() {
           <select
             id={`${id}-rol`}
             className="vt-select"
+            disabled={guardando}
             value={rolFiltro}
             onChange={(evento) => setRolFiltro(evento.target.value)}
           >
@@ -109,7 +129,7 @@ function UsuariosRoles() {
             ))}
           </select>
         </div>
-        <button type="submit" className="vt-btn vt-btn-primary buscador__boton">
+        <button type="submit" className="vt-btn vt-btn-primary buscador__boton" disabled={guardando}>
           <span className="vt-icon" aria-hidden="true">
             search
           </span>
@@ -141,9 +161,9 @@ function UsuariosRoles() {
               </tr>
             </thead>
             <tbody>
-              {ordenarPorNombre(cuentas).map((cuenta) => (
+              {cuentas.map((cuenta) => (
                 <FilaCuenta
-                  key={cuenta.uid}
+                  key={`${cuenta.uid}-${cuenta.rol}`}
                   cuenta={cuenta}
                   esPropia={cuenta.uid === usuario.uid}
                   onCambiarRol={(rol) => pedirConfirmacion('rol', cuenta, rol)}
@@ -154,6 +174,14 @@ function UsuariosRoles() {
           </table>
         </div>
       )}
+
+      <Paginacion
+        pagina={pagina}
+        haySiguiente={haySiguiente}
+        cargando={cargando || guardando}
+        onCambiar={cambiarPagina}
+        etiqueta="Páginas de cuentas y roles"
+      />
 
       <DialogoConfirmacion
         abierto={cambio !== null}

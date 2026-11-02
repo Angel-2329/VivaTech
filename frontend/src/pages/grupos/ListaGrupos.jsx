@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import FormularioNombreGrupo from '../../components/grupos/FormularioNombreGrupo.jsx'
 import DialogoConfirmacion from '../../components/panel/DialogoConfirmacion.jsx'
@@ -21,41 +21,70 @@ function ListaGrupos() {
   const esAdmin = usuario.rol === 'administrador'
   const rutaBase = esAdmin ? '/admin/grupos' : '/maestro/grupos'
 
-  const { datos: grupos, cargando, error, reintentar, setDatos } = useDatos(listarGrupos)
+  const { datos: grupos, cargando, error, reintentar } = useDatos(listarGrupos)
   const [mensaje, setMensaje] = useState('')
+  const [modificando, setModificando] = useState(false)
+  const operacionRef = useRef(false)
 
   const [grupoAEliminar, setGrupoAEliminar] = useState(null)
   const [eliminando, setEliminando] = useState(false)
   const [errorEliminar, setErrorEliminar] = useState('')
 
+  const noDisponible = cargando || Boolean(error) || !Array.isArray(grupos) || modificando
+
+  async function ejecutarCambio(accion) {
+    if (operacionRef.current || cargando || error || !Array.isArray(grupos)) {
+      throw new Error('Espera a que termine la carga o reintenta consultar los grupos.')
+    }
+
+    operacionRef.current = true
+    setModificando(true)
+    setMensaje('')
+
+    try {
+      return await accion()
+    } finally {
+      operacionRef.current = false
+      setModificando(false)
+    }
+  }
+
   async function manejarCrear(nombre) {
-    const grupo = await crearGrupo({ nombre })
-    setDatos((anteriores) => [...anteriores, grupo])
-    setMensaje(`Se creó el grupo "${grupo.nombre}".`)
+    return ejecutarCambio(async () => {
+      const grupo = await crearGrupo({ nombre })
+      setMensaje(`Se creó el grupo "${grupo.nombre}".`)
+      reintentar()
+      return grupo
+    })
   }
 
   async function manejarRenombrar(idGrupo, nombre) {
-    const grupo = await renombrarGrupo(idGrupo, { nombre })
-    setDatos((anteriores) =>
-      anteriores.map((actual) => (actual.idGrupo === idGrupo ? grupo : actual))
-    )
-    setMensaje(`El grupo ahora se llama "${grupo.nombre}".`)
+    return ejecutarCambio(async () => {
+      const grupo = await renombrarGrupo(idGrupo, { nombre })
+      setMensaje(`El grupo ahora se llama "${grupo.nombre}".`)
+      reintentar()
+      return grupo
+    })
   }
 
   function abrirEliminar(grupo) {
+    if (noDisponible || operacionRef.current) return
     setErrorEliminar('')
     setGrupoAEliminar(grupo)
   }
 
   async function confirmarEliminar() {
+    if (noDisponible || operacionRef.current || !grupoAEliminar) return
     setEliminando(true)
     setErrorEliminar('')
 
     try {
-      await eliminarGrupo(grupoAEliminar.idGrupo)
-      setDatos((anteriores) => anteriores.filter((actual) => actual.idGrupo !== grupoAEliminar.idGrupo))
-      setMensaje(`Se eliminó el grupo "${grupoAEliminar.nombre}".`)
-      setGrupoAEliminar(null)
+      await ejecutarCambio(async () => {
+        await eliminarGrupo(grupoAEliminar.idGrupo)
+        setMensaje(`Se eliminó el grupo "${grupoAEliminar.nombre}".`)
+        setGrupoAEliminar(null)
+        reintentar()
+      })
     } catch (errorAlEliminar) {
       setErrorEliminar(errorAlEliminar.message)
     } finally {
@@ -85,6 +114,7 @@ function ListaGrupos() {
           textoBoton="Crear grupo"
           onGuardar={manejarCrear}
           limpiarAlGuardar
+          deshabilitado={noDisponible}
         />
       </section>
 
@@ -108,6 +138,7 @@ function ListaGrupos() {
               rutaDetalle={`${rutaBase}/${grupo.idGrupo}`}
               onRenombrar={(nombre) => manejarRenombrar(grupo.idGrupo, nombre)}
               onEliminar={() => abrirEliminar(grupo)}
+              bloqueado={noDisponible}
             />
           ))}
         </ul>
@@ -140,7 +171,7 @@ function ListaGrupos() {
   )
 }
 
-function TarjetaGrupo({ grupo, rutaDetalle, onRenombrar, onEliminar }) {
+function TarjetaGrupo({ grupo, rutaDetalle, onRenombrar, onEliminar, bloqueado }) {
   const [editando, setEditando] = useState(false)
 
   async function guardarNombre(nombre) {
@@ -159,6 +190,7 @@ function TarjetaGrupo({ grupo, rutaDetalle, onRenombrar, onEliminar }) {
           valorInicial={grupo.nombre}
           onGuardar={guardarNombre}
           onCancelar={() => setEditando(false)}
+          deshabilitado={bloqueado}
         />
       ) : (
         <>
@@ -180,11 +212,11 @@ function TarjetaGrupo({ grupo, rutaDetalle, onRenombrar, onEliminar }) {
               Ver grupo
               <span className="vt-visually-hidden"> {grupo.nombre}</span>
             </Link>
-            <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" onClick={() => setEditando(true)}>
+            <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" onClick={() => setEditando(true)} disabled={bloqueado}>
               Cambiar nombre
               <span className="vt-visually-hidden"> de {grupo.nombre}</span>
             </button>
-            <button type="button" className="vt-btn vt-btn-danger-soft vt-btn-sm" onClick={onEliminar}>
+            <button type="button" className="vt-btn vt-btn-danger-soft vt-btn-sm" onClick={onEliminar} disabled={bloqueado}>
               Eliminar
               <span className="vt-visually-hidden"> {grupo.nombre}</span>
             </button>

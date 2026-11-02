@@ -47,9 +47,14 @@ function InicioAdmin() {
         {error && <EstadoError error={error} onReintentar={reintentar} />}
         {resumen && (
           <dl className="vt-grid-auto admin__resumen">
-            <Indicador etiqueta="Estudiantes" valor={resumen.totalEstudiantes} />
-            <Indicador etiqueta="Maestros" valor={resumen.totalMaestros} />
+            <Indicador etiqueta="Estudiantes en total" valor={resumen.totalEstudiantes} />
+            <Indicador etiqueta="Estudiantes activos" valor={resumen.estudiantesActivos} />
+            <Indicador etiqueta="Estudiantes desactivados" valor={resumen.estudiantesInactivos} />
+            <Indicador etiqueta="Maestros en total" valor={resumen.totalMaestros} />
+            <Indicador etiqueta="Maestros activos" valor={resumen.maestrosActivos} />
+            <Indicador etiqueta="Maestros desactivados" valor={resumen.maestrosInactivos} />
             <Indicador etiqueta="Grupos" valor={resumen.totalGrupos} />
+            <Indicador etiqueta="Lecciones publicadas" valor={resumen.totalLeccionesPublicadas} />
             <Indicador etiqueta="Lecciones completadas" valor={resumen.leccionesCompletadas} />
           </dl>
         )}
