@@ -1,0 +1,18 @@
+info:
+  name: 153 - Rechazar paginación inválida con filtro de rol - 400
+  type: http
+  seq: 153
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios?rol=estudiante&limite=101"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
