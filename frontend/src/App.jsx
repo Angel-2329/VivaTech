@@ -3,12 +3,13 @@ import RutaProtegida from './components/RutaProtegida.jsx'
 import Acceso from './pages/Acceso.jsx'
 import PrimerAcceso from './pages/PrimerAcceso.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
-import EnConstruccion from './pages/EnConstruccion.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
 import ListaGrupos from './pages/grupos/ListaGrupos.jsx'
 import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
+import InicioAdmin from './pages/admin/InicioAdmin.jsx'
+import ProgresoGeneral from './pages/admin/ProgresoGeneral.jsx'
 
 function App() {
   return (
@@ -37,11 +38,11 @@ function App() {
 
       {/* Solo administradores */}
       <Route element={<RutaProtegida roles={['administrador']} />}>
-        <Route path="/admin" element={<EnConstruccion titulo="Inicio del administrador" />} />
+        <Route path="/admin" element={<InicioAdmin />} />
         <Route path="/admin/usuarios" element={<UsuariosRoles />} />
         <Route path="/admin/grupos" element={<ListaGrupos />} />
         <Route path="/admin/grupos/:idGrupo" element={<DetalleGrupo />} />
-        <Route path="/admin/progreso" element={<EnConstruccion titulo="Progreso general" />} />
+        <Route path="/admin/progreso" element={<ProgresoGeneral />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
