@@ -162,13 +162,125 @@ test('GET admin usuarios permite consultar al administrador', async (t) => {
 
   const [sql, valores] = consulta.mock.calls[1].arguments;
 
-  assert.deepEqual(valores, ['Persona', 10, 0]);
+  assert.deepEqual(valores, ['Persona', 10, 0, null]);
   assert.match(sql, /ORDER BY lower\(nombre_completo\), uid/);
   assert.match(sql, /LIMIT \$2 OFFSET \$3/);
 
   assert.doesNotMatch(sql, /\bactivo\s*=\s*true\b/i);
-  assert.doesNotMatch(sql, /\brol\s*=/i);
+  assert.match(sql, /AND\s*\(\$4::text IS NULL OR rol = \$4::text\)/);
 });
+
+for (const escenario of [
+  { nombre: 'estudiante', enviado: 'estudiante', esperado: 'estudiante' },
+  { nombre: 'maestro', enviado: 'maestro', esperado: 'maestro' },
+  { nombre: 'administrador', enviado: 'administrador', esperado: 'administrador' },
+  { nombre: 'vacío', enviado: '', esperado: null },
+  { nombre: 'solo espacios', enviado: '   ', esperado: null },
+  { nombre: 'con espacios exteriores', enviado: '  maestro  ', esperado: 'maestro' }
+]) {
+  test(`GET admin usuarios parametriza el filtro de rol ${escenario.nombre}`, async (t) => {
+    simularIdentidad(t);
+
+    const cuentas = [
+      {
+        uid: 'uid-cuenta-prueba',
+        nombreCompleto: 'Persona de Prueba',
+        apodo: null,
+        rol: escenario.esperado || 'maestro',
+        activo: false
+      }
+    ];
+
+    const consulta = t.mock.method(pool, 'query', async (sql) => {
+      if (/WHERE uid = \$1/.test(sql)) {
+        return {
+          rowCount: 1,
+          rows: [crearSolicitante('administrador')]
+        };
+      }
+
+      return {
+        rowCount: cuentas.length,
+        rows: cuentas
+      };
+    });
+
+    const parametros = new URLSearchParams({
+      buscar: '  Persona  ',
+      rol: escenario.enviado,
+      limite: '10',
+      desplazamiento: '2'
+    });
+
+    const respuesta = await fetch(`${urlUsuarios}?${parametros}`, {
+      headers: {
+        Authorization: 'Bearer token-prueba'
+      }
+    });
+
+    const cuerpo = await respuesta.json();
+
+    assert.equal(respuesta.status, 200);
+    assert.deepEqual(cuerpo, cuentas);
+    assert.equal(consulta.mock.callCount(), 2);
+    assert.deepEqual(
+      consulta.mock.calls[0].arguments[1],
+      ['uid-solicitante']
+    );
+
+    const [sql, valores] = consulta.mock.calls[1].arguments;
+
+    assert.deepEqual(valores, ['Persona', 10, 2, escenario.esperado]);
+    assert.match(sql, /lower\(nombre_completo\)/);
+    assert.match(sql, /lower\(\$1::text\)/);
+    assert.match(sql, /AND\s*\(\$4::text IS NULL OR rol = \$4::text\)/);
+    assert.match(sql, /ORDER BY lower\(nombre_completo\), uid/);
+    assert.match(sql, /LIMIT \$2 OFFSET \$3/);
+    assert.doesNotMatch(sql, /\bactivo\s*=\s*true\b/i);
+  });
+}
+
+for (const escenario of [
+  { nombre: 'inválido', valores: ['superadmin'] },
+  { nombre: 'en mayúsculas', valores: ['MAESTRO'] },
+  { nombre: 'con valores múltiples', valores: ['estudiante', 'maestro'] }
+]) {
+  test(`GET admin usuarios rechaza un filtro de rol ${escenario.nombre}`, async (t) => {
+    simularIdentidad(t);
+
+    const consulta = t.mock.method(pool, 'query', async (sql, valores) => {
+      assert.match(sql, /WHERE uid = \$1/);
+      assert.deepEqual(valores, ['uid-solicitante']);
+
+      return {
+        rowCount: 1,
+        rows: [crearSolicitante('administrador')]
+      };
+    });
+
+    const parametros = new URLSearchParams();
+
+    for (const valor of escenario.valores) {
+      parametros.append('rol', valor);
+    }
+
+    const respuesta = await fetch(`${urlUsuarios}?${parametros}`, {
+      headers: {
+        Authorization: 'Bearer token-prueba'
+      }
+    });
+
+    const cuerpo = await respuesta.json();
+
+    assert.equal(respuesta.status, 400);
+    assert.deepEqual(cuerpo, {
+      ok: false,
+      mensaje: 'El filtro de rol debe ser estudiante, maestro o administrador',
+      codigo: 'rol_invalido'
+    });
+    assert.equal(consulta.mock.callCount(), 1);
+  });
+}
 
 test('GET admin usuarios rechaza al administrador desactivado', async (t) => {
   simularIdentidad(t);
