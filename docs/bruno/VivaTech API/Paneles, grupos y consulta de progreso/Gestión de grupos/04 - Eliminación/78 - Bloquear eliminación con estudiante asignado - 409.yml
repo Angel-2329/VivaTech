@@ -1,0 +1,18 @@
+info:
+  name: 78 - Bloquear eliminación con estudiante asignado - 409
+  type: http
+  seq: 78
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

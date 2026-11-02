@@ -1,0 +1,18 @@
+info:
+  name: 75 - Rechazar identificador fuera de BIGINT - 400
+  type: http
+  seq: 75
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/9223372036854775808"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

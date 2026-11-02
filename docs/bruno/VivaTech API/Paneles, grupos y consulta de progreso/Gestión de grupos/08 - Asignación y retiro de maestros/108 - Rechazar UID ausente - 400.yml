@@ -1,0 +1,21 @@
+info:
+  name: 108 - Rechazar UID ausente - 400
+  type: http
+  seq: 108
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros"
+  body:
+    type: json
+    data: '{}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

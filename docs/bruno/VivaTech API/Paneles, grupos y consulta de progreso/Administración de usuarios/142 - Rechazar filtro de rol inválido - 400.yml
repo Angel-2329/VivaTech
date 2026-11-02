@@ -1,0 +1,18 @@
+info:
+  name: 142 - Rechazar filtro de rol inválido - 400
+  type: http
+  seq: 142
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios?rol=superadmin"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

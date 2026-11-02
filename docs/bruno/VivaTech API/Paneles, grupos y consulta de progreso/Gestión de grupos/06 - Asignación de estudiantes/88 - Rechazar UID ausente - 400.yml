@@ -1,0 +1,21 @@
+info:
+  name: 88 - Rechazar UID ausente - 400
+  type: http
+  seq: 88
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes"
+  body:
+    type: json
+    data: '{}'
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

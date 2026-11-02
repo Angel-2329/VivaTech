@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useSesion } from '../context/SesionContext.jsx'
-import { rutaDeInicio } from '../utils/rutaDeInicio.js'
 import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
+import { MENU_POR_ROL } from '../utils/menuPorRol.js'
 
 const ESCALAS = ['100', '115', '130']
 const CLAVE_GUARDADO = 'vt-escala-texto'
@@ -65,6 +65,7 @@ function Encabezado({ variante = 'acceso' }) {
   const mostrarUsuario = variante !== 'acceso' && usuario
   const conSesion = variante === 'sesion' && usuario
   const nombre = nombreParaSaludo(usuario)
+  const menu = MENU_POR_ROL[usuario?.rol] ?? []
 
   return (
     <header className="vt-header">
@@ -79,16 +80,18 @@ function Encabezado({ variante = 'acceso' }) {
           </span>
         </Link>
 
-        {conSesion && (
+        {conSesion && menu.length > 0 && (
           <nav className="vt-nav" aria-label="Menú principal">
-            <NavLink className="vt-nav-link" to={rutaDeInicio(usuario)} end>
-              Inicio
-            </NavLink>
-            {usuario.rol === 'estudiante' && (
-              <NavLink className="vt-nav-link" to="/estudiante/cursos">
-                Mis cursos
+            {menu.map((opcion) => (
+              <NavLink
+                key={opcion.ruta}
+                className="vt-nav-link"
+                to={opcion.ruta}
+                end={opcion.exacta}
+              >
+                {opcion.texto}
               </NavLink>
-            )}
+            ))}
           </nav>
         )}
       </div>

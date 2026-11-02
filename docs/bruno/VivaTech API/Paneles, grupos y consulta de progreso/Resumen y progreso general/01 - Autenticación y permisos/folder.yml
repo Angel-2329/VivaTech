@@ -1,0 +1,7 @@
+info:
+  name: 01 - Autenticación y permisos
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

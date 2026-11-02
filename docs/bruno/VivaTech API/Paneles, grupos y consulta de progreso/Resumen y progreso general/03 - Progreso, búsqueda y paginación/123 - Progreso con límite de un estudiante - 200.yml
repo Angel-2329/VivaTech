@@ -1,0 +1,18 @@
+info:
+  name: 123 - Progreso con límite de un estudiante - 200
+  type: http
+  seq: 123
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/progreso?limite=1&desplazamiento=0"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

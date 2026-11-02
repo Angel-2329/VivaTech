@@ -1,0 +1,21 @@
+info:
+  name: 84 - Rechazar estudiante duplicado - 409
+  type: http
+  seq: 84
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes"
+  body:
+    type: json
+    data: '{"uid":"{{uidEstudiante}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

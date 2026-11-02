@@ -1,0 +1,7 @@
+info:
+  name: Paneles, grupos y consulta de progreso
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit

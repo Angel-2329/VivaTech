@@ -1,0 +1,18 @@
+info:
+  name: 98 - Administrador retira estudiante - 204
+  type: http
+  seq: 98
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes/{{uidEstudiante}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

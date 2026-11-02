@@ -1,0 +1,21 @@
+info:
+  name: 101 - Maestro no puede asignar maestros - 403
+  type: http
+  seq: 101
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros"
+  body:
+    type: json
+    data: '{"uid":"uid-prueba-b04"}'
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

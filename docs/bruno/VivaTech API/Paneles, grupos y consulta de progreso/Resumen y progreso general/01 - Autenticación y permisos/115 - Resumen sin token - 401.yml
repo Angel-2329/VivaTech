@@ -1,0 +1,16 @@
+info:
+  name: 115 - Resumen sin token - 401
+  type: http
+  seq: 115
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/resumen"
+  auth: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
