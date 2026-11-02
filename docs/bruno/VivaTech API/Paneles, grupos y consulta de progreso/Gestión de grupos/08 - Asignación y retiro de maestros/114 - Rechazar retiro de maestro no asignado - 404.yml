@@ -1,0 +1,18 @@
+info:
+  name: 114 - Rechazar retiro de maestro no asignado - 404
+  type: http
+  seq: 114
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros/{{uidNuevo}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -10,7 +10,9 @@ const {
   eliminarGrupo,
   obtenerDetalleGrupo,
   asignarEstudiante,
-  retirarEstudiante
+  retirarEstudiante,
+  asignarMaestro,
+  retirarMaestro
 } = require('../services/grupos');
 
 const router = express.Router();
@@ -63,7 +65,7 @@ function validarNombre(req, res, next) {
   return next();
 }
 
-function validarUidEstudiante(req, res, next) {
+function validarUidParticipante(req, res, next) {
   if (
     req.method === 'POST'
     && (
@@ -93,7 +95,7 @@ function validarUidEstudiante(req, res, next) {
     });
   }
 
-  req.uidEstudiante = uid;
+  req.uidParticipante = uid;
   return next();
 }
 
@@ -173,13 +175,13 @@ router.get('/:idGrupo', validarIdGrupo, async (req, res) => {
 router.post(
   '/:idGrupo/estudiantes',
   validarIdGrupo,
-  validarUidEstudiante,
+  validarUidParticipante,
   async (req, res) => {
     try {
       const estudiante = await asignarEstudiante(
         req.auth.uid,
         req.params.idGrupo,
-        req.uidEstudiante
+        req.uidParticipante
       );
       return res.status(201).json(estudiante);
     } catch (error) {
@@ -191,13 +193,51 @@ router.post(
 router.delete(
   '/:idGrupo/estudiantes/:uid',
   validarIdGrupo,
-  validarUidEstudiante,
+  validarUidParticipante,
   async (req, res) => {
     try {
       await retirarEstudiante(
         req.auth.uid,
         req.params.idGrupo,
-        req.uidEstudiante
+        req.uidParticipante
+      );
+      return res.status(204).end();
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
+
+router.post(
+  '/:idGrupo/maestros',
+  requiereRol('administrador'),
+  validarIdGrupo,
+  validarUidParticipante,
+  async (req, res) => {
+    try {
+      const maestro = await asignarMaestro(
+        req.auth.uid,
+        req.params.idGrupo,
+        req.uidParticipante
+      );
+      return res.status(201).json(maestro);
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
+
+router.delete(
+  '/:idGrupo/maestros/:uid',
+  requiereRol('administrador'),
+  validarIdGrupo,
+  validarUidParticipante,
+  async (req, res) => {
+    try {
+      await retirarMaestro(
+        req.auth.uid,
+        req.params.idGrupo,
+        req.uidParticipante
       );
       return res.status(204).end();
     } catch (error) {
