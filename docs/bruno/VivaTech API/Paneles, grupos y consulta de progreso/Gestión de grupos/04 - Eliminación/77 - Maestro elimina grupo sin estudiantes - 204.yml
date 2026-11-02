@@ -10,6 +10,11 @@ http:
     type: bearer
     token: "{{tokenNuevo}}"
 
+runtime:
+  variables:
+    - name: idGrupoMaestroPrueba
+      value: "4"
+
 settings:
   encodeUrl: true
   timeout: 0

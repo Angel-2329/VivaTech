@@ -1,0 +1,21 @@
+info:
+  name: 90 - Rechazar asignación de estudiante desactivado - 403
+  type: http
+  seq: 90
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes"
+  body:
+    type: json
+    data: '{"uid":"{{uidEstudiante}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
