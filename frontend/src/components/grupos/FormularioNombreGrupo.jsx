@@ -1,7 +1,7 @@
 import { useId, useRef, useState } from 'react'
 
-const LARGO_MINIMO = 3
-const LARGO_MAXIMO = 60
+const LARGO_MINIMO = 1
+const LARGO_MAXIMO = 100
 
 
 function FormularioNombreGrupo({
@@ -11,6 +11,7 @@ function FormularioNombreGrupo({
   onGuardar,
   onCancelar,
   limpiarAlGuardar = false,
+  deshabilitado = false,
 }) {
   const [nombre, setNombre] = useState(valorInicial)
   const [error, setError] = useState('')
@@ -20,12 +21,13 @@ function FormularioNombreGrupo({
 
   async function manejarEnvio(evento) {
     evento.preventDefault()
-    if (guardando) return
+    if (guardando || deshabilitado) return
 
-    const nombreLimpio = nombre.trim().replace(/\s+/g, ' ')
+    const nombreLimpio = nombre.trim()
+    const longitud = Array.from(nombreLimpio).length
 
-    if (nombreLimpio.length < LARGO_MINIMO) {
-      setError(`Escribe un nombre de al menos ${LARGO_MINIMO} letras.`)
+    if (longitud < LARGO_MINIMO || longitud > LARGO_MAXIMO) {
+      setError(`El nombre del grupo debe tener entre ${LARGO_MINIMO} y ${LARGO_MAXIMO} caracteres.`)
       campoRef.current?.focus()
       return
     }
@@ -50,12 +52,15 @@ function FormularioNombreGrupo({
         <label className="vt-field-label" htmlFor={`${id}-nombre`}>
           {etiqueta}
         </label>
+        <p id={`${id}-ayuda`} className="vt-field-help">
+          Escribe entre {LARGO_MINIMO} y {LARGO_MAXIMO} caracteres. No se cuentan los espacios al inicio y al final.
+        </p>
         <input
           ref={campoRef}
           id={`${id}-nombre`}
           className="vt-input"
           type="text"
-          maxLength={LARGO_MAXIMO}
+          disabled={deshabilitado}
           value={nombre}
           readOnly={guardando}
           onChange={(evento) => {
@@ -63,7 +68,7 @@ function FormularioNombreGrupo({
             if (error) setError('')
           }}
           aria-invalid={error ? 'true' : undefined}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-describedby={`${id}-ayuda${error ? ` ${id}-error` : ''}`}
         />
         {error && (
           <p id={`${id}-error`} className="vt-field-error" role="alert">
@@ -76,11 +81,11 @@ function FormularioNombreGrupo({
       </div>
 
       <div className="vt-cluster">
-        <button type="submit" className="vt-btn vt-btn-primary" disabled={guardando} aria-busy={guardando}>
+        <button type="submit" className="vt-btn vt-btn-primary" disabled={guardando || deshabilitado} aria-busy={guardando}>
           {guardando ? 'Guardando…' : textoBoton}
         </button>
         {onCancelar && (
-          <button type="button" className="vt-btn vt-btn-secondary" onClick={onCancelar} disabled={guardando}>
+          <button type="button" className="vt-btn vt-btn-secondary" onClick={onCancelar} disabled={guardando || deshabilitado}>
             Cancelar
           </button>
         )}

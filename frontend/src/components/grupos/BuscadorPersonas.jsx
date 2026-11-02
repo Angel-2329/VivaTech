@@ -1,38 +1,74 @@
-import { useId, useState } from 'react'
+import { useCallback, useId, useRef, useState } from 'react'
+import { useDatos } from '../../hooks/useDatos.js'
+import Paginacion from '../panel/Paginacion.jsx'
 
-function BuscadorPersonas({ etiqueta, buscar, yaAsignados, textoAgregar = 'Agregar', onAgregar }) {
+const PERSONAS_POR_PAGINA = 20
+
+function BuscadorPersonas({
+  etiqueta,
+  buscar,
+  yaAsignados,
+  textoAgregar = 'Agregar',
+  onAgregar,
+  bloqueado = false,
+}) {
   const [texto, setTexto] = useState('')
-  const [resultados, setResultados] = useState(null)
-  const [buscando, setBuscando] = useState(false)
+  const [criterios, setCriterios] = useState(null)
+  const [pagina, setPagina] = useState(0)
   const [agregando, setAgregando] = useState(null)
-  const [error, setError] = useState('')
+  const [errorAgregar, setErrorAgregar] = useState('')
+  const operacionRef = useRef(false)
   const id = useId()
 
-  async function manejarBusqueda(evento) {
+  const cargar = useCallback(() => {
+    if (criterios === null) return Promise.resolve(null)
+
+    return buscar(criterios.buscar, {
+      limite: PERSONAS_POR_PAGINA + 1,
+      desplazamiento: pagina * PERSONAS_POR_PAGINA,
+    })
+  }, [buscar, criterios, pagina])
+  const { datos, cargando, error: errorBusqueda, reintentar } = useDatos(cargar)
+  const buscando = criterios !== null && cargando
+  const ocupado = buscando || bloqueado || agregando !== null
+  const resultados = datos
+    ?.slice(0, PERSONAS_POR_PAGINA)
+    .filter((persona) => persona.activo !== false)
+  const haySiguiente = (datos?.length ?? 0) > PERSONAS_POR_PAGINA
+  const error = errorAgregar || errorBusqueda?.message
+
+  function manejarBusqueda(evento) {
     evento.preventDefault()
-    if (buscando) return
+    if (ocupado || operacionRef.current) return
+    setErrorAgregar('')
+    setPagina(0)
+    setCriterios({ buscar: texto.trim() })
+  }
 
-    setBuscando(true)
-    setError('')
-
-    try {
-      setResultados(await buscar(texto.trim()))
-    } catch (errorAlBuscar) {
-      setError(errorAlBuscar.message || 'No pudimos buscar. Inténtalo nuevamente.')
-    } finally {
-      setBuscando(false)
-    }
+  function cambiarPagina(nuevaPagina) {
+    if (ocupado || operacionRef.current) return
+    setErrorAgregar('')
+    setPagina(nuevaPagina)
   }
 
   async function manejarAgregar(persona) {
+    if (
+      ocupado
+      || operacionRef.current
+      || yaAsignados.includes(persona.uid)
+      || persona.activo === false
+    ) return
+
+    operacionRef.current = true
     setAgregando(persona.uid)
-    setError('')
+    setErrorAgregar('')
 
     try {
       await onAgregar(persona)
     } catch (errorAlAgregar) {
-      setError(errorAlAgregar.message || 'No pudimos agregar a esta persona. Inténtalo nuevamente.')
+      setErrorAgregar(errorAlAgregar.message || 'No pudimos agregar a esta persona. Inténtalo nuevamente.')
     } finally {
+      operacionRef.current = false
       setAgregando(null)
     }
   }
@@ -45,18 +81,20 @@ function BuscadorPersonas({ etiqueta, buscar, yaAsignados, textoAgregar = 'Agreg
             {etiqueta}
           </label>
           <p id={`${id}-ayuda`} className="vt-field-help">
-            Escribe parte del nombre o déjalo vacío para ver a todos.
+            Escribe parte del nombre o déjalo vacío para consultar las cuentas activas. Los resultados se muestran por páginas.
           </p>
           <input
             id={`${id}-texto`}
             className="vt-input"
             type="search"
+            maxLength={100}
+            disabled={ocupado}
             value={texto}
             onChange={(evento) => setTexto(evento.target.value)}
             aria-describedby={`${id}-ayuda`}
           />
         </div>
-        <button type="submit" className="vt-btn vt-btn-secondary buscador__boton" disabled={buscando} aria-busy={buscando}>
+        <button type="submit" className="vt-btn vt-btn-secondary buscador__boton" disabled={ocupado} aria-busy={buscando}>
           <span className="vt-icon" aria-hidden="true">
             search
           </span>
@@ -73,9 +111,31 @@ function BuscadorPersonas({ etiqueta, buscar, yaAsignados, textoAgregar = 'Agreg
         </div>
       )}
 
+      {errorBusqueda && (
+        <button
+          type="button"
+          className="vt-btn vt-btn-secondary vt-btn-sm"
+          disabled={ocupado}
+          onClick={() => {
+            setErrorAgregar('')
+            reintentar()
+          }}
+        >
+          Reintentar búsqueda
+        </button>
+      )}
+
       <div role="status">
-        {resultados?.length === 0 && <p className="vt-text-muted">No encontramos a nadie con ese nombre.</p>}
-        {resultados?.length > 0 && <p className="vt-visually-hidden">{resultados.length} resultados</p>}
+        {buscando && <p className="vt-text-muted">Buscando personas…</p>}
+        {datos?.length === 0 && <p className="vt-text-muted">No encontramos a nadie con ese nombre en esta página.</p>}
+        {datos?.length > 0 && resultados?.length === 0 && (
+          <p className="vt-text-muted">
+            No hay cuentas activas en esta página. Revisa las otras páginas o cambia la búsqueda.
+          </p>
+        )}
+        {resultados?.length > 0 && (
+          <p className="vt-visually-hidden">{resultados.length} personas disponibles en esta página</p>
+        )}
       </div>
 
       {resultados?.length > 0 && (
@@ -102,7 +162,7 @@ function BuscadorPersonas({ etiqueta, buscar, yaAsignados, textoAgregar = 'Agreg
                     type="button"
                     className="vt-btn vt-btn-primary vt-btn-sm"
                     onClick={() => manejarAgregar(persona)}
-                    disabled={agregando !== null}
+                    disabled={ocupado}
                     aria-busy={agregando === persona.uid}
                   >
                     {agregando === persona.uid ? 'Agregando…' : textoAgregar}
@@ -113,6 +173,16 @@ function BuscadorPersonas({ etiqueta, buscar, yaAsignados, textoAgregar = 'Agreg
             )
           })}
         </ul>
+      )}
+
+      {criterios !== null && (
+        <Paginacion
+          pagina={pagina}
+          haySiguiente={haySiguiente}
+          cargando={ocupado}
+          onCambiar={cambiarPagina}
+          etiqueta={`Páginas de ${etiqueta.toLowerCase()}`}
+        />
       )}
     </div>
   )

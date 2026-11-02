@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import BuscadorPersonas from '../../components/grupos/BuscadorPersonas.jsx'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
@@ -25,10 +25,8 @@ import { formatearFecha, ordenarPorNombre, plural } from '../../utils/formato.js
 import './Grupos.css'
 
 
-function buscarMaestros(texto) {
-  return buscarCuentas({ buscar: texto, rol: 'maestro' }).then((cuentas) =>
-    cuentas.filter((cuenta) => cuenta.activo)
-  )
+function buscarMaestros(texto, opciones = {}) {
+  return buscarCuentas({ ...opciones, buscar: texto, rol: 'maestro' })
 }
 
 
@@ -40,29 +38,66 @@ function DetalleGrupo() {
   const cargar = useCallback(() => obtenerGrupo(idGrupo), [idGrupo])
   const { datos: grupo, cargando, error, reintentar, setDatos } = useDatos(cargar)
   const [mensaje, setMensaje] = useState('')
+  const [procesandoParticipante, setProcesandoParticipante] = useState(false)
+  const operacionRef = useRef(false)
 
   const [aRetirar, setARetirar] = useState(null)
   const [retirando, setRetirando] = useState(false)
   const [errorRetirar, setErrorRetirar] = useState('')
 
+  async function ejecutarCambioParticipante(accion) {
+    if (operacionRef.current) {
+      throw new Error('Espera a que termine la operación en curso.')
+    }
+
+    operacionRef.current = true
+    setProcesandoParticipante(true)
+    setMensaje('')
+
+    try {
+      return await accion()
+    } finally {
+      operacionRef.current = false
+      setProcesandoParticipante(false)
+    }
+  }
+
   async function manejarAgregarEstudiante(persona) {
-    const nuevo = await agregarEstudiante(grupo.idGrupo, persona.uid)
-    setDatos((anterior) => ({ ...anterior, estudiantes: [...anterior.estudiantes, nuevo] }))
-    setMensaje(`Se agregó a ${nuevo.nombreCompleto} al grupo.`)
+    return ejecutarCambioParticipante(async () => {
+      const nuevo = await agregarEstudiante(grupo.idGrupo, persona.uid)
+      setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? {
+        ...anterior,
+        estudiantes: [
+          ...anterior.estudiantes.filter((actual) => actual.uid !== nuevo.uid),
+          nuevo,
+        ],
+      } : anterior)
+      setMensaje(`Se agregó a ${nuevo.nombreCompleto} al grupo.`)
+    })
   }
 
   async function manejarAsignarMaestro(persona) {
-    const nuevo = await asignarMaestro(grupo.idGrupo, persona.uid)
-    setDatos((anterior) => ({ ...anterior, maestros: [...anterior.maestros, nuevo] }))
-    setMensaje(`Se asignó a ${nuevo.nombreCompleto} como maestro del grupo.`)
+    return ejecutarCambioParticipante(async () => {
+      const nuevo = await asignarMaestro(grupo.idGrupo, persona.uid)
+      setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? {
+        ...anterior,
+        maestros: [
+          ...anterior.maestros.filter((actual) => actual.uid !== nuevo.uid),
+          nuevo,
+        ],
+      } : anterior)
+      setMensaje(`Se asignó a ${nuevo.nombreCompleto} como maestro del grupo.`)
+    })
   }
 
   function abrirRetirar(tipo, persona) {
+    if (operacionRef.current) return
     setErrorRetirar('')
     setARetirar({ tipo, uid: persona.uid, nombreCompleto: persona.nombreCompleto })
   }
 
   async function confirmarRetirar() {
+    if (operacionRef.current || !aRetirar) return
     setRetirando(true)
     setErrorRetirar('')
 
@@ -70,15 +105,17 @@ function DetalleGrupo() {
     const lista = esEstudiante ? 'estudiantes' : 'maestros'
 
     try {
-      if (esEstudiante) await retirarEstudiante(grupo.idGrupo, aRetirar.uid)
-      else await retirarMaestro(grupo.idGrupo, aRetirar.uid)
+      await ejecutarCambioParticipante(async () => {
+        if (esEstudiante) await retirarEstudiante(grupo.idGrupo, aRetirar.uid)
+        else await retirarMaestro(grupo.idGrupo, aRetirar.uid)
 
-      setDatos((anterior) => ({
-        ...anterior,
-        [lista]: anterior[lista].filter((persona) => persona.uid !== aRetirar.uid),
-      }))
-      setMensaje(`Se retiró a ${aRetirar.nombreCompleto} del grupo.`)
-      setARetirar(null)
+        setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? {
+          ...anterior,
+          [lista]: anterior[lista].filter((persona) => persona.uid !== aRetirar.uid),
+        } : anterior)
+        setMensaje(`Se retiró a ${aRetirar.nombreCompleto} del grupo.`)
+        setARetirar(null)
+      })
     } catch (errorAlRetirar) {
       setErrorRetirar(errorAlRetirar.message)
     } finally {
@@ -122,6 +159,7 @@ function DetalleGrupo() {
 
           <TablaEstudiantes
             grupo={grupo}
+            procesando={procesandoParticipante}
             onRetirar={(estudiante) => abrirRetirar('estudiante', estudiante)}
           />
 
@@ -134,12 +172,14 @@ function DetalleGrupo() {
               buscar={buscarEstudiantes}
               yaAsignados={grupo.estudiantes.map((estudiante) => estudiante.uid)}
               onAgregar={manejarAgregarEstudiante}
+              bloqueado={procesandoParticipante}
             />
           </section>
 
           {esAdmin && (
             <SeccionMaestros
               grupo={grupo}
+              procesando={procesandoParticipante}
               onAsignar={manejarAsignarMaestro}
               onRetirar={(maestro) => abrirRetirar('maestro', maestro)}
             />
@@ -167,7 +207,7 @@ function DetalleGrupo() {
   )
 }
 
-function TablaEstudiantes({ grupo, onRetirar }) {
+function TablaEstudiantes({ grupo, onRetirar, procesando }) {
   if (grupo.estudiantes.length === 0) {
     return (
       <EstadoVacio icono="group_add" titulo="Este grupo todavía no tiene estudiantes">
@@ -197,6 +237,9 @@ function TablaEstudiantes({ grupo, onRetirar }) {
               <tr key={estudiante.uid}>
                 <td data-label="Estudiante">
                   <strong>{estudiante.nombreCompleto}</strong>
+                  <span className={estudiante.activo ? 'vt-badge vt-badge-success' : 'vt-badge vt-badge-neutral'}>
+                    {estudiante.activo ? 'Cuenta activa' : 'Cuenta desactivada'}
+                  </span>
                   {estudiante.apodo && (
                     <span className="vt-text-muted"> ({estudiante.apodo})</span>
                   )}
@@ -209,13 +252,14 @@ function TablaEstudiantes({ grupo, onRetirar }) {
                   />
                 </td>
                 <td data-label="Última actividad">
-                  {formatearFecha(estudiante.ultimaActividad, 'Sin empezar')}
+                  {formatearFecha(estudiante.ultimaActividad, 'Sin actividad registrada')}
                 </td>
                 <td data-label="Acciones">
                   <button
                     type="button"
                     className="vt-btn vt-btn-danger-soft vt-btn-sm"
                     onClick={() => onRetirar(estudiante)}
+                    disabled={procesando}
                   >
                     Retirar
                     <span className="vt-visually-hidden"> a {estudiante.nombreCompleto}</span>
@@ -230,7 +274,7 @@ function TablaEstudiantes({ grupo, onRetirar }) {
   )
 }
 
-function SeccionMaestros({ grupo, onAsignar, onRetirar }) {
+function SeccionMaestros({ grupo, onAsignar, onRetirar, procesando }) {
   return (
     <section className="vt-card vt-stack" aria-labelledby="titulo-maestros">
       <h2 id="titulo-maestros" className="vt-headline-sm">
@@ -248,6 +292,7 @@ function SeccionMaestros({ grupo, onAsignar, onRetirar }) {
                 type="button"
                 className="vt-btn vt-btn-danger-soft vt-btn-sm"
                 onClick={() => onRetirar(maestro)}
+                disabled={procesando}
               >
                 Retirar
                 <span className="vt-visually-hidden"> a {maestro.nombreCompleto}</span>
@@ -263,6 +308,7 @@ function SeccionMaestros({ grupo, onAsignar, onRetirar }) {
         yaAsignados={grupo.maestros.map((maestro) => maestro.uid)}
         textoAgregar="Asignar"
         onAgregar={onAsignar}
+        bloqueado={procesando}
       />
     </section>
   )
