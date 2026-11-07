@@ -1,0 +1,556 @@
+[
+  {
+    "categoria": "Banca móvil",
+    "orden": 1,
+    "titulo": "Uso seguro de la aplicación del banco",
+    "descripcion": "Aprende a entrar a tu banco desde el celular, revisar tu saldo y cuidar tus datos.",
+    "lecciones": [
+      {
+        "orden": 1,
+        "titulo": "Abrir la aplicación de forma segura",
+        "objetivo": "Instalar y abrir la aplicación de tu banco reconociendo las señales de que es segura.",
+        "duracionEstimadaMinutos": 10,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "La aplicación de tu banco te deja ver tu dinero y hacer pagos desde el celular. Para usarla con tranquilidad, primero asegúrate de que sea la verdadera.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "smartphone", "alt": "Celular" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Descárgala solo de la tienda de tu celular: Play Store o App Store.",
+                  "Revisa que el creador de la aplicación sea tu banco.",
+                  "Nunca la instales desde un enlace que te mandaron por mensaje."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Te llega este mensaje: \"Descarga aquí la nueva aplicación de tu banco\", con un enlace.",
+            "recursos": [{ "tipo": "icono", "nombre": "sms", "alt": "Mensaje de texto" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué haces?",
+              "opciones": [
+                { "id": "a", "texto": "Toco el enlace y la instalo" },
+                { "id": "b", "texto": "Busco la aplicación en la tienda oficial de mi celular" },
+                { "id": "c", "texto": "Le reenvío el mensaje a mi familia" }
+              ],
+              "correcta": "b",
+              "pista": "No instales aplicaciones desde mensajes inesperados. Busca la aplicación en la tienda oficial.",
+              "mensajeAcierto": "¡Exacto! Así te aseguras de tener la aplicación verdadera."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Para entrar, la aplicación te pide tu contraseña, tu huella o tu cara. Esa forma de entrar es solo tuya.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "lock", "alt": "Candado" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "No compartas tu contraseña con nadie.",
+                  "No la escribas en un papel junto a tu celular.",
+                  "Tu huella o tu cara ayudan a proteger el acceso. Mantén también una contraseña segura."
+                ]
+              },
+              { "tipo": "aviso", "texto": "El banco nunca te pide tu contraseña por llamada, mensaje o correo." }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Abriste la aplicación de Banco Ejemplo. Toca el botón para entrar con tu huella.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Banco Ejemplo", "subtitulo": "Hola, ¿cómo quieres entrar?" },
+              "opciones": [
+                { "id": "huella", "texto": "Entrar con huella", "icono": "fingerprint" },
+                { "id": "olvide", "texto": "Olvidé mi contraseña", "icono": "help" },
+                { "id": "cuenta", "texto": "Abrir una cuenta nueva", "icono": "person_add" }
+              ],
+              "correcta": "huella",
+              "pista": "Busca el botón con el dibujo de una huella digital.",
+              "mensajeAcierto": "¡Muy bien! Elegiste cómo entrar con tu huella en esta práctica."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Cuando termines, cierra tu sesión y cuida desde dónde te conectas.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "logout", "alt": "Cerrar sesión" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Toca \"Cerrar sesión\" antes de guardar el celular.",
+                  "Usa tus datos móviles o el internet de tu casa, no el wifi público.",
+                  "Ponle bloqueo de pantalla a tu celular."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Estás en un café con wifi gratis y quieres revisar tu saldo.",
+            "recursos": [{ "tipo": "icono", "nombre": "wifi", "alt": "Wifi" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué es lo más seguro?",
+              "opciones": [
+                { "id": "a", "texto": "Conectarme al wifi del café" },
+                { "id": "b", "texto": "Usar mis datos móviles" },
+                { "id": "c", "texto": "Pedirle prestado el celular a alguien" }
+              ],
+              "correcta": "b",
+              "pista": "Una red pública puede ser falsa o insegura. Prefiere una conexión de confianza.",
+              "mensajeAcierto": "¡Correcto! Tus datos móviles son más seguros para entrar al banco."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 2,
+        "titulo": "Consultar tu saldo y movimientos",
+        "objetivo": "Revisar el saldo y los movimientos de tu cuenta en la aplicación e identificar un cargo que no reconoces.",
+        "duracionEstimadaMinutos": 12,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "El saldo es el dinero que tienes hoy en tu cuenta. Los movimientos son la lista de lo que entró y salió.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "account_balance_wallet", "alt": "Cartera" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Depósito: dinero que entra, como tu sueldo.",
+                  "Cargo o retiro: dinero que sale, como un pago o una compra.",
+                  "Cada movimiento muestra la fecha, la descripción y la cantidad."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Estás en el inicio de Banco Ejemplo. Toca el botón para ver cuánto dinero tienes.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Banco Ejemplo", "subtitulo": "¿Qué quieres hacer hoy?" },
+              "opciones": [
+                { "id": "saldo", "texto": "Consultar saldo", "icono": "account_balance_wallet" },
+                { "id": "transferir", "texto": "Transferir", "icono": "swap_horiz" },
+                { "id": "pagar", "texto": "Pagar servicios", "icono": "receipt_long" },
+                { "id": "ayuda", "texto": "Ayuda", "icono": "help" }
+              ],
+              "correcta": "saldo",
+              "pista": "Busca la palabra \"saldo\" o el dibujo de una cartera.",
+              "mensajeAcierto": "¡Muy bien! Ya sabes dónde ver tu dinero."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "En la lista de movimientos, lo más reciente aparece arriba. Los cargos suelen llevar un signo de menos (-).",
+            "recursos": [
+              { "tipo": "icono", "nombre": "list_alt", "alt": "Lista de movimientos" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Revisa tus movimientos cada semana.",
+                  "Compáralos con tus compras y pagos.",
+                  "Si ves un cargo que no hiciste, repórtalo pronto al banco."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Quieres ver lo que entró y salió de tu cuenta. Toca el botón correcto.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Tu cuenta", "subtitulo": "Saldo disponible: $3,250.00" },
+              "opciones": [
+                { "id": "movimientos", "texto": "Ver movimientos", "icono": "list_alt" },
+                { "id": "bloquear", "texto": "Bloquear tarjeta", "icono": "credit_card_off" },
+                { "id": "perfil", "texto": "Mi perfil", "icono": "person" }
+              ],
+              "correcta": "movimientos",
+              "pista": "Los movimientos son la lista de entradas y salidas de dinero.",
+              "mensajeAcierto": "¡Correcto! Aquí puedes revisar cada entrada y salida."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "En tus movimientos aparece \"Compra en Tienda Lejana -$899.00\". Tú no hiciste esa compra.",
+            "recursos": [{ "tipo": "icono", "nombre": "report", "alt": "Alerta" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué es lo mejor?",
+              "opciones": [
+                { "id": "a", "texto": "Ignorarlo, seguro es un error" },
+                { "id": "b", "texto": "Reportarlo al banco desde la aplicación o al número de mi tarjeta" },
+                { "id": "c", "texto": "Publicarlo en mis redes sociales" }
+              ],
+              "correcta": "b",
+              "pista": "Un cargo que no reconoces puede ser un fraude, y tu banco puede ayudarte.",
+              "mensajeAcierto": "¡Correcto! Reportarlo pronto ayuda a proteger tu dinero."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 3,
+        "titulo": "Reconocer mensajes falsos del banco",
+        "objetivo": "Reconocer mensajes y llamadas falsas a nombre del banco y saber qué hacer ante ellos.",
+        "duracionEstimadaMinutos": 15,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Hay personas que se hacen pasar por el banco para robar tus datos. Lo intentan por mensaje, correo o llamada.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "warning", "alt": "Advertencia" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Te dicen que tu cuenta será bloqueada si no actúas rápido.",
+                  "Te piden tu contraseña, tu NIP o el código que te llegó por SMS.",
+                  "Traen un enlace extraño o con faltas de ortografía."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Te llega este SMS: \"BANCO: Tu cuenta fue bloqueada. Actívala aquí: banco-ejemplo.invalid\".",
+            "recursos": [{ "tipo": "icono", "nombre": "sms", "alt": "Mensaje de texto" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Es un mensaje confiable?",
+              "opciones": [
+                { "id": "a", "texto": "Sí, porque dice BANCO" },
+                { "id": "b", "texto": "No debo confiar en él; verificaré por un canal oficial" }
+              ],
+              "correcta": "b",
+              "pista": "Fíjate en la prisa que te mete y en el enlace que trae.",
+              "mensajeAcierto": "¡Bien visto! Ese mensaje es falso. No toques el enlace."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "El código que te llega por SMS sirve para confirmar tus operaciones. Es como una firma: solo tú debes usarlo.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "password", "alt": "Código de seguridad" },
+              { "tipo": "aviso", "texto": "Nadie del banco te pedirá tu NIP, tu contraseña ni el código de un SMS." }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Te llama alguien que dice ser del banco. Te pide el código que te acaba de llegar para \"cancelar una compra\".",
+            "recursos": [{ "tipo": "icono", "nombre": "call", "alt": "Llamada" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué haces?",
+              "opciones": [
+                { "id": "a", "texto": "Le dicto el código" },
+                { "id": "b", "texto": "Cuelgo y llamo al número que viene en mi tarjeta" },
+                { "id": "c", "texto": "Le doy mi NIP para que me ayude" }
+              ],
+              "correcta": "b",
+              "pista": "Un empleado del banco nunca necesita tu código ni tu NIP.",
+              "mensajeAcierto": "¡Exacto! Llamar tú al número oficial es lo más seguro."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Recibiste un mensaje falso a nombre de Banco Ejemplo. En la aplicación, toca la opción para reportarlo.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Ayuda", "subtitulo": "¿En qué te podemos ayudar?" },
+              "opciones": [
+                { "id": "reportar", "texto": "Reportar un fraude", "icono": "report" },
+                { "id": "preguntas", "texto": "Preguntas frecuentes", "icono": "help" },
+                { "id": "sucursal", "texto": "Buscar sucursal", "icono": "location_on" }
+              ],
+              "correcta": "reportar",
+              "pista": "Busca la opción que habla de fraude.",
+              "mensajeAcierto": "¡Muy bien! Reportarlo te protege a ti y a otras personas."
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Recuerda: si un mensaje te mete prisa o te pide datos, detente y verifica.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "verified_user", "alt": "Escudo de seguridad" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "No toques enlaces de mensajes sospechosos.",
+                  "No compartas tu contraseña, tu NIP ni tus códigos.",
+                  "Comunícate tú al número oficial de tu banco."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "categoria": "Pagos digitales",
+    "orden": 1,
+    "titulo": "Pago de servicios en línea",
+    "descripcion": "Practica cómo pagar la luz o el agua por internet, paso a paso y sin dinero real.",
+    "lecciones": [
+      {
+        "orden": 1,
+        "titulo": "Leer tu recibo de luz",
+        "objetivo": "Identificar en un recibo de luz el total a pagar, la fecha límite y la referencia.",
+        "duracionEstimadaMinutos": 8,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Antes de pagar en línea necesitas tu recibo. Ahí están los tres datos que vas a usar.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "receipt", "alt": "Recibo" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Total a pagar: cuánto debes.",
+                  "Fecha límite de pago: el último día para pagar sin recargos.",
+                  "Referencia o número de servicio: identifica tu cuenta."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Este es tu recibo de Luz del Valle. Toca la fecha límite de pago.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Luz del Valle", "subtitulo": "Recibo de energía eléctrica" },
+              "opciones": [
+                { "id": "total", "texto": "Total a pagar: $486.00", "icono": "payments" },
+                { "id": "fecha", "texto": "Pagar antes del: 20 de noviembre", "icono": "event" },
+                { "id": "periodo", "texto": "Periodo: 15 de septiembre a 15 de noviembre", "icono": "date_range" }
+              ],
+              "correcta": "fecha",
+              "pista": "Busca la fecha que dice hasta cuándo puedes pagar.",
+              "mensajeAcierto": "¡Muy bien! Esa es la fecha límite."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "En el mismo recibo, ahora toca el total que tienes que pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Luz del Valle", "subtitulo": "Recibo de energía eléctrica" },
+              "opciones": [
+                { "id": "total", "texto": "Total a pagar: $486.00", "icono": "payments" },
+                { "id": "fecha", "texto": "Pagar antes del: 20 de noviembre", "icono": "event" },
+                { "id": "periodo", "texto": "Periodo: 15 de septiembre a 15 de noviembre", "icono": "date_range" }
+              ],
+              "correcta": "total",
+              "pista": "Busca la cantidad de dinero con el signo de pesos.",
+              "mensajeAcierto": "¡Correcto! Esa es la cantidad que vas a pagar."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Hoy es 22 de noviembre y tu recibo decía \"Pagar antes del: 20 de noviembre\".",
+            "recursos": [{ "tipo": "icono", "nombre": "event_busy", "alt": "Fecha vencida" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué puede pasar?",
+              "opciones": [
+                { "id": "a", "texto": "Nada, se puede pagar cuando yo quiera" },
+                { "id": "b", "texto": "Me pueden cobrar un recargo o suspender el servicio" }
+              ],
+              "correcta": "b",
+              "pista": "Piensa para qué sirve la fecha límite.",
+              "mensajeAcierto": "¡Correcto! Por eso conviene pagar antes de la fecha límite."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 2,
+        "titulo": "Capturar la referencia de pago",
+        "objetivo": "Elegir el servicio en la aplicación y escribir la referencia del recibo sin errores.",
+        "duracionEstimadaMinutos": 10,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Para pagar desde la aplicación del banco, eliges el servicio y escribes la referencia de tu recibo.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "keyboard", "alt": "Teclado" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Copia la referencia número por número.",
+                  "Revisa que no falte ni sobre ningún número.",
+                  "Compara el nombre del servicio con el de tu recibo."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "En Banco Ejemplo, toca la opción para pagar tu recibo de luz.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Pagar servicios", "subtitulo": "Elige el servicio" },
+              "opciones": [
+                { "id": "luz", "texto": "Luz del Valle", "icono": "bolt" },
+                { "id": "agua", "texto": "Agua Clara", "icono": "water_drop" },
+                { "id": "telefono", "texto": "Telefonía Sol", "icono": "call" }
+              ],
+              "correcta": "luz",
+              "pista": "Tu recibo es de luz: busca el rayo.",
+              "mensajeAcierto": "¡Muy bien! Elegiste el servicio correcto."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Tu recibo dice: Referencia 0123 4567 8901. Escribiste 0123 4567 891.",
+            "recursos": [{ "tipo": "icono", "nombre": "pin", "alt": "Número de referencia" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Está bien escrita?",
+              "opciones": [
+                { "id": "a", "texto": "Sí, se parece mucho" },
+                { "id": "b", "texto": "No, falta un número" }
+              ],
+              "correcta": "b",
+              "pista": "Cuenta los números de cada grupo.",
+              "mensajeAcierto": "¡Bien visto! Con un número de menos, el pago podría no llegar a tu recibo."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Antes de confirmar, la aplicación te muestra un resumen. Léelo con calma.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "fact_check", "alt": "Revisar datos" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Servicio: el mismo de tu recibo.",
+                  "Referencia: igual a la de tu recibo.",
+                  "Cantidad: el total a pagar."
+                ]
+              },
+              { "tipo": "aviso", "texto": "Si algo no coincide con tu recibo, regresa y corrígelo antes de pagar." }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Revisaste el resumen y todo coincide con tu recibo. Toca el botón para pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Confirma tu pago", "subtitulo": "Luz del Valle · $486.00" },
+              "opciones": [
+                { "id": "confirmar", "texto": "Confirmar pago", "icono": "check_circle" },
+                { "id": "corregir", "texto": "Corregir datos", "icono": "edit" },
+                { "id": "cancelar", "texto": "Cancelar", "icono": "cancel" }
+              ],
+              "correcta": "confirmar",
+              "pista": "Si todo coincide, ya puedes confirmar.",
+              "mensajeAcierto": "¡Listo! Hiciste tu primer pago de práctica, sin dinero real."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 3,
+        "titulo": "Guardar tu comprobante",
+        "objetivo": "Guardar el comprobante de un pago y reconocer los datos que lo hacen válido.",
+        "duracionEstimadaMinutos": 8,
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Al terminar un pago, la aplicación te da un comprobante. Es la prueba de que pagaste.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "receipt_long", "alt": "Comprobante" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Folio o número de operación.",
+                  "Fecha y hora del pago.",
+                  "Servicio, referencia y cantidad pagada."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Tu pago se hizo. Toca la opción para guardar el comprobante en tu celular.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": { "titulo": "Pago realizado", "subtitulo": "Folio de operación 458921" },
+              "opciones": [
+                { "id": "guardar", "texto": "Guardar comprobante", "icono": "download" },
+                { "id": "compartir", "texto": "Compartir", "icono": "share" },
+                { "id": "inicio", "texto": "Volver al inicio", "icono": "home" }
+              ],
+              "correcta": "guardar",
+              "pista": "Busca la palabra \"Guardar\" y la flecha hacia abajo.",
+              "mensajeAcierto": "¡Muy bien! Elegiste cómo guardar el comprobante en esta práctica."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Luz del Valle te dice que no recibió tu pago.",
+            "recursos": [{ "tipo": "icono", "nombre": "help", "alt": "Duda" }],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué te sirve para demostrar que pagaste?",
+              "opciones": [
+                { "id": "a", "texto": "El comprobante con su folio" },
+                { "id": "b", "texto": "Una foto del recibo sin pagar" },
+                { "id": "c", "texto": "Decir que ya pagué" }
+              ],
+              "correcta": "a",
+              "pista": "Busca la prueba que tiene número de operación.",
+              "mensajeAcierto": "¡Exacto! El folio del comprobante demuestra tu pago."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Guarda tus comprobantes por lo menos hasta que veas tu pago en el siguiente recibo.",
+            "recursos": [
+              { "tipo": "icono", "nombre": "folder", "alt": "Carpeta" },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Guárdalo en tu celular o mándatelo por correo.",
+                  "No lo compartas con desconocidos: tiene datos de tu cuenta.",
+                  "Revisa en tu siguiente recibo que el pago aparezca."
+                ]
+              }
+            ],
+            "actividad": { "tipo": "lectura" }
+          }
+        ]
+      }
+    ]
+  }
+]
