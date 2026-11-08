@@ -1,42 +1,6 @@
-// DATOS DE PRUEBA para los servicios simulados del Sprint 3.
-// Tienen exactamente la forma acordada en el contrato de la API.
-
-export const categorias = [
-  {
-    idCategoria: 1,
-    nombre: 'Banca móvil',
-    cursos: [
-      {
-        idCurso: 1,
-        titulo: 'Uso seguro de la aplicación del banco',
-        descripcion: 'Aprende a entrar a tu banco desde el celular, revisar tu saldo y cuidar tus datos.',
-        lecciones: [
-          { idLeccion: 1, titulo: 'Abrir la aplicación de forma segura', duracionEstimadaMinutos: 10, estado: 'completada' },
-          { idLeccion: 2, titulo: 'Consultar tu saldo y movimientos', duracionEstimadaMinutos: 12, estado: 'en_progreso' },
-          { idLeccion: 3, titulo: 'Reconocer mensajes falsos del banco', duracionEstimadaMinutos: 15, estado: 'pendiente' },
-        ],
-      },
-    ],
-  },
-  {
-    idCategoria: 2,
-    nombre: 'Pagos digitales',
-    cursos: [
-      {
-        idCurso: 2,
-        titulo: 'Pago de servicios en línea',
-        descripcion: 'Practica cómo pagar la luz o el agua por internet, paso a paso y sin dinero real.',
-        lecciones: [
-          { idLeccion: 4, titulo: 'Leer tu recibo de luz', duracionEstimadaMinutos: 8, estado: 'pendiente' },
-          { idLeccion: 5, titulo: 'Capturar la referencia de pago', duracionEstimadaMinutos: 10, estado: 'pendiente' },
-          { idLeccion: 6, titulo: 'Guardar tu comprobante', duracionEstimadaMinutos: 8, estado: 'pendiente' },
-        ],
-      },
-    ],
-  },
-]
-
-export const TOTAL_LECCIONES_PUBLICADAS = 6
+// DATOS DE PRUEBA de los servicios simulados.
+// Los cursos y lecciones del Sprint 4 están en contenidoDePrueba.js y progresoDePrueba.js.
+// Aquí quedan los datos del Sprint 3 y las funciones responder y fallar.
 
 // ---------- Cuentas (GET /api/admin/usuarios) ----------
 
