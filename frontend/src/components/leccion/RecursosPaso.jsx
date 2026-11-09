@@ -1,6 +1,3 @@
-// Recursos de apoyo de un paso: icono, lista y aviso.
-// El recurso "video" se muestra en la tarea 3.23.11 (VideoYouTube.jsx).
-
 function RecursosPaso({ recursos }) {
   if (!recursos?.length) return null
 
@@ -9,6 +6,14 @@ function RecursosPaso({ recursos }) {
 
 function Recurso({ recurso }) {
   if (recurso.tipo === 'icono') {
+    if (!recurso.alt?.trim()) {
+      return (
+        <span className="vt-category-icon leccion__icono" aria-hidden="true">
+          <span className="vt-icon">{recurso.nombre}</span>
+        </span>
+      )
+    }
+
     return (
       <span className="vt-category-icon leccion__icono" role="img" aria-label={recurso.alt}>
         <span className="vt-icon" aria-hidden="true">
@@ -42,7 +47,7 @@ function Recurso({ recurso }) {
     )
   }
 
-  // "video" y cualquier tipo nuevo todavía no se muestran
+  
   return null
 }
 
