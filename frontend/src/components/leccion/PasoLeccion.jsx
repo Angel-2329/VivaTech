@@ -1,5 +1,5 @@
 import ActividadLectura from './ActividadLectura.jsx'
-import ActividadTemporal from './ActividadTemporal.jsx'
+import ActividadOpcion from './ActividadOpcion.jsx'
 import ActividadToque from './ActividadToque.jsx'
 import RecursosPaso from './RecursosPaso.jsx'
 
@@ -36,7 +36,20 @@ function Actividad({ actividad, guardando, onCompletar }) {
     return <ActividadToque actividad={actividad} guardando={guardando} onCompletar={onCompletar} />
   }
 
-  return <ActividadTemporal actividad={actividad} guardando={guardando} onCompletar={onCompletar} />
+  if (actividad?.tipo === 'opcion') {
+    return <ActividadOpcion actividad={actividad} guardando={guardando} onCompletar={onCompletar} />
+  }
+
+  return (
+    <div className="vt-alert vt-alert-warning" role="alert">
+      <span className="vt-icon" aria-hidden="true">
+        warning
+      </span>
+      <p className="vt-alert__content">
+        No pudimos mostrar esta actividad. Avísale a tu maestra o maestro.
+      </p>
+    </div>
+  )
 }
 
 export default PasoLeccion
