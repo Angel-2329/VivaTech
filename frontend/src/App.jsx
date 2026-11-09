@@ -5,6 +5,7 @@ import PrimerAcceso from './pages/PrimerAcceso.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
+import Leccion from './pages/estudiante/Leccion.jsx'
 import ListaGrupos from './pages/grupos/ListaGrupos.jsx'
 import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
@@ -28,6 +29,7 @@ function App() {
       <Route element={<RutaProtegida roles={['estudiante']} />}>
         <Route path="/estudiante" element={<InicioEstudiante />} />
         <Route path="/estudiante/cursos" element={<MisCursos />} />
+        <Route path="/estudiante/lecciones/:idLeccion" element={<Leccion />} />
       </Route>
 
       {/* Solo maestros */}
