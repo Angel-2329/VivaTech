@@ -1,5 +1,4 @@
 const NOMBRE_ACTIVIDAD = {
-  toque: 'Toca el botón correcto',
   opcion: 'Elige la respuesta correcta',
 }
 
