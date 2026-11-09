@@ -1,22 +1,10 @@
-import { useState } from 'react'
+import { clasesOpcion, useRespuesta } from '../../hooks/useRespuesta.js'
+import { BotonContinuar, MensajesRespuesta } from './RespuestaActividad.jsx'
 import './Actividades.css'
 
 function ActividadToque({ actividad, guardando, onCompletar }) {
-  const [acerto, setAcerto] = useState(false)
-  const [ultimaIncorrecta, setUltimaIncorrecta] = useState(null)
-  const [intentosFallidos, setIntentosFallidos] = useState(0)
-
-  function tocar(opcion) {
-    if (acerto) return
-
-    if (opcion.id === actividad.correcta) {
-      setAcerto(true)
-      setUltimaIncorrecta(null)
-    } else {
-      setUltimaIncorrecta(opcion.id)
-      setIntentosFallidos((numero) => numero + 1)
-    }
-  }
+  const respuesta = useRespuesta(actividad.correcta)
+  const { acerto, ultimaIncorrecta, elegir } = respuesta
 
   return (
     <div className="vt-stack">
@@ -50,14 +38,8 @@ function ActividadToque({ actividad, guardando, onCompletar }) {
                 <li key={opcion.id}>
                   <button
                     type="button"
-                    className={[
-                      'simulador__boton',
-                      esCorrectaElegida && 'vt-sim-highlight is-correcta',
-                      esIncorrectaElegida && 'is-incorrecta',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => tocar(opcion)}
+                    className={clasesOpcion('simulador__boton', { esCorrectaElegida, esIncorrectaElegida })}
+                    onClick={() => elegir(opcion.id)}
                     aria-disabled={acerto && !esCorrectaElegida ? 'true' : undefined}
                   >
                     {opcion.icono && (
@@ -81,48 +63,9 @@ function ActividadToque({ actividad, guardando, onCompletar }) {
         </div>
       </div>
 
-      {/* Los mensajes se anuncian a los lectores de pantalla */}
-      <div aria-live="polite">
-        {acerto && (
-          <div className="vt-alert vt-alert-success">
-            <span className="vt-icon" aria-hidden="true">
-              check_circle
-            </span>
-            <p className="vt-alert__content">{actividad.mensajeAcierto}</p>
-          </div>
-        )}
+      <MensajesRespuesta {...respuesta} mensajeAcierto={actividad.mensajeAcierto} pista={actividad.pista} />
 
-        {!acerto && ultimaIncorrecta && (
-          <div key={intentosFallidos} className="vt-alert vt-alert-warning">
-            <span className="vt-icon" aria-hidden="true">
-              lightbulb
-            </span>
-            <div className="vt-alert__content">
-              <p className="vt-alert__title">Ese no es. Inténtalo otra vez</p>
-              <p>{actividad.pista}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {acerto && (
-        <div>
-          <button
-            type="button"
-            className="vt-btn vt-btn-primary"
-            onClick={onCompletar}
-            disabled={guardando}
-            aria-busy={guardando}
-          >
-            {guardando ? 'Guardando…' : 'Continuar'}
-            {!guardando && (
-              <span className="vt-icon" aria-hidden="true">
-                arrow_forward
-              </span>
-            )}
-          </button>
-        </div>
-      )}
+      {acerto && <BotonContinuar guardando={guardando} onCompletar={onCompletar} />}
     </div>
   )
 }
