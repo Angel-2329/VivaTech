@@ -3,12 +3,16 @@ import { Link, useParams } from 'react-router'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
 import IndicadorPasos from '../../components/leccion/IndicadorPasos.jsx'
+import LeccionTerminada from '../../components/leccion/LeccionTerminada.jsx'
 import PasoLeccion from '../../components/leccion/PasoLeccion.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
+import { obtenerMisCursos } from '../../services/cursosService.js'
 import { guardarPaso, obtenerLeccion } from '../../services/leccionesService.js'
+import { todosLosCursos } from '../../utils/cursos.js'
+import { mensajeDeAvance, mensajeErrorAlGuardar, sePuedeReintentar } from '../../utils/mensajesLeccion.js'
 import './Leccion.css'
 
-// Errores que no se arreglan con "Intentar de nuevo"
+
 const ERRORES_SIN_REINTENTO = {
   curso_cerrado: {
     icono: 'event_busy',
@@ -70,7 +74,7 @@ function Leccion() {
   )
 }
 
-// Abre en el primer paso pendiente; si la lección ya estaba terminada, en el paso 1.
+
 function posicionInicial(leccion) {
   const posicion = leccion.pasos.findIndex((paso) => paso.idPaso === leccion.progreso.idPasoParaContinuar)
   return posicion === -1 ? 0 : posicion
@@ -81,7 +85,8 @@ function RecorridoLeccion({ leccion }) {
   const [progreso, setProgreso] = useState(leccion.progreso)
   const [guardando, setGuardando] = useState(false)
   const [errorGuardado, setErrorGuardado] = useState(null)
-  const [recienTerminada, setRecienTerminada] = useState(false)
+  const [mensajeAvance, setMensajeAvance] = useState(null)
+  const [terminada, setTerminada] = useState(null)
 
   const total = leccion.pasos.length
   const paso = leccion.pasos[posicion]
@@ -91,11 +96,17 @@ function RecorridoLeccion({ leccion }) {
 
   function irAlPaso(nuevaPosicion) {
     setErrorGuardado(null)
-    setRecienTerminada(false)
+    setMensajeAvance(null)
     setPosicion(nuevaPosicion)
   }
 
-  // El paso cuenta como guardado solo cuando responde el servidor
+  function repasar() {
+    setTerminada(null)
+    irAlPaso(0)
+  }
+
+  // El paso cuenta como guardado solo cuando responde el servidor.
+  // Si falla, la actividad no se reinicia: el alumno solo presiona "Intentar de nuevo".
   async function completarPaso() {
     setGuardando(true)
     setErrorGuardado(null)
@@ -104,9 +115,11 @@ function RecorridoLeccion({ leccion }) {
       const respuesta = await guardarPaso(leccion.idLeccion, paso.idPaso)
       setProgreso(respuesta)
 
-      if (esUltimo) {
-        setRecienTerminada(respuesta.leccionCompletada)
-      } else {
+      if (esUltimo && respuesta.leccionCompletada) {
+        const certificado = respuesta.cursoCompletado ? await buscarCertificado(leccion.idCurso) : null
+        setTerminada({ cursoCompletado: respuesta.cursoCompletado, certificado })
+      } else if (!esUltimo) {
+        setMensajeAvance(mensajeDeAvance(posicion))
         setPosicion(posicion + 1)
       }
     } catch (error) {
@@ -124,37 +137,58 @@ function RecorridoLeccion({ leccion }) {
     )
   }
 
+  if (terminada) {
+    return (
+      <LeccionTerminada
+        leccion={leccion}
+        cursoCompletado={terminada.cursoCompletado}
+        certificado={terminada.certificado}
+        onRepasar={repasar}
+      />
+    )
+  }
+
   return (
     <div className="vt-stack vt-stack-lg">
       <p className="vt-body-md vt-text-muted">
         <strong>Lo que vas a aprender:</strong> {leccion.objetivo} · {leccion.duracionEstimadaMinutos} min
       </p>
 
-      <IndicadorPasos total={total} posicion={posicion} completados={progreso.pasosCompletados} />
+      <IndicadorPasos
+        total={total}
+        posicion={posicion}
+        completados={progreso.pasosCompletados}
+        mensaje={mensajeAvance}
+      />
 
       <PasoLeccion paso={paso} numero={posicion + 1} guardando={guardando} onCompletar={completarPaso} />
 
       {errorGuardado && (
-        <EstadoError
-          error={errorGuardado}
-          onReintentar={completarPaso}
-          titulo="No pudimos guardar este paso"
-        />
-      )}
-
-      {/* TEMPORAL: la pantalla completa de "¡Terminaste la lección!" se hace en 3.23.6 */}
-      {recienTerminada && (
-        <div className="vt-alert vt-alert-success" role="status">
+        <div className="vt-alert vt-alert-error" role="alert">
           <span className="vt-icon" aria-hidden="true">
-            check_circle
+            error
           </span>
           <div className="vt-alert__content vt-stack vt-stack-sm">
-            <p className="vt-alert__title">¡Terminaste la lección!</p>
-            <div>
-              <Link className="vt-btn vt-btn-secondary vt-btn-sm" to="/estudiante/cursos">
-                Volver a Mis cursos
-              </Link>
-            </div>
+            <p className="vt-alert__title">No pudimos guardar este paso</p>
+            <p>{mensajeErrorAlGuardar(errorGuardado)}</p>
+            {sePuedeReintentar(errorGuardado) && (
+              <>
+                <p>Lo que hiciste no se borra.</p>
+                <div>
+                  <button
+                    type="button"
+                    className="vt-btn vt-btn-secondary vt-btn-sm"
+                    onClick={completarPaso}
+                    disabled={guardando}
+                  >
+                    <span className="vt-icon" aria-hidden="true">
+                      refresh
+                    </span>
+                    Intentar de nuevo
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -192,6 +226,18 @@ function RecorridoLeccion({ leccion }) {
       </nav>
     </div>
   )
+}
+
+// Busca si el alumno ya tiene certificado de ese curso (GET /api/mis-cursos).
+// Si no se puede consultar, se muestra "Obtener certificado".
+async function buscarCertificado(idCurso) {
+  try {
+    const categorias = await obtenerMisCursos()
+    const curso = todosLosCursos(categorias).find((actual) => actual.idCurso === idCurso)
+    return curso?.certificado ?? null
+  } catch {
+    return null
+  }
 }
 
 export default Leccion
