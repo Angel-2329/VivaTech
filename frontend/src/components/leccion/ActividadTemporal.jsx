@@ -1,6 +1,4 @@
-// TEMPORAL (tarea 3.23.2)
 const NOMBRE_ACTIVIDAD = {
-  lectura: 'Lectura',
   toque: 'Toca el botón correcto',
   opcion: 'Elige la respuesta correcta',
 }

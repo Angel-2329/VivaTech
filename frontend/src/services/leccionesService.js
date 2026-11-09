@@ -1,14 +1,9 @@
 // SERVICIO SIMULADO de lecciones (Sprint 4, tarea 3.23.1).
-
-
 import { fallar, responder } from './simulacion/datosDePrueba.js'
 import { armarLeccion, registrarPaso } from './simulacion/progresoDePrueba.js'
 
 // Real: return solicitarApi(`/lecciones/${idLeccion}`)
-
-
 export async function obtenerLeccion(idLeccion) {
-  
   const leccion = armarLeccion(String(idLeccion))
 
   if (!leccion) {

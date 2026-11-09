@@ -1,3 +1,4 @@
+import ActividadLectura from './ActividadLectura.jsx'
 import ActividadTemporal from './ActividadTemporal.jsx'
 import RecursosPaso from './RecursosPaso.jsx'
 
@@ -18,9 +19,18 @@ function PasoLeccion({ paso, numero, guardando, onCompletar }) {
 
       <RecursosPaso recursos={otrosRecursos} />
 
-      <ActividadTemporal actividad={paso.actividad} guardando={guardando} onCompletar={onCompletar} />
+      <Actividad actividad={paso.actividad} guardando={guardando} onCompletar={onCompletar} />
     </section>
   )
+}
+
+
+function Actividad({ actividad, guardando, onCompletar }) {
+  if (actividad?.tipo === 'lectura') {
+    return <ActividadLectura guardando={guardando} onCompletar={onCompletar} />
+  }
+
+  return <ActividadTemporal actividad={actividad} guardando={guardando} onCompletar={onCompletar} />
 }
 
 export default PasoLeccion
