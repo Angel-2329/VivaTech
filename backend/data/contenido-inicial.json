@@ -1,5 +1,6 @@
 [
   {
+    "claveCarga": "uso-seguro-banco",
     "categoria": "Banca móvil",
     "orden": 1,
     "titulo": "Uso seguro de la aplicación del banco",
@@ -307,6 +308,7 @@
     ]
   },
   {
+    "claveCarga": "pago-servicios",
     "categoria": "Pagos digitales",
     "orden": 1,
     "titulo": "Pago de servicios en línea",

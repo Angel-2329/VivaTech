@@ -3,6 +3,12 @@ const assert = require('node:assert/strict');
 const contenido = require('../data/contenido-inicial.json');
 const { validarCurso } = require('../src/services/validar-contenido');
 
+test('Contenido inicial: conserva dos claves técnicas estables y únicas para la carga', () => {
+  assert.deepEqual(contenido.map((curso) => curso.claveCarga), ['uso-seguro-banco', 'pago-servicios']);
+  assert.equal(new Set(contenido.map((curso) => curso.claveCarga)).size, contenido.length);
+  for (const curso of contenido) assert.match(curso.claveCarga, /^[a-z0-9_-]{1,80}$/);
+});
+
 test('Contenido inicial: el JSON contiene exactamente los dos cursos acordados', () => {
   assert.ok(Array.isArray(contenido));
   assert.equal(contenido.length, 2);
