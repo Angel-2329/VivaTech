@@ -1,15 +1,16 @@
-function IndicadorPasos({ total, posicion, completados }) {
+function IndicadorPasos({ total, posicion, completados, mensaje }) {
   return (
     <div className="vt-stack vt-stack-sm">
       <div className="vt-cluster vt-cluster-between">
         <p className="vt-label-lg">
           Paso {posicion + 1} de {total}
         </p>
-        <p className="vt-autosave">
+        {/* role="status": el mensaje de avance se anuncia al cambiar */}
+        <p className="vt-autosave" role="status">
           <span className="vt-icon" aria-hidden="true">
-            cloud_done
+            {mensaje ? 'check_circle' : 'cloud_done'}
           </span>
-          Tu avance se guarda solo
+          {mensaje ?? 'Tu avance se guarda solo'}
         </p>
       </div>
 

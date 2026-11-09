@@ -16,6 +16,8 @@ export async function obtenerLeccion(idLeccion) {
 // Real: return solicitarApi(`/lecciones/${idLeccion}/progreso`, { metodo: 'PUT', datos: { idPaso } })
 export async function guardarPaso(idLeccion, idPaso) {
   const resultado = registrarPaso(String(idLeccion), String(idPaso))
+ //Prueba de error al guardar
+ // if (!globalThis.yaFallo) { globalThis.yaFallo = true; return fallar('Sin internet', 0, 'error_conexion') }
 
   if (resultado.error) {
     const { mensaje, estado, codigo } = resultado.error

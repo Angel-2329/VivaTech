@@ -21,3 +21,18 @@
   flex: 1 1 12rem;
   text-align: center;
 }
+
+.leccion__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--vt-space-sm);
+}
+
+@media (min-width: 40rem) {
+  .leccion__acciones {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
