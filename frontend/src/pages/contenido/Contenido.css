@@ -1,0 +1,16 @@
+.contenido__categoria {
+  padding-block-start: var(--vt-space-md);
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.contenido__cursos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contenido__mover .vt-select {
+  width: auto;
+  min-width: 10rem;
+  max-width: 100%;
+}

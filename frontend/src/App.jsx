@@ -11,6 +11,7 @@ import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
 import InicioAdmin from './pages/admin/InicioAdmin.jsx'
 import ProgresoGeneral from './pages/admin/ProgresoGeneral.jsx'
+import Contenido from './pages/contenido/Contenido.jsx'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
       <Route element={<RutaProtegida roles={['maestro']} />}>
         <Route path="/maestro" element={<ListaGrupos />} />
         <Route path="/maestro/grupos/:idGrupo" element={<DetalleGrupo />} />
+        <Route path="/maestro/contenido" element={<Contenido />} />
       </Route>
 
       {/* Solo administradores */}
@@ -45,6 +47,7 @@ function App() {
         <Route path="/admin/grupos" element={<ListaGrupos />} />
         <Route path="/admin/grupos/:idGrupo" element={<DetalleGrupo />} />
         <Route path="/admin/progreso" element={<ProgresoGeneral />} />
+        <Route path="/admin/contenido" element={<Contenido />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
