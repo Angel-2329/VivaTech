@@ -1,0 +1,15 @@
+info:
+  name: 161 - Detalle de leccion sin token - 401
+  type: http
+  seq: 161
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/lecciones/5"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

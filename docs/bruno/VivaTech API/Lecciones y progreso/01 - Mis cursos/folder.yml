@@ -1,0 +1,7 @@
+info:
+  name: 01 - Mis cursos
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

@@ -8,6 +8,7 @@ const adminUsuariosRouter = require('./routes/admin-usuarios');
 const gruposRouter = require('./routes/grupos');
 const adminProgresoRouter = require('./routes/admin-progreso');
 const misCursosRouter = require('./routes/mis-cursos');
+const leccionesRouter = require('./routes/lecciones');
 const manejarJsonInvalido =
   require('./middlewares/manejar-json-invalido');
 
@@ -23,6 +24,7 @@ app.use('/api/admin/usuarios', adminUsuariosRouter);
 app.use('/api/grupos', gruposRouter);
 app.use('/api/admin', adminProgresoRouter);
 app.use('/api/mis-cursos', misCursosRouter);
+app.use('/api/lecciones', leccionesRouter);
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,

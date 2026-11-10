@@ -1,0 +1,18 @@
+info:
+  name: 178 - Detalle de leccion alumno desactivado - 403
+  type: http
+  seq: 178
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/lecciones/5"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
