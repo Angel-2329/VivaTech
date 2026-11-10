@@ -1,14 +1,14 @@
 info:
-  name: 158 - Mis cursos administrador sin permiso - 403
+  name: 157 - Mis cursos maestro sin permiso - 403
   type: http
-  seq: 5
+  seq: 157
 
 http:
   method: GET
   url: "{{baseUrl}}/api/mis-cursos"
   auth:
     type: bearer
-    token: "{{tokenAdministrador}}"
+    token: "{{tokenNuevo}}"
 
 settings:
   encodeUrl: true

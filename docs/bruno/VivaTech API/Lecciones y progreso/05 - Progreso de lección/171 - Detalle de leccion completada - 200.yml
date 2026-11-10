@@ -1,0 +1,18 @@
+info:
+  name: 171 - Detalle de leccion completada - 200
+  type: http
+  seq: 171
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/lecciones/24"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

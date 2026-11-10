@@ -1,11 +1,11 @@
 info:
-  name: 159 - Mis cursos catalogo inicial publicado - 200
+  name: 168 - Detalle de leccion ID fuera de BIGINT - 400
   type: http
-  seq: 8
+  seq: 168
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/mis-cursos"
+  url: "{{baseUrl}}/api/lecciones/9223372036854775808"
   auth:
     type: bearer
     token: "{{tokenEstudiante}}"

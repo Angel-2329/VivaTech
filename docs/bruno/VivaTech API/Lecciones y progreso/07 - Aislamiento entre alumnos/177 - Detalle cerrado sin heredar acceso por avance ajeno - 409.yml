@@ -1,14 +1,14 @@
 info:
-  name: 156 - Mis cursos token invalido - 401 copy
+  name: 177 - Detalle cerrado sin heredar acceso por avance ajeno - 409
   type: http
-  seq: 4
+  seq: 177
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/mis-cursos"
+  url: "{{baseUrl}}/api/lecciones/31"
   auth:
     type: bearer
-    token: token-invalido-de-prueba
+    token: "{{tokenEstudiante}}"
 
 settings:
   encodeUrl: true
