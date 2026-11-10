@@ -4,7 +4,7 @@ import { EstadoCarga, EstadoError } from '../../components/panel/EstadosCarga.js
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { obtenerMisCursos } from '../../services/cursosService.js'
-import { siguienteLeccion, todosLosCursos } from '../../utils/cursos.js'
+import { rutaLeccion, siguienteLeccion, todosLosCursos } from '../../utils/cursos.js'
 import { plural } from '../../utils/formato.js'
 import { nombreParaSaludo } from '../../utils/nombreParaSaludo.js'
 import './Estudiante.css'
@@ -36,14 +36,17 @@ function ResumenAlumno({ categorias }) {
   const siguiente = siguienteLeccion(categorias)
   const continuar = siguiente?.leccion.estado === 'en_progreso'
 
+  let aviso = 'Empieza tu primera lección'
+  if (continuar) aviso = 'Continúa donde te quedaste'
+  else if (cursosIniciados > 0) aviso = 'Tu siguiente lección'
+
   return (
     <>
-      
       <section className="vt-card vt-card-highlight vt-stack" aria-labelledby="titulo-siguiente">
         {siguiente ? (
           <>
             <p className="vt-eyebrow">
-              {continuar ? 'Continúa donde te quedaste' : 'Empieza tu primera lección'}
+              {aviso}
             </p>
             <div className="vt-stack vt-stack-sm">
               <h2 id="titulo-siguiente" className="vt-headline-md">
@@ -53,12 +56,14 @@ function ResumenAlumno({ categorias }) {
                 Curso: {siguiente.curso.titulo} · {siguiente.leccion.duracionEstimadaMinutos} min
               </p>
             </div>
-            <Link className="vt-btn vt-btn-primary" to="/estudiante/cursos">
-              Ver en Mis cursos
-              <span className="vt-icon" aria-hidden="true">
-                arrow_forward
-              </span>
-            </Link>
+            <div>
+              <Link className="vt-btn vt-btn-primary" to={rutaLeccion(siguiente.leccion.idLeccion)}>
+                {continuar ? 'Continuar lección' : 'Empezar lección'}
+                <span className="vt-icon" aria-hidden="true">
+                  arrow_forward
+                </span>
+              </Link>
+            </div>
           </>
         ) : (
           <>

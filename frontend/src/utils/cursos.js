@@ -4,6 +4,17 @@ export const TEXTO_ESTADO_LECCION = {
   pendiente: 'Sin empezar',
 }
 
+
+export const TEXTO_BOTON_LECCION = {
+  pendiente: 'Empezar',
+  en_progreso: 'Continuar',
+  completada: 'Repasar',
+}
+
+export function rutaLeccion(idLeccion) {
+  return `/estudiante/lecciones/${idLeccion}`
+}
+
 export function contarCompletadas(lecciones) {
   return lecciones.filter((leccion) => leccion.estado === 'completada').length
 }
