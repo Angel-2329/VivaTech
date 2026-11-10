@@ -19,7 +19,7 @@
   width: 100%;
   min-height: var(--vt-touch-target-mobile);
   padding: var(--vt-space-sm) var(--vt-space-md);
-  border: var(--vt-border) solid var(--vt-outline-variant);
+  border: var(--vt-border) solid var(--vt-outline);
   border-radius: var(--vt-radius-md);
   background-color: var(--vt-surface-low);
   color: var(--vt-on-surface);
@@ -82,7 +82,7 @@
   width: 100%;
   min-height: 3.5rem;
   padding: var(--vt-space-sm) var(--vt-space-md);
-  border: var(--vt-border) solid var(--vt-outline-variant);
+  border: var(--vt-border) solid var(--vt-outline);
   border-radius: var(--vt-radius-lg);
   background-color: var(--vt-surface-lowest);
   color: var(--vt-on-surface);

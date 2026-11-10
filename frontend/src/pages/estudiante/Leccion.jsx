@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
@@ -88,6 +88,16 @@ function RecorridoLeccion({ leccion }) {
   const [mensajeAvance, setMensajeAvance] = useState(null)
   const [terminada, setTerminada] = useState(null)
 
+  const tituloPasoRef = useRef(null)
+  const enfocarPaso = useRef(false)
+
+  useEffect(() => {
+    if (enfocarPaso.current) {
+      enfocarPaso.current = false
+      tituloPasoRef.current?.focus()
+    }
+  }, [posicion, terminada])
+
   const total = leccion.pasos.length
   const paso = leccion.pasos[posicion]
   const esPrimero = posicion === 0
@@ -97,6 +107,7 @@ function RecorridoLeccion({ leccion }) {
   function irAlPaso(nuevaPosicion) {
     setErrorGuardado(null)
     setMensajeAvance(null)
+    enfocarPaso.current = true
     setPosicion(nuevaPosicion)
   }
 
@@ -105,8 +116,7 @@ function RecorridoLeccion({ leccion }) {
     irAlPaso(0)
   }
 
-  // El paso cuenta como guardado solo cuando responde el servidor.
-  // Si falla, la actividad no se reinicia: el alumno solo presiona "Intentar de nuevo".
+  
   async function completarPaso() {
     setGuardando(true)
     setErrorGuardado(null)
@@ -120,6 +130,7 @@ function RecorridoLeccion({ leccion }) {
         setTerminada({ cursoCompletado: respuesta.cursoCompletado, certificado })
       } else if (!esUltimo) {
         setMensajeAvance(mensajeDeAvance(posicion))
+        enfocarPaso.current = true
         setPosicion(posicion + 1)
       }
     } catch (error) {
@@ -159,9 +170,10 @@ function RecorridoLeccion({ leccion }) {
         posicion={posicion}
         completados={progreso.pasosCompletados}
         mensaje={mensajeAvance}
+        tituloRef={tituloPasoRef}
       />
 
-      <PasoLeccion paso={paso} numero={posicion + 1} guardando={guardando} onCompletar={completarPaso} />
+      <PasoLeccion paso={paso} guardando={guardando} onCompletar={completarPaso} />
 
       {errorGuardado && (
         <div className="vt-alert vt-alert-error" role="alert">
@@ -228,8 +240,7 @@ function RecorridoLeccion({ leccion }) {
   )
 }
 
-// Busca si el alumno ya tiene certificado de ese curso (GET /api/mis-cursos).
-// Si no se puede consultar, se muestra "Obtener certificado".
+
 async function buscarCertificado(idCurso) {
   try {
     const categorias = await obtenerMisCursos()
