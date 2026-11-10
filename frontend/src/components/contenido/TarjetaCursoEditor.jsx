@@ -4,7 +4,6 @@ import { plural } from '../../utils/formato.js'
 
 function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAccion, onMover }) {
   const estado = ESTADO_CURSO[curso.estadoPublicacion]
-  const esMio = curso.creadoPor.uid === usuario.uid
   const esAdmin = usuario.rol === 'administrador'
   const retirado = curso.estadoPublicacion === 'retirado'
 
@@ -25,7 +24,7 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
         <h3 className="vt-headline-sm">{curso.titulo}</h3>
         <p>{curso.descripcion}</p>
         <p className="vt-body-sm vt-text-muted">
-          Creado por {esMio ? 'ti' : curso.creadoPor.nombreCompleto}
+          Creado por {curso.creadoPor}
         </p>
       </div>
 

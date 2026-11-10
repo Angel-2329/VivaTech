@@ -59,7 +59,7 @@ function CategoriaEditor({
           <button
             type="button"
             className="vt-btn vt-btn-outline vt-btn-sm"
-            onClick={() => onMoverCategoria(categoria, posicion)}
+            onClick={() => onMoverCategoria(categoria, posicion - 1)}
             disabled={bloqueado || posicion === 0}
           >
             <span className="vt-icon" aria-hidden="true">
@@ -71,7 +71,7 @@ function CategoriaEditor({
           <button
             type="button"
             className="vt-btn vt-btn-outline vt-btn-sm"
-            onClick={() => onMoverCategoria(categoria, posicion + 2)}
+            onClick={() => onMoverCategoria(categoria, posicion + 1)}
             disabled={bloqueado || posicion === totalCategorias - 1}
           >
             <span className="vt-icon" aria-hidden="true">
