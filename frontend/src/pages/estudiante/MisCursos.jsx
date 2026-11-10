@@ -1,9 +1,10 @@
+import { Link } from 'react-router'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { obtenerMisCursos } from '../../services/cursosService.js'
-import { TEXTO_ESTADO_LECCION, contarCompletadas } from '../../utils/cursos.js'
+import { TEXTO_BOTON_LECCION, TEXTO_ESTADO_LECCION, contarCompletadas, rutaLeccion } from '../../utils/cursos.js'
 import { plural } from '../../utils/formato.js'
 import './Estudiante.css'
 
@@ -14,6 +15,12 @@ const CLASE_INSIGNIA = {
   completada: 'vt-badge vt-badge-success',
   en_progreso: 'vt-badge vt-badge-primary',
   pendiente: 'vt-badge vt-badge-neutral',
+}
+
+const CLASE_BOTON = {
+  en_progreso: 'vt-btn vt-btn-primary vt-btn-sm',
+  pendiente: 'vt-btn vt-btn-secondary vt-btn-sm',
+  completada: 'vt-btn vt-btn-outline vt-btn-sm',
 }
 
 
@@ -128,10 +135,10 @@ function Curso({ curso }) {
               </p>
             </div>
 
-            {/* Las lecciones se abren en el Sprint 4 */}
-            <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" disabled>
-              Disponible pronto
-            </button>
+            <Link className={CLASE_BOTON[leccion.estado]} to={rutaLeccion(leccion.idLeccion)}>
+              {TEXTO_BOTON_LECCION[leccion.estado]}
+              <span className="vt-visually-hidden">: {leccion.titulo}</span>
+            </Link>
           </li>
         ))}
       </ol>
