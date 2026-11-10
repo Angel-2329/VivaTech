@@ -1,0 +1,157 @@
+import { useId, useState } from 'react'
+import { ESTADO_CURSO } from '../../utils/contenido.js'
+import { plural } from '../../utils/formato.js'
+
+function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAccion, onMover }) {
+  const estado = ESTADO_CURSO[curso.estadoPublicacion]
+  const esMio = curso.creadoPor.uid === usuario.uid
+  const esAdmin = usuario.rol === 'administrador'
+  const retirado = curso.estadoPublicacion === 'retirado'
+
+  return (
+    <li className="vt-card vt-stack contenido__curso">
+      <div className="vt-stack vt-stack-sm">
+        <p className="vt-cluster">
+          <span className={estado.clase}>
+            <span className="vt-icon" aria-hidden="true">
+              {estado.icono}
+            </span>
+            {estado.texto}
+          </span>
+          {!retirado && (
+            <span className="vt-body-sm vt-text-muted">{plural(curso.totalLecciones, 'lección', 'lecciones')}</span>
+          )}
+        </p>
+        <h3 className="vt-headline-sm">{curso.titulo}</h3>
+        <p>{curso.descripcion}</p>
+        <p className="vt-body-sm vt-text-muted">
+          Creado por {esMio ? 'ti' : curso.creadoPor.nombreCompleto}
+        </p>
+      </div>
+
+      {retirado && (
+        <p className="vt-body-sm vt-text-muted">
+          Curso retirado: se conserva el avance de los alumnos y ya no se puede editar.
+        </p>
+      )}
+
+      {!retirado && !curso.puedeEditar && (
+        <p className="vt-body-sm vt-text-muted">Solo quien lo creó o un administrador puede editarlo.</p>
+      )}
+
+      {curso.puedeEditar && (
+        <AccionesCurso
+          curso={curso}
+          bloqueado={bloqueado}
+          onPedirAccion={onPedirAccion}
+          puedeMover={esAdmin}
+          categorias={categorias}
+          onMover={onMover}
+        />
+      )}
+    </li>
+  )
+}
+
+function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias, onMover }) {
+  const id = useId()
+  const publicado = curso.estadoPublicacion === 'publicado'
+  const noPuedeDespublicar = publicado && curso.tieneAvance
+
+  return (
+    <div className="vt-stack vt-stack-sm">
+      <div className="vt-cluster">
+        {/* Se activa en la 3.23.10 (editor de lecciones y pasos) */}
+        <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" disabled>
+          Editar lecciones
+          <span className="vt-visually-hidden"> de {curso.titulo} (disponible pronto)</span>
+        </button>
+
+        {publicado ? (
+          <button
+            type="button"
+            className="vt-btn vt-btn-outline vt-btn-sm"
+            onClick={() => onPedirAccion(curso, 'borrador')}
+            disabled={bloqueado || noPuedeDespublicar}
+            aria-describedby={noPuedeDespublicar ? `${id}-avance` : undefined}
+          >
+            Volver a borrador
+            <span className="vt-visually-hidden"> {curso.titulo}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="vt-btn vt-btn-primary vt-btn-sm"
+            onClick={() => onPedirAccion(curso, 'publicar')}
+            disabled={bloqueado}
+          >
+            Publicar
+            <span className="vt-visually-hidden"> {curso.titulo}</span>
+          </button>
+        )}
+
+        <button
+          type="button"
+          className="vt-btn vt-btn-danger-soft vt-btn-sm"
+          onClick={() => onPedirAccion(curso, 'eliminar')}
+          disabled={bloqueado}
+        >
+          Eliminar curso
+          <span className="vt-visually-hidden"> {curso.titulo}</span>
+        </button>
+      </div>
+
+      {noPuedeDespublicar && (
+        <p id={`${id}-avance`} className="vt-btn-hint">
+          No puede volver a borrador porque algún alumno ya tiene avance.
+        </p>
+      )}
+
+      {puedeMover && categorias.length > 1 && (
+        <MoverCurso curso={curso} categorias={categorias} bloqueado={bloqueado} onMover={onMover} />
+      )}
+    </div>
+  )
+}
+
+// Solo el administrador mueve un curso a otra categoría
+function MoverCurso({ curso, categorias, bloqueado, onMover }) {
+  const id = useId()
+  const otras = categorias.filter((categoria) => categoria.idCategoria !== curso.idCategoria)
+  const [destino, setDestino] = useState(otras[0]?.idCategoria ?? '')
+  // Si la lista de categorías cambió, se toma la primera disponible
+  const elegido = otras.some((categoria) => categoria.idCategoria === destino) ? destino : otras[0]?.idCategoria
+
+  return (
+    <form
+      className="vt-cluster contenido__mover"
+      onSubmit={(evento) => {
+        evento.preventDefault()
+        if (elegido) onMover(curso, elegido)
+      }}
+    >
+      <label className="vt-body-sm" htmlFor={`${id}-destino`}>
+        Mover a
+      </label>
+      <select
+        id={`${id}-destino`}
+        className="vt-select"
+        value={elegido}
+        onChange={(evento) => setDestino(evento.target.value)}
+        disabled={bloqueado}
+      >
+        {otras.map((categoria) => (
+          <option key={categoria.idCategoria} value={categoria.idCategoria}>
+            {categoria.nombre}
+          </option>
+        ))}
+      </select>
+      <button type="submit" className="vt-btn vt-btn-secondary vt-btn-sm" disabled={bloqueado}>
+        Mover
+        <span className="vt-visually-hidden"> {curso.titulo}</span>
+      </button>
+    </form>
+  )
+}
+
+export default TarjetaCursoEditor
