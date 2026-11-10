@@ -8,6 +8,17 @@ const OTRA_MAESTRA = { uid: 'maestra-demo', nombreCompleto: 'Laura Pérez Gómez
 
 let siguienteIdCategoria = 3
 let siguienteIdCurso = 15
+let siguienteIdLeccion = 90
+
+function leccionDePrueba(titulo) {
+  return {
+    idLeccion: String(siguienteIdLeccion++),
+    titulo,
+    objetivo: 'Lección de ejemplo para probar el editor.',
+    duracionEstimadaMinutos: 5,
+    pasos: [],
+  }
+}
 
 const categorias = CATEGORIAS.map((categoria, posicion) => ({
   idCategoria: categoria.idCategoria,
@@ -17,49 +28,53 @@ const categorias = CATEGORIAS.map((categoria, posicion) => ({
 
 const cursos = [
   ...CATEGORIAS.flatMap((categoria) =>
-    categoria.cursos.map((curso) => ({
+    categoria.cursos.map((curso, posicion) => ({
       idCurso: curso.idCurso,
       idCategoria: categoria.idCategoria,
+      orden: posicion + 1,
       titulo: curso.titulo,
       descripcion: curso.descripcion,
       estadoPublicacion: 'publicado',
       fechaCierre: null,
-      creadoPor: ADMIN,
-      totalLecciones: curso.lecciones.length,
+      autor: ADMIN,
+      lecciones: curso.lecciones,
       avanceFijo: null,
     })),
   ),
   {
     idCurso: '12',
     idCategoria: '2',
+    orden: 2,
     titulo: 'Hacer compras en línea con seguridad',
     descripcion: 'Aprende a revisar una tienda en línea antes de pagar y a guardar tu comprobante.',
     estadoPublicacion: 'borrador',
     fechaCierre: null,
-    creadoPor: { uid: YO },
-    totalLecciones: 2,
+    autor: { uid: YO },
+    lecciones: [leccionDePrueba('Revisar que la tienda sea confiable'), leccionDePrueba('Pagar y guardar el comprobante')],
     avanceFijo: false,
   },
   {
     idCurso: '13',
     idCategoria: '1',
+    orden: 2,
     titulo: 'Usar el cajero automático',
     descripcion: 'Retira efectivo y consulta tu saldo en el cajero sin prisas.',
     estadoPublicacion: 'retirado',
     fechaCierre: null,
-    creadoPor: { uid: YO },
-    totalLecciones: 0,
+    autor: { uid: YO },
+    lecciones: [],
     avanceFijo: true,
   },
   {
     idCurso: '14',
     idCategoria: '2',
+    orden: 3,
     titulo: 'Recargar saldo al celular',
     descripcion: 'Recarga tiempo aire desde la aplicación de tu banco.',
     estadoPublicacion: 'borrador',
     fechaCierre: null,
-    creadoPor: OTRA_MAESTRA,
-    totalLecciones: 1,
+    autor: OTRA_MAESTRA,
+    lecciones: [leccionDePrueba('Elegir el monto de la recarga')],
     avanceFijo: false,
   },
 ]
@@ -69,7 +84,7 @@ function error(mensaje, estado, codigo) {
 }
 
 function esAutor(curso, usuario) {
-  return curso.creadoPor.uid === YO || curso.creadoPor.uid === usuario.uid
+  return curso.autor.uid === YO || curso.autor.uid === usuario.uid
 }
 
 
@@ -86,45 +101,60 @@ function puedeEditar(curso, usuario) {
   return usuario.rol === 'administrador' || esAutor(curso, usuario)
 }
 
-function cursoParaRespuesta(curso, usuario) {
-  const autor = curso.creadoPor.uid === YO ? usuario : curso.creadoPor
+
+function resumenCurso(curso, usuario) {
+  const autor = curso.autor.uid === YO ? usuario : curso.autor
   return {
     idCurso: curso.idCurso,
     idCategoria: curso.idCategoria,
+    orden: curso.orden,
     titulo: curso.titulo,
     descripcion: curso.descripcion,
     estadoPublicacion: curso.estadoPublicacion,
     fechaCierre: curso.fechaCierre,
-    creadoPor: { uid: autor.uid, nombreCompleto: autor.nombreCompleto },
+    creadoPor: autor.nombreCompleto,
     puedeEditar: puedeEditar(curso, usuario),
     tieneAvance: tieneAvance(curso),
-    totalLecciones: curso.totalLecciones,
+    totalLecciones: curso.lecciones.length,
   }
 }
 
-function categoriaParaRespuesta(categoria, usuario) {
-  return {
-    ...categoria,
-    cursos: cursos
-      .filter((curso) => curso.idCategoria === categoria.idCategoria)
-      .map((curso) => cursoParaRespuesta(curso, usuario)),
-  }
+
+function detalleCurso(curso, usuario) {
+  return { ...resumenCurso(curso, usuario), lecciones: curso.lecciones }
+}
+
+function resumenCategoria(categoria) {
+  return { idCategoria: categoria.idCategoria, nombre: categoria.nombre, orden: categoria.orden }
 }
 
 function ordenarCategorias() {
   categorias.sort((a, b) => a.orden - b.orden)
-  categorias.forEach((categoria, posicion) => {
-    categoria.orden = posicion + 1
-  })
 }
 
-function buscarCursoEditable(idCurso, usuario) {
+function siguienteOrden(idCategoria) {
+  const ordenes = cursos.filter((curso) => curso.idCategoria === idCategoria).map((curso) => curso.orden)
+  return Math.max(0, ...ordenes) + 1
+}
+
+function existeCategoria(idCategoria) {
+  return categorias.some((categoria) => categoria.idCategoria === idCategoria)
+}
+
+function nombreRepetido(nombre, excepto) {
+  return categorias.some(
+    (categoria) => categoria !== excepto && categoria.nombre.toLowerCase() === nombre.toLowerCase(),
+  )
+}
+
+
+function buscarCurso(idCurso, usuario, { permitirRetirado = false } = {}) {
   const curso = cursos.find((actual) => actual.idCurso === idCurso)
   if (!curso) return { fallo: error('El curso no existe', 404, 'curso_no_encontrado') }
   if (usuario.rol === 'maestro' && !esAutor(curso, usuario)) {
     return { fallo: error('Solo puedes modificar los cursos que tú creaste', 403, 'curso_ajeno') }
   }
-  if (curso.estadoPublicacion === 'retirado') {
+  if (curso.estadoPublicacion === 'retirado' && !permitirRetirado) {
     return { fallo: error('Un curso retirado es de solo lectura', 409, 'curso_retirado') }
   }
   return { curso }
@@ -140,43 +170,51 @@ function soloAdministrador(usuario) {
 
 export function armarContenido(usuario) {
   ordenarCategorias()
-  return categorias.map((categoria) => categoriaParaRespuesta(categoria, usuario))
+  return categorias.map((categoria) => ({
+    ...resumenCategoria(categoria),
+    cursos: cursos
+      .filter((curso) => curso.idCategoria === categoria.idCategoria)
+      .sort((a, b) => a.orden - b.orden)
+      .map((curso) => resumenCurso(curso, usuario)),
+  }))
 }
 
-export function crearCursoPrueba({ idCategoria, titulo, descripcion }, usuario) {
-  if (!categorias.some((categoria) => categoria.idCategoria === idCategoria)) {
-    return error('La categoría no existe', 404, 'categoria_no_encontrada')
-  }
+// POST /api/cursos
+export function crearCursoPrueba({ idCategoria, titulo, descripcion, fechaCierre = null }, usuario) {
+  if (!existeCategoria(idCategoria)) return error('La categoría no existe', 404, 'categoria_no_encontrada')
+
   const curso = {
     idCurso: String(siguienteIdCurso++),
     idCategoria,
+    orden: siguienteOrden(idCategoria),
     titulo,
     descripcion,
     estadoPublicacion: 'borrador',
-    fechaCierre: null,
-    creadoPor: { uid: usuario.uid, nombreCompleto: usuario.nombreCompleto },
-    totalLecciones: 0,
+    fechaCierre,
+    autor: { uid: usuario.uid, nombreCompleto: usuario.nombreCompleto },
+    lecciones: [],
     avanceFijo: false,
   }
   cursos.push(curso)
-  return { respuesta: cursoParaRespuesta(curso, usuario) }
+  return { respuesta: detalleCurso(curso, usuario) }
 }
 
+// PATCH /api/cursos/:idCurso
 export function cambiarCursoPrueba(idCurso, cambios, usuario) {
-  const { curso, fallo } = buscarCursoEditable(idCurso, usuario)
+  const { curso, fallo } = buscarCurso(idCurso, usuario)
   if (fallo) return fallo
 
-  if (cambios.idCategoria !== undefined) {
+  if (cambios.idCategoria !== undefined && cambios.idCategoria !== curso.idCategoria) {
     const sinPermiso = soloAdministrador(usuario)
     if (sinPermiso) return sinPermiso
-    if (!categorias.some((categoria) => categoria.idCategoria === cambios.idCategoria)) {
-      return error('La categoría no existe', 404, 'categoria_no_encontrada')
-    }
+    if (!existeCategoria(cambios.idCategoria)) return error('La categoría no existe', 404, 'categoria_no_encontrada')
     curso.idCategoria = cambios.idCategoria
+    curso.orden = siguienteOrden(cambios.idCategoria)
   }
 
   if (cambios.estadoPublicacion === 'publicado') {
-    if (curso.totalLecciones === 0) {
+    
+    if (curso.lecciones.length === 0) {
       return error('Agrega al menos una lección antes de publicar el curso', 409, 'curso_sin_lecciones')
     }
     curso.estadoPublicacion = 'publicado'
@@ -189,71 +227,93 @@ export function cambiarCursoPrueba(idCurso, cambios, usuario) {
     curso.estadoPublicacion = 'borrador'
   }
 
-  return { respuesta: cursoParaRespuesta(curso, usuario) }
+  if (cambios.titulo !== undefined) curso.titulo = cambios.titulo
+  if (cambios.descripcion !== undefined) curso.descripcion = cambios.descripcion
+  if (cambios.fechaCierre !== undefined) curso.fechaCierre = cambios.fechaCierre
+
+  return { respuesta: detalleCurso(curso, usuario) }
 }
 
+// DELETE /api/cursos/:idCurso
+// Sin avance: 204 sin cuerpo (respuesta undefined). Con avance o ya retirado: 200 con el retiro.
 export function eliminarCursoPrueba(idCurso, usuario) {
-  const { curso, fallo } = buscarCursoEditable(idCurso, usuario)
+  const { curso, fallo } = buscarCurso(idCurso, usuario, { permitirRetirado: true })
   if (fallo) return fallo
+
+  const retiro = { idCurso: curso.idCurso, estadoPublicacion: 'retirado', resultado: 'retirado' }
+
+  if (curso.estadoPublicacion === 'retirado') return { respuesta: retiro }
 
   if (tieneAvance(curso)) {
     curso.estadoPublicacion = 'retirado'
-    curso.totalLecciones = 0
-    return { respuesta: { resultado: 'retirado' } }
+    curso.lecciones = []
+    curso.avanceFijo = true
+    return { respuesta: retiro }
   }
 
   cursos.splice(cursos.indexOf(curso), 1)
-  return { respuesta: { resultado: 'eliminado' } }
+  return { respuesta: undefined }
 }
 
+// POST /api/categorias
 export function crearCategoriaPrueba({ nombre }, usuario) {
   const sinPermiso = soloAdministrador(usuario)
   if (sinPermiso) return sinPermiso
-  if (categorias.some((categoria) => categoria.nombre.toLowerCase() === nombre.toLowerCase())) {
-    return error('Ya existe una categoría con ese nombre', 409, 'categoria_duplicada')
-  }
+  if (nombreRepetido(nombre)) return error('Ya existe una categoría con ese nombre', 409, 'categoria_duplicada')
+
   const categoria = { idCategoria: String(siguienteIdCategoria++), nombre, orden: categorias.length + 1 }
   categorias.push(categoria)
-  return { respuesta: categoriaParaRespuesta(categoria, usuario) }
+  return { respuesta: resumenCategoria(categoria) }
 }
 
-export function cambiarCategoriaPrueba(idCategoria, cambios, usuario) {
+// PATCH /api/categorias/:idCategoria con { nombre }
+export function renombrarCategoriaPrueba(idCategoria, { nombre }, usuario) {
   const sinPermiso = soloAdministrador(usuario)
   if (sinPermiso) return sinPermiso
   const categoria = categorias.find((actual) => actual.idCategoria === idCategoria)
   if (!categoria) return error('La categoría no existe', 404, 'categoria_no_encontrada')
+  if (nombreRepetido(nombre, categoria)) return error('Ya existe una categoría con ese nombre', 409, 'categoria_duplicada')
 
-  if (cambios.nombre !== undefined) {
-    const repetida = categorias.some(
-      (otra) => otra !== categoria && otra.nombre.toLowerCase() === cambios.nombre.toLowerCase(),
-    )
-    if (repetida) return error('Ya existe una categoría con ese nombre', 409, 'categoria_duplicada')
-    categoria.nombre = cambios.nombre
-  }
-
- 
-  if (cambios.orden !== undefined) {
-    const destino = Math.min(Math.max(cambios.orden, 1), categorias.length)
-    ordenarCategorias()
-    categorias.splice(categorias.indexOf(categoria), 1)
-    categorias.splice(destino - 1, 0, categoria)
-    categorias.forEach((actual, posicion) => {
-      actual.orden = posicion + 1
-    })
-  }
-
-  return { respuesta: categoriaParaRespuesta(categoria, usuario) }
+  categoria.nombre = nombre
+  return { respuesta: resumenCategoria(categoria) }
 }
 
+// PUT /api/categorias/orden con { idsCategorias }: la lista completa, sin faltantes ni repetidos.
+// Responde solo [{ idCategoria, orden }], sin nombres ni cursos.
+export function ordenarCategoriasPrueba({ idsCategorias }, usuario) {
+  const sinPermiso = soloAdministrador(usuario)
+  if (sinPermiso) return sinPermiso
+
+  const completa =
+    Array.isArray(idsCategorias) &&
+    idsCategorias.length === categorias.length &&
+    new Set(idsCategorias).size === idsCategorias.length &&
+    idsCategorias.every(existeCategoria)
+  if (!completa) {
+    return error('El nuevo orden debe incluir todas las categorías una sola vez', 400, 'orden_invalido')
+  }
+
+  idsCategorias.forEach((id, posicion) => {
+    categorias.find((categoria) => categoria.idCategoria === id).orden = posicion + 1
+  })
+  ordenarCategorias()
+  return { respuesta: categorias.map(({ idCategoria, orden }) => ({ idCategoria, orden })) }
+}
+
+// DELETE /api/categorias/:idCategoria
 export function eliminarCategoriaPrueba(idCategoria, usuario) {
   const sinPermiso = soloAdministrador(usuario)
   if (sinPermiso) return sinPermiso
   const categoria = categorias.find((actual) => actual.idCategoria === idCategoria)
   if (!categoria) return error('La categoría no existe', 404, 'categoria_no_encontrada')
+  // Cuenta también los retirados, aunque tengan 0 lecciones
   if (cursos.some((curso) => curso.idCategoria === idCategoria)) {
     return error('La categoría tiene cursos, aunque sean retirados', 409, 'categoria_con_cursos')
   }
+
   categorias.splice(categorias.indexOf(categoria), 1)
-  ordenarCategorias()
-  return { respuesta: null }
+  categorias.forEach((actual, posicion) => {
+    actual.orden = posicion + 1
+  })
+  return { respuesta: undefined }
 }

@@ -13,9 +13,9 @@ import {
   crearCurso,
   eliminarCategoria,
   eliminarCurso,
-  moverCategoria,
   moverCurso,
   obtenerContenido,
+  ordenarCategorias,
   renombrarCategoria,
 } from '../../services/contenidoService.js'
 import { plural } from '../../utils/formato.js'
@@ -69,11 +69,15 @@ function Contenido() {
     return ejecutar(() => renombrarCategoria(categoria.idCategoria, nombre, usuario), `La categoría ahora se llama "${nombre}".`)
   }
 
-  async function manejarMoverCategoria(categoria, orden) {
+  // El servidor recibe la lista completa de categorías en el nuevo orden
+  async function manejarMoverCategoria(categoria, nuevaPosicion) {
+    const ids = categorias.map((actual) => actual.idCategoria).filter((id) => id !== categoria.idCategoria)
+    ids.splice(nuevaPosicion, 0, categoria.idCategoria)
+
     try {
       await ejecutar(
-        () => moverCategoria(categoria.idCategoria, orden, usuario),
-        `"${categoria.nombre}" ahora está en el lugar ${orden}.`,
+        () => ordenarCategorias(ids, usuario),
+        `"${categoria.nombre}" ahora está en el lugar ${nuevaPosicion + 1}.`,
       )
     } catch (errorAlMover) {
       setMensaje('')
@@ -276,8 +280,9 @@ function dialogoDeCurso(curso, tipo, usuario) {
     textoConfirmar: curso.tieneAvance ? 'Sí, retirar el curso' : 'Sí, eliminar',
     peligro: true,
     accion: () => eliminarCurso(curso.idCurso, usuario),
-    textoExito: ({ resultado }) =>
-      resultado === 'retirado' ? `"${curso.titulo}" quedó como retirado.` : `Se eliminó "${curso.titulo}".`,
+    // 204 llega como undefined (se borró); 200 trae resultado: 'retirado'
+    textoExito: (respuesta) =>
+      respuesta?.resultado === 'retirado' ? `"${curso.titulo}" quedó como retirado.` : `Se eliminó "${curso.titulo}".`,
   }
 }
 
