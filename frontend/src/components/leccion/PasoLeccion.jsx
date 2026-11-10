@@ -3,15 +3,12 @@ import ActividadOpcion from './ActividadOpcion.jsx'
 import ActividadToque from './ActividadToque.jsx'
 import RecursosPaso from './RecursosPaso.jsx'
 
-function PasoLeccion({ paso, numero, guardando, onCompletar }) {
+function PasoLeccion({ paso, guardando, onCompletar }) {
   const iconos = paso.recursos?.filter((recurso) => recurso.tipo === 'icono') ?? []
   const otrosRecursos = paso.recursos?.filter((recurso) => recurso.tipo !== 'icono') ?? []
 
   return (
-    <section className="vt-card vt-stack leccion__paso" aria-labelledby={`paso-${paso.idPaso}`}>
-      <h2 id={`paso-${paso.idPaso}`} className="vt-visually-hidden">
-        Paso {numero}
-      </h2>
+    <section className="vt-card vt-stack leccion__paso" aria-labelledby="titulo-paso">
 
       <div className="leccion__instruccion">
         <RecursosPaso recursos={iconos} />

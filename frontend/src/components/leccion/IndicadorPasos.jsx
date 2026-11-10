@@ -1,11 +1,10 @@
-function IndicadorPasos({ total, posicion, completados, mensaje }) {
+function IndicadorPasos({ total, posicion, completados, mensaje, tituloRef }) {
   return (
     <div className="vt-stack vt-stack-sm">
       <div className="vt-cluster vt-cluster-between">
-        <p className="vt-label-lg">
+        <h2 id="titulo-paso" ref={tituloRef} tabIndex={-1} className="vt-label-lg leccion__titulo-paso">
           Paso {posicion + 1} de {total}
-        </p>
-        {/* role="status": el mensaje de avance se anuncia al cambiar */}
+        </h2>
         <p className="vt-autosave" role="status">
           <span className="vt-icon" aria-hidden="true">
             {mensaje ? 'check_circle' : 'cloud_done'}
@@ -14,7 +13,7 @@ function IndicadorPasos({ total, posicion, completados, mensaje }) {
         </p>
       </div>
 
-      <ol className="vt-step-track" style={{ '--vt-steps': total }} aria-label="Pasos de la lección">
+      <ol className="vt-step-track leccion__pasos" style={{ '--vt-steps': total }} aria-label="Pasos de la lección">
         {Array.from({ length: total }, (_, numero) => (
           <li
             key={numero}
