@@ -1,0 +1,21 @@
+info:
+  name: 191 - Guardar progreso JSON mal formado - 400
+  type: http
+  seq: 15
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/9223372036854775807/progreso"
+  body:
+    type: json
+    data: '{"idPaso":'
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
