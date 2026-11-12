@@ -1,0 +1,18 @@
+info:
+  name: 208 - Listado del editor ignora identidad en query - 200
+  type: http
+  seq: 208
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido?uid=autor-ficticio&rol=administrador&puedeEditar=true"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

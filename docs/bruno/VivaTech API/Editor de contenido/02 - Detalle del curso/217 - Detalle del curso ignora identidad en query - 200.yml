@@ -1,0 +1,18 @@
+info:
+  name: 217 - Detalle del curso ignora identidad en query - 200
+  type: http
+  seq: 217
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/3?uid=autor-ficticio&rol=administrador&puedeEditar=true"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
