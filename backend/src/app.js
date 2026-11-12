@@ -17,6 +17,10 @@ const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_ORIGIN
 }));
+app.use('/api/lecciones', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
 app.use(express.json());
 app.use('/api/perfil', perfilRouter);
 app.use('/api/estudiantes', estudiantesRouter);

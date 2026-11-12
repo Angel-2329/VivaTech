@@ -1,0 +1,24 @@
+info:
+  name: 195 - PG02 completar leccion sin completar curso - 200
+  type: http
+  seq: 19
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/33/progreso"
+  body:
+    type: json
+    data: |-
+      {
+        "idPaso": "85"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

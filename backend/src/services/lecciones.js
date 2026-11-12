@@ -167,4 +167,175 @@ async function obtenerDetalleLeccion(usuario, idLeccion, { ahora = new Date() } 
   };
 }
 
-module.exports = { obtenerDetalleLeccion };
+const COLUMNAS_PROGRESO = `
+  estado AS "estadoProgreso",
+  id_ultimo_paso_completado::text AS "idUltimoPasoCompletado",
+  fecha_finalizacion AS "fechaFinalizacion"
+`;
+
+function comprobarIdPaso(idPaso) {
+  const maximo = '9223372036854775807';
+  if (typeof idPaso !== 'string' || !/^[1-9][0-9]{0,18}$/.test(idPaso)
+    || (idPaso.length === maximo.length && idPaso > maximo)) {
+    throw new ErrorReglaCurso(400, 'El identificador del paso no es válido para esta lección', 'id_paso_invalido');
+  }
+}
+
+async function rechazarLeccionNoDisponible(cliente, idLeccion) {
+  const resultado = await cliente.query(`
+    SELECT EXISTS (
+      SELECT 1 FROM historial_cursos_retirados h
+      JOIN cursos c ON c.id_curso = h.id_curso
+      CROSS JOIN LATERAL jsonb_array_elements(h.lecciones) historica
+      WHERE c.estado_publicacion = 'retirado'
+        AND historica->>'idLeccion' = $1::text
+    ) AS retirada
+  `, [idLeccion]);
+  if (resultado.rows[0]?.retirada === true) {
+    throw new ErrorReglaCurso(404, 'Este curso fue retirado y sus lecciones ya no están disponibles', 'curso_retirado');
+  }
+  throw new ErrorReglaCurso(404, 'La lección no está disponible', 'leccion_no_encontrada');
+}
+
+async function guardarPasoLeccion(usuario, idLeccion, idPaso, { reloj = () => new Date() } = {}) {
+  comprobarEstudiante(usuario);
+  comprobarId(idLeccion);
+  comprobarIdPaso(idPaso);
+  if (typeof reloj !== 'function') throw new TypeError('El reloj debe ser una función');
+
+  const cliente = await pool.connect();
+  let enTransaccion = false;
+  let errorConexion;
+  try {
+    await cliente.query('BEGIN');
+    enTransaccion = true;
+
+    // Orden compartido con futuras escrituras: curso, lección, progreso.
+    // El bloqueo del curso serializa también el primer progreso, que aún no tiene fila.
+    const cursos = await cliente.query(`
+      SELECT c.id_curso::text AS "idCurso", c.estado_publicacion,
+        c.fecha_cierre::text AS fecha_cierre
+      FROM cursos c
+      JOIN lecciones l ON l.id_curso = c.id_curso
+      WHERE l.id_leccion = $1::bigint
+      FOR UPDATE OF c
+    `, [idLeccion]);
+    if (cursos.rows.length === 0) await rechazarLeccionNoDisponible(cliente, idLeccion);
+    const curso = cursos.rows[0];
+
+    const lecciones = await cliente.query(`
+      SELECT id_leccion::text AS "idLeccion"
+      FROM lecciones
+      WHERE id_leccion = $1::bigint AND id_curso = $2::bigint
+      FOR UPDATE
+    `, [idLeccion, curso.idCurso]);
+    if (lecciones.rows.length === 0) await rechazarLeccionNoDisponible(cliente, idLeccion);
+
+    const avances = await cliente.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM progresos p
+        JOIN lecciones l ON l.id_leccion = p.id_leccion
+        WHERE p.uid_estudiante = $1 AND l.id_curso = $2::bigint
+      ) AS "tieneAvance"
+    `, [usuario.uid, curso.idCurso]);
+    // No usar un instante capturado antes de esperar los bloqueos.
+    validarAccesoLeccion(usuario, curso, {
+      tieneAvance: avances.rows[0]?.tieneAvance,
+      ahora: reloj()
+    });
+
+    const detallePasos = await cliente.query(`
+      SELECT id_paso::text AS "idPaso", orden
+      FROM pasos WHERE id_leccion = $1::bigint
+      ORDER BY orden, id_paso
+    `, [idLeccion]);
+    const pasos = detallePasos.rows;
+    if (pasos.length === 0) throw new TypeError('La lección publicada debe tener pasos');
+    const indiceSolicitado = pasos.findIndex((paso) => paso.idPaso === idPaso);
+    if (indiceSolicitado === -1) {
+      throw new ErrorReglaCurso(400, 'El identificador del paso no es válido para esta lección', 'id_paso_invalido');
+    }
+
+    const progresos = await cliente.query(`
+      SELECT ${COLUMNAS_PROGRESO}
+      FROM progresos
+      WHERE uid_estudiante = $1 AND id_leccion = $2::bigint
+      FOR UPDATE
+    `, [usuario.uid, idLeccion]);
+    let fila = progresos.rows[0] || {};
+    let progreso = obtenerProgreso(fila, pasos);
+
+    if (indiceSolicitado > progreso.pasosCompletados) {
+      throw new ErrorReglaCurso(409, 'Completa el paso anterior para continuar', 'paso_fuera_de_secuencia');
+    }
+
+    // Un paso anterior o repetido es un reintento sin escritura ni cambio de fechas.
+    if (indiceSolicitado === progreso.pasosCompletados) {
+      const completa = indiceSolicitado === pasos.length - 1;
+      const estado = completa ? 'completada' : 'en_progreso';
+      let guardado;
+      if (progresos.rows.length === 0) {
+        guardado = await cliente.query(`
+          INSERT INTO progresos (
+            uid_estudiante, id_leccion, estado,
+            id_ultimo_paso_completado, fecha_finalizacion
+          ) VALUES ($1, $2::bigint, $3, $4::bigint,
+            CASE WHEN $5::boolean THEN clock_timestamp() ELSE NULL END)
+          RETURNING ${COLUMNAS_PROGRESO}
+        `, [usuario.uid, idLeccion, estado, idPaso, completa]);
+      } else {
+        guardado = await cliente.query(`
+          UPDATE progresos
+          SET estado = $3, id_ultimo_paso_completado = $4::bigint,
+            fecha_finalizacion = CASE WHEN $5::boolean THEN clock_timestamp() ELSE NULL END
+          WHERE uid_estudiante = $1 AND id_leccion = $2::bigint
+          RETURNING ${COLUMNAS_PROGRESO}
+        `, [usuario.uid, idLeccion, estado, idPaso, completa]);
+      }
+      if (guardado.rows.length !== 1) throw new TypeError('El guardado no devolvió un progreso único');
+      fila = guardado.rows[0];
+      progreso = obtenerProgreso(fila, pasos);
+    }
+
+    const resumen = await cliente.query(`
+      SELECT count(*)::integer AS "totalLecciones",
+        count(*) FILTER (WHERE p.estado = 'completada')::integer AS "leccionesCompletadas"
+      FROM lecciones l
+      LEFT JOIN progresos p ON p.id_leccion = l.id_leccion AND p.uid_estudiante = $1
+      WHERE l.id_curso = $2::bigint
+    `, [usuario.uid, curso.idCurso]);
+    const totales = resumen.rows[0];
+    if (!totales || !Number.isInteger(totales.totalLecciones) || totales.totalLecciones < 1
+      || !Number.isInteger(totales.leccionesCompletadas) || totales.leccionesCompletadas < 0
+      || totales.leccionesCompletadas > totales.totalLecciones) {
+      throw new TypeError('El resumen del curso no es válido');
+    }
+
+    const respuesta = {
+      idLeccion,
+      ...progreso,
+      leccionCompletada: progreso.estado === 'completada',
+      cursoCompletado: totales.leccionesCompletadas === totales.totalLecciones
+    };
+    await cliente.query('COMMIT');
+    enTransaccion = false;
+    return respuesta;
+  } catch (error) {
+    if (enTransaccion) {
+      try {
+        await cliente.query('ROLLBACK');
+      } catch (falloRollback) {
+        errorConexion = falloRollback;
+        console.error('No fue posible revertir la transacción de progreso');
+      }
+    } else {
+      errorConexion = error;
+    }
+    throw error;
+  } finally {
+    if (errorConexion) cliente.release(errorConexion);
+    else cliente.release();
+  }
+}
+
+module.exports = { obtenerDetalleLeccion, guardarPasoLeccion };

@@ -1,0 +1,24 @@
+info:
+  name: 186 - Guardar progreso administrador sin permiso - 403
+  type: http
+  seq: 10
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/9223372036854775807/progreso"
+  body:
+    type: json
+    data: |-
+      {
+        "idPaso": "1"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
