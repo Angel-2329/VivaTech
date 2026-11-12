@@ -1,8 +1,10 @@
 import { useId, useState } from 'react'
+import FormularioFechaCierre from './FormularioFechaCierre.jsx'
 import { ESTADO_CURSO } from '../../utils/contenido.js'
+import { textoFecha, yaCerro } from '../../utils/fechas.js'
 import { plural } from '../../utils/formato.js'
 
-function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAccion, onMover }) {
+function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAccion, onMover, onCambiarFecha }) {
   const estado = ESTADO_CURSO[curso.estadoPublicacion]
   const esAdmin = usuario.rol === 'administrador'
   const retirado = curso.estadoPublicacion === 'retirado'
@@ -26,6 +28,7 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
         <p className="vt-body-sm vt-text-muted">
           Creado por {curso.creadoPor}
         </p>
+        {!retirado && <TextoFechaCierre fechaCierre={curso.fechaCierre} />}
       </div>
 
       {retirado && (
@@ -46,14 +49,30 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
           puedeMover={esAdmin}
           categorias={categorias}
           onMover={onMover}
+          onCambiarFecha={onCambiarFecha}
         />
       )}
     </li>
   )
 }
 
-function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias, onMover }) {
+function TextoFechaCierre({ fechaCierre }) {
+  let texto = 'Sin fecha de cierre'
+  if (fechaCierre) texto = yaCerro(fechaCierre) ? `Cerró el ${textoFecha(fechaCierre)}` : `Disponible hasta el ${textoFecha(fechaCierre)}`
+
+  return (
+    <p className="vt-cluster vt-body-sm">
+      <span className="vt-icon" aria-hidden="true">
+        {fechaCierre && yaCerro(fechaCierre) ? 'event_busy' : 'event'}
+      </span>
+      {texto}
+    </p>
+  )
+}
+
+function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias, onMover, onCambiarFecha }) {
   const id = useId()
+  const [editandoFecha, setEditandoFecha] = useState(false)
   const publicado = curso.estadoPublicacion === 'publicado'
   const noPuedeDespublicar = publicado && curso.tieneAvance
 
@@ -98,7 +117,33 @@ function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias
           Eliminar curso
           <span className="vt-visually-hidden"> {curso.titulo}</span>
         </button>
+
+        {!editandoFecha && (
+          <button
+            type="button"
+            className="vt-btn vt-btn-ghost vt-btn-sm"
+            onClick={() => setEditandoFecha(true)}
+            disabled={bloqueado}
+          >
+            <span className="vt-icon" aria-hidden="true">
+              event
+            </span>
+            Fecha de cierre
+            <span className="vt-visually-hidden"> de {curso.titulo}</span>
+          </button>
+        )}
       </div>
+
+      {editandoFecha && (
+        <FormularioFechaCierre
+          curso={curso}
+          onGuardar={async (fecha) => {
+            await onCambiarFecha(curso, fecha)
+            setEditandoFecha(false)
+          }}
+          onCancelar={() => setEditandoFecha(false)}
+        />
+      )}
 
       {noPuedeDespublicar && (
         <p id={`${id}-avance`} className="vt-btn-hint">

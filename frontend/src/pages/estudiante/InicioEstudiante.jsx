@@ -4,7 +4,7 @@ import { EstadoCarga, EstadoError } from '../../components/panel/EstadosCarga.js
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { obtenerMisCursos } from '../../services/cursosService.js'
-import { rutaLeccion, siguienteLeccion, todosLosCursos } from '../../utils/cursos.js'
+import { cursosVigentes, rutaLeccion, siguienteLeccion } from '../../utils/cursos.js'
 import { plural } from '../../utils/formato.js'
 import { nombreParaSaludo } from '../../utils/nombreParaSaludo.js'
 import './Estudiante.css'
@@ -29,7 +29,8 @@ function InicioEstudiante() {
 }
 
 function ResumenAlumno({ categorias }) {
-  const cursos = todosLosCursos(categorias)
+  // Los retirados no cuentan como cursos por tomar
+  const cursos = cursosVigentes(categorias)
   const cursosIniciados = cursos.filter((curso) =>
     curso.lecciones.some((leccion) => leccion.estado !== 'pendiente')
   ).length

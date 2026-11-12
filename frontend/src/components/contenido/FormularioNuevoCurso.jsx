@@ -1,16 +1,19 @@
 import { useId, useRef, useState } from 'react'
+import CampoFechaCierre from './CampoFechaCierre.jsx'
 import CampoTexto from './CampoTexto.jsx'
-import { LIMITES, revisarTexto } from '../../utils/contenido.js'
+import { LIMITES, revisarFechaCierre, revisarTexto } from '../../utils/contenido.js'
 
 function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
   const [idCategoria, setIdCategoria] = useState(categorias[0]?.idCategoria ?? '')
   const [titulo, setTitulo] = useState('')
   const [descripcion, setDescripcion] = useState('')
+  const [fechaCierre, setFechaCierre] = useState('')
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [guardando, setGuardando] = useState(false)
   const tituloRef = useRef(null)
   const descripcionRef = useRef(null)
+  const fechaRef = useRef(null)
   const idCampo = useId()
 
   async function enviar(evento) {
@@ -20,19 +23,25 @@ function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
     const nuevosErrores = {
       titulo: revisarTexto(titulo, LIMITES.tituloCurso, 'el título del curso'),
       descripcion: revisarTexto(descripcion, LIMITES.descripcionCurso, 'la descripción del curso'),
+      fechaCierre: revisarFechaCierre(fechaCierre),
     }
     setErrores(nuevosErrores)
     setErrorGeneral('')
 
-    if (nuevosErrores.titulo || nuevosErrores.descripcion) {
-      const campoConError = nuevosErrores.titulo ? tituloRef : descripcionRef
+    const campoConError =
+      (nuevosErrores.titulo && tituloRef) ||
+      (nuevosErrores.descripcion && descripcionRef) ||
+      (nuevosErrores.fechaCierre && fechaRef)
+    if (campoConError) {
       campoConError.current?.focus()
       return
     }
 
     setGuardando(true)
     try {
-      await onCrear({ idCategoria, titulo: titulo.trim(), descripcion: descripcion.trim() })
+      const datos = { idCategoria, titulo: titulo.trim(), descripcion: descripcion.trim() }
+      if (fechaCierre) datos.fechaCierre = fechaCierre
+      await onCrear(datos)
     } catch (errorAlCrear) {
       setErrorGeneral(errorAlCrear.message || 'No pudimos crear el curso. Inténtalo otra vez.')
       setGuardando(false)
@@ -81,6 +90,13 @@ function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
         error={errores.descripcion}
         multilinea
         campoRef={descripcionRef}
+      />
+
+      <CampoFechaCierre
+        valor={fechaCierre}
+        onCambiar={setFechaCierre}
+        error={errores.fechaCierre}
+        campoRef={fechaRef}
       />
 
       {errorGeneral && (

@@ -1,15 +1,12 @@
 // AVANCE SIMULADO del alumno con sesión (Sprint 4, tarea 3.23.1).
-
-
 import { CATEGORIAS } from './contenidoDePrueba.js'
+import { CURSO_RETIRADO, FECHAS_CIERRE, estadoSegunFecha } from './estadoCursosDePrueba.js'
 
-// Avance inicial: lección 21 terminada y lección 22 en el paso 2 de 5.
+
 const progresos = new Map([
   ['21', { estado: 'completada', idUltimoPasoCompletado: '106', fechaFinalizacion: '2026-11-03T17:30:00.000Z' }],
   ['22', { estado: 'en_progreso', idUltimoPasoCompletado: '108', fechaFinalizacion: null }],
 ])
-
-// Certificados emitidos por curso: idCurso -> { idCertificado, folio }.
 
 const certificados = new Map()
 
@@ -71,27 +68,55 @@ function resumenProgreso(leccion) {
   }
 }
 
-// GET /api/mis-cursos
-export function armarMisCursos() {
-  return CATEGORIAS.filter((categoria) => categoria.cursos.length > 0).map((categoria) => ({
-    idCategoria: categoria.idCategoria,
-    nombre: categoria.nombre,
-    cursos: categoria.cursos.map((curso) => ({
-      idCurso: curso.idCurso,
-      titulo: curso.titulo,
-      descripcion: curso.descripcion,
-      estadoCurso: 'disponible',
-      fechaCierre: null,
-      cursoCompletado: cursoCompletado(curso),
-      certificado: certificados.get(curso.idCurso) ?? null,
-      lecciones: curso.lecciones.map((leccion) => ({
-        idLeccion: leccion.idLeccion,
-        titulo: leccion.titulo,
-        duracionEstimadaMinutos: leccion.duracionEstimadaMinutos,
-        estado: estadoDe(leccion.idLeccion),
-      })),
+function tieneAvance(curso) {
+  return curso.lecciones.some((leccion) => estadoDe(leccion.idLeccion) !== 'pendiente')
+}
+
+function resumenCursoAlumno(curso) {
+  const fechaCierre = FECHAS_CIERRE[curso.idCurso] ?? null
+  return {
+    idCurso: curso.idCurso,
+    titulo: curso.titulo,
+    descripcion: curso.descripcion,
+    estadoCurso: estadoSegunFecha(fechaCierre),
+    fechaCierre,
+    cursoCompletado: cursoCompletado(curso),
+    certificado: certificados.get(curso.idCurso) ?? null,
+    lecciones: curso.lecciones.map((leccion) => ({
+      idLeccion: leccion.idLeccion,
+      titulo: leccion.titulo,
+      duracionEstimadaMinutos: leccion.duracionEstimadaMinutos,
+      estado: estadoDe(leccion.idLeccion),
     })),
-  }))
+  }
+}
+
+// Un curso retirado llega solo con su resumen y lecciones: []
+function resumenCursoRetirado() {
+  return {
+    idCurso: CURSO_RETIRADO.idCurso,
+    titulo: CURSO_RETIRADO.titulo,
+    descripcion: CURSO_RETIRADO.descripcion,
+    estadoCurso: 'retirado',
+    fechaCierre: null,
+    cursoCompletado: CURSO_RETIRADO.cursoCompletado,
+    certificado: certificados.get(CURSO_RETIRADO.idCurso) ?? null,
+    lecciones: [],
+  }
+}
+
+// GET /api/mis-cursos
+// Un curso cerrado solo aparece si el alumno ya tiene avance en él.
+export function armarMisCursos() {
+  return CATEGORIAS.map((categoria) => {
+    const cursos = categoria.cursos
+      .filter((curso) => estadoSegunFecha(FECHAS_CIERRE[curso.idCurso]) !== 'cerrado' || tieneAvance(curso))
+      .map(resumenCursoAlumno)
+
+    if (CURSO_RETIRADO.idCategoria === categoria.idCategoria) cursos.push(resumenCursoRetirado())
+
+    return { idCategoria: categoria.idCategoria, nombre: categoria.nombre, cursos }
+  }).filter((categoria) => categoria.cursos.length > 0)
 }
 
 // GET /api/lecciones/:idLeccion  (null si no existe)

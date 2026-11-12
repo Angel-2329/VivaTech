@@ -1,5 +1,7 @@
 import { CATEGORIAS } from './contenidoDePrueba.js'
 import { armarMisCursos } from './progresoDePrueba.js'
+import { CURSO_RETIRADO, FECHAS_CIERRE } from './estadoCursosDePrueba.js'
+import { esFechaCalendario, hoyEnMexico } from '../../utils/fechas.js'
 
 
 const YO = '__yo__'
@@ -35,7 +37,7 @@ const cursos = [
       titulo: curso.titulo,
       descripcion: curso.descripcion,
       estadoPublicacion: 'publicado',
-      fechaCierre: null,
+      fechaCierre: FECHAS_CIERRE[curso.idCurso] ?? null,
       autor: ADMIN,
       lecciones: curso.lecciones,
       avanceFijo: null,
@@ -54,11 +56,11 @@ const cursos = [
     avanceFijo: false,
   },
   {
-    idCurso: '13',
-    idCategoria: '1',
+    idCurso: CURSO_RETIRADO.idCurso,
+    idCategoria: CURSO_RETIRADO.idCategoria,
     orden: 2,
-    titulo: 'Usar el cajero automático',
-    descripcion: 'Retira efectivo y consulta tu saldo en el cajero sin prisas.',
+    titulo: CURSO_RETIRADO.titulo,
+    descripcion: CURSO_RETIRADO.descripcion,
     estadoPublicacion: 'retirado',
     fechaCierre: null,
     autor: { uid: YO },
@@ -160,6 +162,15 @@ function buscarCurso(idCurso, usuario, { permitirRetirado = false } = {}) {
   return { curso }
 }
 
+
+function fechaInvalida(fechaCierre) {
+  if (fechaCierre === null) return null
+  if (!esFechaCalendario(fechaCierre) || fechaCierre < hoyEnMexico()) {
+    return error('La fecha de cierre debe ser de hoy en adelante', 400, 'fecha_cierre_invalida')
+  }
+  return null
+}
+
 function soloAdministrador(usuario) {
   return usuario.rol === 'administrador'
     ? null
@@ -182,6 +193,8 @@ export function armarContenido(usuario) {
 // POST /api/cursos
 export function crearCursoPrueba({ idCategoria, titulo, descripcion, fechaCierre = null }, usuario) {
   if (!existeCategoria(idCategoria)) return error('La categoría no existe', 404, 'categoria_no_encontrada')
+  const fechaMal = fechaInvalida(fechaCierre)
+  if (fechaMal) return fechaMal
 
   const curso = {
     idCurso: String(siguienteIdCurso++),
@@ -203,6 +216,10 @@ export function crearCursoPrueba({ idCategoria, titulo, descripcion, fechaCierre
 export function cambiarCursoPrueba(idCurso, cambios, usuario) {
   const { curso, fallo } = buscarCurso(idCurso, usuario)
   if (fallo) return fallo
+  if (cambios.fechaCierre !== undefined) {
+    const fechaMal = fechaInvalida(cambios.fechaCierre)
+    if (fechaMal) return fechaMal
+  }
 
   if (cambios.idCategoria !== undefined && cambios.idCategoria !== curso.idCategoria) {
     const sinPermiso = soloAdministrador(usuario)
