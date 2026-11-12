@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { Link } from 'react-router'
 import FormularioFechaCierre from './FormularioFechaCierre.jsx'
 import { ESTADO_CURSO } from '../../utils/contenido.js'
 import { textoFecha, yaCerro } from '../../utils/fechas.js'
@@ -8,6 +9,7 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
   const estado = ESTADO_CURSO[curso.estadoPublicacion]
   const esAdmin = usuario.rol === 'administrador'
   const retirado = curso.estadoPublicacion === 'retirado'
+  const rutaEditor = `${esAdmin ? '/admin' : '/maestro'}/contenido/cursos/${curso.idCurso}`
 
   return (
     <li className="vt-card vt-stack contenido__curso">
@@ -38,12 +40,21 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
       )}
 
       {!retirado && !curso.puedeEditar && (
-        <p className="vt-body-sm vt-text-muted">Solo quien lo creó o un administrador puede editarlo.</p>
+        <div className="vt-stack vt-stack-sm">
+          <p className="vt-body-sm vt-text-muted">Solo quien lo creó o un administrador puede editarlo.</p>
+          <div>
+            <Link className="vt-btn vt-btn-outline vt-btn-sm" to={rutaEditor}>
+              Ver lecciones
+              <span className="vt-visually-hidden"> de {curso.titulo}</span>
+            </Link>
+          </div>
+        </div>
       )}
 
       {curso.puedeEditar && (
         <AccionesCurso
           curso={curso}
+          rutaEditor={rutaEditor}
           bloqueado={bloqueado}
           onPedirAccion={onPedirAccion}
           puedeMover={esAdmin}
@@ -70,7 +81,7 @@ function TextoFechaCierre({ fechaCierre }) {
   )
 }
 
-function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias, onMover, onCambiarFecha }) {
+function AccionesCurso({ curso, rutaEditor, bloqueado, onPedirAccion, puedeMover, categorias, onMover, onCambiarFecha }) {
   const id = useId()
   const [editandoFecha, setEditandoFecha] = useState(false)
   const publicado = curso.estadoPublicacion === 'publicado'
@@ -79,11 +90,10 @@ function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias
   return (
     <div className="vt-stack vt-stack-sm">
       <div className="vt-cluster">
-        {/* Se activa en la 3.23.10 (editor de lecciones y pasos) */}
-        <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" disabled>
+        <Link className="vt-btn vt-btn-secondary vt-btn-sm" to={rutaEditor}>
           Editar lecciones
-          <span className="vt-visually-hidden"> de {curso.titulo} (disponible pronto)</span>
-        </button>
+          <span className="vt-visually-hidden"> de {curso.titulo}</span>
+        </Link>
 
         {publicado ? (
           <button
@@ -158,12 +168,11 @@ function AccionesCurso({ curso, bloqueado, onPedirAccion, puedeMover, categorias
   )
 }
 
-// Solo el administrador mueve un curso a otra categoría
+
 function MoverCurso({ curso, categorias, bloqueado, onMover }) {
   const id = useId()
   const otras = categorias.filter((categoria) => categoria.idCategoria !== curso.idCategoria)
   const [destino, setDestino] = useState(otras[0]?.idCategoria ?? '')
-  // Si la lista de categorías cambió, se toma la primera disponible
   const elegido = otras.some((categoria) => categoria.idCategoria === destino) ? destino : otras[0]?.idCategoria
 
   return (

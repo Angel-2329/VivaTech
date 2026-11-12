@@ -1,7 +1,8 @@
 import { useId } from 'react'
 
-function CampoTexto({ etiqueta, valor, onCambiar, maximo, error, multilinea = false, deshabilitado, campoRef }) {
-  const id = useId()
+function CampoTexto({ etiqueta, valor, onCambiar, maximo, error, multilinea = false, deshabilitado, campoRef, id: idPropio }) {
+  const idGenerado = useId()
+  const id = idPropio ?? idGenerado
   const largo = Array.from(valor.trim()).length
   const Control = multilinea ? 'textarea' : 'input'
 

@@ -1,9 +1,11 @@
 import { auth } from '../config/firebase.js'
 
-function crearError(mensaje, estado, codigo) {
+// errores: desglose opcional [{ ruta, codigo, mensaje }] (por ejemplo en contenido_invalido)
+function crearError(mensaje, estado, codigo, errores) {
   return Object.assign(new Error(mensaje), {
     estado,
     codigo,
+    ...(Array.isArray(errores) ? { errores } : {}),
   })
 }
 
@@ -77,7 +79,8 @@ export async function solicitarApi(
     throw crearError(
       cuerpo?.mensaje || 'No se pudo completar la solicitud',
       respuesta.status,
-      cuerpo?.codigo
+      cuerpo?.codigo,
+      cuerpo?.errores
     )
   }
 
