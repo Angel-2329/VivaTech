@@ -25,8 +25,12 @@ export function todosLosCursos(categorias) {
 }
 
 
+export function cursosVigentes(categorias) {
+  return todosLosCursos(categorias).filter((curso) => curso.estadoCurso !== 'retirado')
+}
+
 export function siguienteLeccion(categorias) {
-  const cursos = todosLosCursos(categorias)
+  const cursos = cursosVigentes(categorias)
 
   for (const estado of ['en_progreso', 'pendiente']) {
     for (const curso of cursos) {

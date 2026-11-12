@@ -14,3 +14,7 @@
   min-width: 10rem;
   max-width: 100%;
 }
+
+.contenido__fecha {
+  max-width: 14rem;
+}

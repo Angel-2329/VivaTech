@@ -15,6 +15,7 @@ function CategoriaEditor({
   onEliminarCategoria,
   onPedirAccion,
   onMoverCurso,
+  onCambiarFecha,
 }) {
   const [editandoNombre, setEditandoNombre] = useState(false)
   const esAdmin = usuario.rol === 'administrador'
@@ -105,6 +106,7 @@ function CategoriaEditor({
               bloqueado={bloqueado}
               onPedirAccion={onPedirAccion}
               onMover={onMoverCurso}
+              onCambiarFecha={onCambiarFecha}
             />
           ))}
         </ul>

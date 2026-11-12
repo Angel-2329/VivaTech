@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
+import BotonCertificado from '../certificado/BotonCertificado.jsx'
 
 
 function LeccionTerminada({ leccion, cursoCompletado, certificado, onRepasar }) {
@@ -32,19 +33,7 @@ function LeccionTerminada({ leccion, cursoCompletado, certificado, onRepasar }) 
 
       <div className="leccion__acciones">
         {/* El certificado se activa en la tarea 3.26.3 */}
-        {cursoCompletado && (
-          <span className="vt-stack vt-stack-sm">
-            <button type="button" className="vt-btn vt-btn-success" disabled aria-describedby="certificado-pronto">
-              <span className="vt-icon" aria-hidden="true">
-                workspace_premium
-              </span>
-              {certificado ? 'Ver certificado' : 'Obtener certificado'}
-            </button>
-            <span id="certificado-pronto" className="vt-btn-hint">
-              Disponible pronto
-            </span>
-          </span>
-        )}
+        {cursoCompletado && <BotonCertificado certificado={certificado} />}
 
         {leccion.siguienteLeccion && (
           <Link

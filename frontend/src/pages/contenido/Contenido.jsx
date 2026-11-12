@@ -8,6 +8,7 @@ import { EstadoCarga, EstadoError, EstadoVacio, MensajeExito } from '../../compo
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import {
+  actualizarCurso,
   cambiarEstadoCurso,
   crearCategoria,
   crearCurso,
@@ -18,6 +19,7 @@ import {
   ordenarCategorias,
   renombrarCategoria,
 } from '../../services/contenidoService.js'
+import { textoFecha } from '../../utils/fechas.js'
 import { plural } from '../../utils/formato.js'
 import './Contenido.css'
 
@@ -95,6 +97,16 @@ function Contenido() {
   }
 
  
+
+  // fecha = "AAAA-MM-DD" o null para quitarla. Los errores los muestra el formulario.
+  function manejarCambiarFecha(curso, fecha) {
+    return ejecutar(
+      () => actualizarCurso(curso.idCurso, { fechaCierre: fecha }, usuario),
+      fecha
+        ? `"${curso.titulo}" estará disponible hasta el ${textoFecha(fecha)}.`
+        : `"${curso.titulo}" ya no tiene fecha de cierre.`,
+    )
+  }
 
   function abrirDialogo(configuracion) {
     if (bloqueado) return
@@ -218,6 +230,7 @@ function Contenido() {
           onEliminarCategoria={pedirEliminarCategoria}
           onPedirAccion={pedirAccionCurso}
           onMoverCurso={manejarMoverCurso}
+          onCambiarFecha={manejarCambiarFecha}
         />
       ))}
 
@@ -271,11 +284,12 @@ function dialogoDeCurso(curso, tipo, usuario) {
         <p>Algunos alumnos ya tienen avance en este curso.</p>
         <p>
           Se borrarán sus lecciones y pasos, y el curso quedará como <strong>retirado</strong>: se conservan el título,
-          la descripción y el avance de los alumnos. Esta acción no se puede deshacer.
+          la descripción, el avance de los alumnos y sus certificados. Los alumnos lo verán como "Curso retirado".
+          Esta acción no se puede deshacer.
         </p>
       </>
     ) : (
-      <p>Se borrará el curso con todas sus lecciones y pasos. Esta acción no se puede deshacer.</p>
+      <p>Nadie tiene avance en este curso. Se borrará todo: el curso, sus lecciones y sus pasos. Esta acción no se puede deshacer.</p>
     ),
     textoConfirmar: curso.tieneAvance ? 'Sí, retirar el curso' : 'Sí, eliminar',
     peligro: true,
