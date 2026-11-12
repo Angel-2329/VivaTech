@@ -1,3 +1,6 @@
+import VideoYouTube from './VideoYouTube.jsx'
+import { esIdVideo } from '../../utils/youtube.js'
+
 function RecursosPaso({ recursos }) {
   if (!recursos?.length) return null
 
@@ -5,6 +8,11 @@ function RecursosPaso({ recursos }) {
 }
 
 function Recurso({ recurso }) {
+  // Solo llega en pasos de lectura; si el ID no es válido no se muestra nada
+  if (recurso.tipo === 'video') {
+    return esIdVideo(recurso.idVideo) ? <VideoYouTube idVideo={recurso.idVideo} titulo={recurso.titulo} /> : null
+  }
+
   if (recurso.tipo === 'icono') {
     if (!recurso.alt?.trim()) {
       return (

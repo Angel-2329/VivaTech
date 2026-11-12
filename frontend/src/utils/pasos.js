@@ -1,4 +1,5 @@
 import { revisarTexto } from './contenido.js'
+import { esIdVideo, extraerIdVideo } from './youtube.js'
 
 export const LIMITES_PASO = {
   titulo: 100,
@@ -13,6 +14,7 @@ export const LIMITES_PASO = {
   elementoLista: 150,
   aviso: 200,
   alt: 80,
+  tituloVideo: 100,
 }
 
 export const MAX_LECCIONES = 10
@@ -33,9 +35,15 @@ export const TIPOS_RECURSO = {
   icono: 'Ícono',
   lista: 'Lista',
   aviso: 'Aviso importante',
+  video: 'Video de YouTube',
 }
 
+// Un video por paso y solo en pasos de lectura (3.24.8)
+export function puedeLlevarVideo(paso) {
+  return paso.actividad.tipo === 'lectura' && !paso.recursos.some((recurso) => recurso.tipo === 'video')
+}
 
+// ---- Formas vacías ----
 
 export function leccionVacia() {
   return { titulo: '', objetivo: '', duracionEstimadaMinutos: 5 }
@@ -48,10 +56,12 @@ export function pasoVacio() {
 export function recursoVacio(tipo) {
   if (tipo === 'icono') return { tipo, nombre: '', alt: '' }
   if (tipo === 'lista') return { tipo, elementos: ['', ''] }
+  // Video nuevo: el editor manda el enlace (url) y el backend guarda solo el idVideo
+  if (tipo === 'video') return { tipo, url: '', titulo: '' }
   return { tipo: 'aviso', texto: '' }
 }
 
-
+// Los ID de opción los pone el editor: a, b, c… (el maestro no los escribe)
 export function nuevoIdOpcion(opciones) {
   const usados = new Set(opciones.map((opcion) => opcion.id))
   for (const letra of 'abcdefghij') {
@@ -68,7 +78,7 @@ function opcionesVacias(cantidad) {
   return opciones
 }
 
-
+// Al cambiar el tipo se conservan las opciones, la pista y el mensaje si sirven
 export function cambiarTipoActividad(actividad, tipo) {
   if (tipo === 'lectura') return { tipo: 'lectura' }
 
@@ -84,9 +94,13 @@ export function cambiarTipoActividad(actividad, tipo) {
 }
 
 
-
 function recortar(texto) {
   return typeof texto === 'string' ? texto.trim() : texto
+}
+
+// "youtu.be/abc" -> "https://youtu.be/abc", para mandar siempre el enlace completo
+function conProtocolo(enlace) {
+  return !enlace || /^https?:\/\//i.test(enlace) ? enlace : `https://${enlace}`
 }
 
 
@@ -95,6 +109,11 @@ export function limpiarPaso(paso) {
     if (recurso.tipo === 'icono') return { tipo: 'icono', nombre: recortar(recurso.nombre), alt: recortar(recurso.alt) }
     if (recurso.tipo === 'lista') return { tipo: 'lista', elementos: recurso.elementos.map(recortar) }
     if (recurso.tipo === 'aviso') return { tipo: 'aviso', texto: recortar(recurso.texto) }
+    // Nunca se mandan url e idVideo juntos: enlace nuevo con url, video existente con idVideo
+    if (recurso.tipo === 'video') {
+      if (recurso.url !== undefined) return { tipo: 'video', url: conProtocolo(recortar(recurso.url)), titulo: recortar(recurso.titulo) }
+      return { tipo: 'video', plataforma: 'youtube', idVideo: recurso.idVideo, titulo: recortar(recurso.titulo) }
+    }
     return recurso
   })
 
@@ -123,7 +142,6 @@ export function limpiarPaso(paso) {
 
   return { instruccion: recortar(paso.instruccion), recursos, actividad: limpia }
 }
-
 
 
 export function validarLeccion({ titulo, objetivo, duracionEstimadaMinutos }) {
@@ -160,7 +178,22 @@ export function validarPaso(paso) {
       })
     }
     if (recurso.tipo === 'aviso') revisar(`${ruta}.texto`, recurso.texto, LIMITES_PASO.aviso, 'el aviso')
+    if (recurso.tipo === 'video') {
+      if (paso.actividad.tipo !== 'lectura') {
+        errores[ruta] = 'El video solo se puede usar en pasos de lectura.'
+      } else if (recurso.url !== undefined && !extraerIdVideo(recurso.url)) {
+        errores[`${ruta}.url`] = recortar(recurso.url)
+          ? 'Ese enlace no es de un video de YouTube. Cópialo desde el botón "Compartir" del video.'
+          : 'Pega el enlace del video de YouTube.'
+      } else if (recurso.url === undefined && !esIdVideo(recurso.idVideo)) {
+        errores[`${ruta}.url`] = 'Este video no es válido. Usa "Cambiar enlace" y pega otro.'
+      }
+      revisar(`${ruta}.titulo`, recurso.titulo, LIMITES_PASO.tituloVideo, 'el título del video')
+    }
   })
+  if (paso.recursos.filter((recurso) => recurso.tipo === 'video').length > 1) {
+    errores.recursos = 'Un paso puede tener solo un video.'
+  }
 
   const { actividad } = paso
   if (actividad.tipo === 'lectura') return errores
@@ -190,21 +223,21 @@ export function validarPaso(paso) {
   return errores
 }
 
-
 export function estructuraPaso(paso) {
   const { actividad } = paso
   return JSON.stringify({
     tipo: actividad.tipo,
-    recursos: paso.recursos.map((recurso) =>
-      recurso.tipo === 'lista' ? `lista:${recurso.elementos.length}` : `${recurso.tipo}:${recurso.nombre ?? ''}`,
-    ),
+    recursos: paso.recursos.map((recurso) => {
+      if (recurso.tipo === 'lista') return `lista:${recurso.elementos.length}`
+      if (recurso.tipo === 'video') return `video:${recurso.idVideo ?? `enlace:${recurso.url}`}`
+      return `${recurso.tipo}:${recurso.nombre ?? ''}`
+    }),
     opciones: actividad.opciones?.map((opcion) => `${opcion.id}:${opcion.icono ?? ''}`) ?? [],
     correcta: actividad.correcta ?? null,
     // Solo se corrigen subtítulos existentes: agregarlo o quitarlo cambia la estructura
     subtitulo: Boolean(actividad.pantalla?.subtitulo),
   })
 }
-
 
 export function rutaDelServidor(ruta) {
   return String(ruta ?? '')
@@ -222,7 +255,8 @@ export function erroresDelServidor(error) {
   )
 }
 
-
+// Para publicar: de 1 a 10 lecciones, cada una de 3 a 8 pasos y con al menos una práctica.
+// Devuelve el primer problema en palabras sencillas, o '' si se puede publicar.
 export function problemaParaPublicar(lecciones) {
   if (lecciones.length === 0) return 'Agrega al menos una lección antes de publicar el curso.'
   if (lecciones.length > MAX_LECCIONES) return `Un curso puede tener hasta ${MAX_LECCIONES} lecciones.`
