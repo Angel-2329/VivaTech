@@ -1,0 +1,27 @@
+.video-youtube {
+  margin: 0;
+  width: 100%;
+  max-width: 40rem;
+}
+
+
+.video-youtube__marco {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--vt-radius-lg);
+  background-color: var(--vt-surface-high);
+}
+
+.video-youtube__marco iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video-youtube__aviso {
+  color: var(--vt-on-surface-variant);
+}

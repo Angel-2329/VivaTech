@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import CampoTexto from './CampoTexto.jsx'
 import VistaPreviaPaso from './VistaPreviaPaso.jsx'
+import VideoYouTube from '../leccion/VideoYouTube.jsx'
 import {
   LIMITES_PASO,
   MAX_ELEMENTOS_LISTA,
@@ -15,11 +16,13 @@ import {
   limpiarPaso,
   nuevoIdOpcion,
   pasoVacio,
+  puedeLlevarVideo,
   recursoVacio,
   validarPaso,
 } from '../../utils/pasos.js'
+import { esIdVideo, extraerIdVideo } from '../../utils/youtube.js'
 
-
+// Cambia un valor dentro del paso sin modificar el original. ruta: "actividad.opciones.0.texto"
 function conValor(objeto, ruta, valor) {
   const [clave, ...resto] = ruta.split('.')
   const copia = Array.isArray(objeto) ? [...objeto] : { ...objeto }
@@ -27,7 +30,8 @@ function conValor(objeto, ruta, valor) {
   return copia
 }
 
-
+// soloTextos: curso publicado o con avance. No se cambian el tipo, los recursos,
+// las opciones ni la respuesta correcta; solo se corrigen los textos.
 function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar, onCancelar }) {
   const idBase = useId()
   const [paso, setPaso] = useState(() => structuredClone(pasoInicial ?? pasoVacio()))
@@ -39,7 +43,7 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
   const { actividad } = paso
   const idDe = (ruta) => `${idBase}-${ruta.replaceAll('.', '-')}`
 
-  
+  // Al agregar o quitar recursos, puntos u opciones las posiciones cambian: se limpian los errores
   function cambiar(ruta, valor) {
     setPaso((anterior) => conValor(anterior, ruta, valor))
     const cambiaEstructura = Array.isArray(valor) || ruta === 'actividad'
@@ -47,8 +51,13 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     else if (errores[ruta]) setErrores((anteriores) => ({ ...anteriores, [ruta]: '' }))
   }
 
+  // El video solo va en pasos de lectura: si se cambia a toque u opción, se quita
   function cambiarTipo(tipo) {
-    setPaso((anterior) => ({ ...anterior, actividad: cambiarTipoActividad(anterior.actividad, tipo) }))
+    setPaso((anterior) => ({
+      ...anterior,
+      recursos: tipo === 'lectura' ? anterior.recursos : anterior.recursos.filter((recurso) => recurso.tipo !== 'video'),
+      actividad: cambiarTipoActividad(anterior.actividad, tipo),
+    }))
     setErrores({})
   }
 
@@ -80,6 +89,12 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     } catch (errorAlGuardar) {
       // 400 contenido_invalido: cada error junto a su campo, y el mensaje general de respaldo
       const delServidor = erroresDelServidor(errorAlGuardar)
+      // 400 video_invalido no trae ruta: el error va en el campo del enlace
+      const posicionVideo = paso.recursos.findIndex((recurso) => recurso.tipo === 'video')
+      if (errorAlGuardar.codigo === 'video_invalido' && posicionVideo !== -1) {
+        delServidor[`recursos.${posicionVideo}.url`] =
+          'Ese enlace no es de un video de YouTube. Cópialo desde el botón "Compartir" del video.'
+      }
       setErrores(delServidor)
       setErrorGeneral(errorAlGuardar.message || 'No pudimos guardar el paso. Inténtalo otra vez.')
       setGuardando(false)
@@ -88,7 +103,7 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     }
   }
 
-  
+ 
   const campo = (ruta, etiqueta, maximo, extra = {}) => ({
     id: idDe(ruta),
     etiqueta,
@@ -206,6 +221,9 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
 
 function Recursos({ paso, soloTextos, campo, errores, idDe, cambiar }) {
   const tiposUsados = new Set(paso.recursos.map((recurso) => recurso.tipo))
+  const tiposParaAgregar = Object.entries(TIPOS_RECURSO).filter(([tipo]) =>
+    tipo === 'video' ? puedeLlevarVideo(paso) : !tiposUsados.has(tipo),
+  )
 
   function quitar(posicion) {
     cambiar(
@@ -223,7 +241,12 @@ function Recursos({ paso, soloTextos, campo, errores, idDe, cambiar }) {
       {paso.recursos.map((recurso, posicion) => {
         const ruta = `recursos.${posicion}`
         return (
-          <div key={`${recurso.tipo}-${posicion}`} className="vt-stack vt-stack-sm editor__recurso">
+          <div
+            key={`${recurso.tipo}-${posicion}`}
+            id={idDe(ruta)}
+            tabIndex={-1}
+            className="vt-stack vt-stack-sm editor__recurso"
+          >
             <p className="vt-cluster vt-cluster-between">
               <strong>{TIPOS_RECURSO[recurso.tipo] ?? recurso.tipo}</strong>
               {!soloTextos && (
@@ -306,6 +329,24 @@ function Recursos({ paso, soloTextos, campo, errores, idDe, cambiar }) {
               </>
             )}
 
+            {errores[ruta] && (
+              <p className="vt-field-error" role="alert">
+                {errores[ruta]}
+              </p>
+            )}
+
+            {recurso.tipo === 'video' && (
+              <CamposVideo
+                recurso={recurso}
+                ruta={ruta}
+                soloTextos={soloTextos}
+                campo={campo}
+                errores={errores}
+                idDe={idDe}
+                cambiar={cambiar}
+              />
+            )}
+
             {recurso.tipo === 'aviso' && (
               <CampoTexto {...campo(`${ruta}.texto`, 'Texto del aviso', LIMITES_PASO.aviso, { multilinea: true })} />
             )}
@@ -315,9 +356,7 @@ function Recursos({ paso, soloTextos, campo, errores, idDe, cambiar }) {
 
       {!soloTextos && (
         <div className="vt-cluster">
-          {Object.entries(TIPOS_RECURSO)
-            .filter(([tipo]) => !tiposUsados.has(tipo))
-            .map(([tipo, texto]) => (
+          {tiposParaAgregar.map(([tipo, texto]) => (
               <button
                 key={tipo}
                 type="button"
@@ -333,6 +372,73 @@ function Recursos({ paso, soloTextos, campo, errores, idDe, cambiar }) {
         </div>
       )}
     </fieldset>
+  )
+}
+
+
+function CamposVideo({ recurso, ruta, soloTextos, campo, errores, idDe, cambiar }) {
+  const esNuevo = recurso.url !== undefined
+  const idVista = esNuevo ? extraerIdVideo(recurso.url) : recurso.idVideo
+  const idCampo = idDe(`${ruta}.url`)
+  const error = errores[`${ruta}.url`]
+
+  return (
+    <>
+      {esNuevo && (
+        <div className="vt-field">
+          <label className="vt-field-label" htmlFor={idCampo}>
+            Enlace de YouTube
+          </label>
+          <p id={`${idCampo}-ayuda`} className="vt-field-help">
+            En YouTube, abre el video, presiona "Compartir" y copia el enlace. Por ejemplo: https://youtu.be/…
+          </p>
+          <input
+            id={idCampo}
+            className="vt-input"
+            type="url"
+            inputMode="url"
+            value={recurso.url}
+            onChange={(evento) => cambiar(`${ruta}.url`, evento.target.value)}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={`${idCampo}-ayuda${error ? ` ${idCampo}-error` : ''}`}
+          />
+          {error && (
+            <p id={`${idCampo}-error`} className="vt-field-error" role="alert">
+              <span className="vt-icon" aria-hidden="true">
+                error
+              </span>
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!esNuevo && error && (
+        <p id={idCampo} tabIndex={-1} className="vt-field-error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <CampoTexto {...campo(`${ruta}.titulo`, 'Título del video (lo leen los lectores de pantalla)', LIMITES_PASO.tituloVideo)} />
+
+      {esIdVideo(idVista) ? (
+        <VideoYouTube idVideo={idVista} titulo={recurso.titulo.trim() || 'Video de YouTube'} />
+      ) : (
+        esNuevo && <p className="vt-body-sm vt-text-muted">Aquí verás el video cuando pegues un enlace válido.</p>
+      )}
+
+      {!esNuevo && !soloTextos && (
+        <div>
+          <button
+            type="button"
+            className="vt-btn vt-btn-outline vt-btn-sm"
+            onClick={() => cambiar(ruta, { tipo: 'video', url: '', titulo: recurso.titulo })}
+          >
+            Cambiar enlace
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 

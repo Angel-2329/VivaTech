@@ -2,6 +2,7 @@ import { CATEGORIAS } from './contenidoDePrueba.js'
 import { armarMisCursos } from './progresoDePrueba.js'
 import { CURSO_RETIRADO, FECHAS_CIERRE } from './estadoCursosDePrueba.js'
 import { esFechaCalendario, hoyEnMexico } from '../../utils/fechas.js'
+import { extraerIdVideo } from '../../utils/youtube.js'
 import {
   MAX_LECCIONES,
   MAX_PASOS,
@@ -49,7 +50,6 @@ const cursos = [
       estadoPublicacion: 'publicado',
       fechaCierre: FECHAS_CIERRE[curso.idCurso] ?? null,
       autor: ADMIN,
-      // Copia: lo que se edite aquí no cambia lo que ve el alumno simulado
       lecciones: structuredClone(curso.lecciones),
       avanceFijo: null,
     })),
@@ -133,7 +133,7 @@ function resumenCurso(curso, usuario) {
 }
 
 
-// El orden se calcula por la posición, siempre de 1 a n
+
 function detalleCurso(curso, usuario) {
   return {
     ...resumenCurso(curso, usuario),
@@ -357,10 +357,6 @@ export function eliminarCategoriaPrueba(idCategoria, usuario) {
   return { respuesta: undefined }
 }
 
-// ---- Editor de lecciones y pasos (3.23.10) ----
-// Rutas y respuestas acordadas con Angel. Cada escritura responde solo su recurso
-// (o 204 sin cuerpo); la pantalla vuelve a pedir el detalle del curso después.
-
 function errorDetallado(mensaje, estado, codigo, errores) {
   return { error: { mensaje, estado, codigo, errores } }
 }
@@ -384,6 +380,24 @@ function datosInvalidos(errores, recurso) {
     mensaje,
   }))
   return lista.length ? errorDetallado('Revisa los datos del contenido', 400, 'contenido_invalido', lista) : null
+}
+
+
+function convertirVideos(paso) {
+  for (const recurso of paso.recursos) {
+    if (recurso.tipo !== 'video') continue
+    if (recurso.url !== undefined && recurso.idVideo !== undefined) {
+      return { fallo: error('Manda el enlace o el idVideo, no los dos', 400, 'video_invalido') }
+    }
+    if (recurso.url !== undefined) {
+      const idVideo = extraerIdVideo(recurso.url)
+      if (!idVideo) return { fallo: error('El enlace no es de un video de YouTube', 400, 'video_invalido') }
+      const { titulo } = recurso
+      for (const clave of Object.keys(recurso)) delete recurso[clave]
+      Object.assign(recurso, { tipo: 'video', plataforma: 'youtube', idVideo, titulo })
+    }
+  }
+  return { paso }
 }
 
 function ubicarLeccion(idLeccion) {
@@ -526,10 +540,12 @@ export function crearPasoPrueba(idLeccion, paso, usuario) {
   if (ubicada.leccion.pasos.length >= MAX_PASOS) {
     return error(`Una lección puede tener hasta ${MAX_PASOS} pasos`, 409, 'limite_pasos')
   }
-  const invalido = datosInvalidos(validarPaso(paso), 'paso')
+  const convertido = convertirVideos(limpiarPaso(paso))
+  if (convertido.fallo) return convertido.fallo
+  const invalido = datosInvalidos(validarPaso(convertido.paso), 'paso')
   if (invalido) return invalido
 
-  const nuevo = { idPaso: String(siguienteIdPaso++), ...limpiarPaso(paso) }
+  const nuevo = { idPaso: String(siguienteIdPaso++), ...convertido.paso }
   ubicada.leccion.pasos.push(nuevo)
   return { respuesta: pasoRespuesta(ubicada.leccion, nuevo) }
 }
@@ -541,10 +557,12 @@ export function actualizarPasoPrueba(idPaso, paso, usuario) {
   if (!ubicado) return error('El paso no existe', 404, 'paso_no_encontrado')
   const { fallo } = buscarCurso(ubicado.curso.idCurso, usuario)
   if (fallo) return fallo
-  const invalido = datosInvalidos(validarPaso(paso), 'paso')
+  const convertido = convertirVideos(limpiarPaso(paso))
+  if (convertido.fallo) return convertido.fallo
+  const limpio = convertido.paso
+  const invalido = datosInvalidos(validarPaso(limpio), 'paso')
   if (invalido) return invalido
 
-  const limpio = limpiarPaso(paso)
   if (cambioEstructural(ubicado.curso) && estructuraPaso(limpio) !== estructuraPaso(ubicado.paso)) {
     return error(
       'En este curso solo puedes corregir textos: no se cambia el tipo, los recursos, las opciones ni la respuesta correcta',
