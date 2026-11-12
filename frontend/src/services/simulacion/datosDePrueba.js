@@ -1,6 +1,5 @@
 // DATOS DE PRUEBA de los servicios simulados.
-// Los cursos y lecciones del Sprint 4 están en contenidoDePrueba.js y progresoDePrueba.js.
-// Aquí quedan los datos del Sprint 3 y las funciones responder y fallar.
+
 
 // ---------- Cuentas (GET /api/admin/usuarios) ----------
 
@@ -51,9 +50,9 @@ export async function responder(valor) {
 }
 
 // Falla igual que solicitarApi: un Error con mensaje, estado y codigo
-export async function fallar(mensaje, estado, codigo) {
+export async function fallar(mensaje, estado, codigo, errores) {
   await new Promise((resolver) => setTimeout(resolver, ESPERA_MS))
-  throw Object.assign(new Error(mensaje), { estado, codigo })
+  throw Object.assign(new Error(mensaje), { estado, codigo, ...(errores ? { errores } : {}) })
 }
 
 export function buscarCuenta(uid) {

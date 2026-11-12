@@ -1,20 +1,29 @@
 import { fallar, responder } from './simulacion/datosDePrueba.js'
 import {
+  actualizarLeccionPrueba,
+  actualizarPasoPrueba,
   armarContenido,
+  armarCursoEditor,
   cambiarCursoPrueba,
   crearCategoriaPrueba,
   crearCursoPrueba,
+  crearLeccionPrueba,
+  crearPasoPrueba,
   eliminarCategoriaPrueba,
   eliminarCursoPrueba,
+  eliminarLeccionPrueba,
+  eliminarPasoPrueba,
   ordenarCategoriasPrueba,
+  ordenarLeccionesPrueba,
+  ordenarPasosPrueba,
   renombrarCategoriaPrueba,
 } from './simulacion/contenidoEditorDePrueba.js'
 
 
 function resolver(resultado) {
   if (resultado.error) {
-    const { mensaje, estado, codigo } = resultado.error
-    return fallar(mensaje, estado, codigo)
+    const { mensaje, estado, codigo, errores } = resultado.error
+    return fallar(mensaje, estado, codigo, errores)
   }
   return responder(resultado.respuesta)
 }
@@ -24,14 +33,13 @@ export async function obtenerContenido(usuario) {
   return responder(armarContenido(usuario))
 }
 
-// fechaCierre es opcional: si no se manda, queda en null. Responde el detalle del curso.
+
 // Real: return solicitarApi('/cursos', { metodo: 'POST', datos: { idCategoria, titulo, descripcion, fechaCierre } })
 export async function crearCurso(datos, usuario) {
   return resolver(crearCursoPrueba(datos, usuario))
 }
 
-// cambios: titulo, descripcion, fechaCierre, estadoPublicacion o idCategoria (solo admin).
-// Responde el detalle del curso.
+
 // Real: return solicitarApi(`/cursos/${idCurso}`, { metodo: 'PATCH', datos: cambios })
 export async function actualizarCurso(idCurso, cambios, usuario) {
   return resolver(cambiarCursoPrueba(idCurso, cambios, usuario))
@@ -63,8 +71,7 @@ export async function renombrarCategoria(idCategoria, nombre, usuario) {
   return resolver(renombrarCategoriaPrueba(idCategoria, { nombre }, usuario))
 }
 
-// La posición en la lista es el orden. Siempre la lista completa, sin faltantes ni repetidos.
-// Responde [{ idCategoria, orden }]; la pantalla después vuelve a pedir GET /api/contenido.
+
 // Real: return solicitarApi('/categorias/orden', { metodo: 'PUT', datos: { idsCategorias } })
 export async function ordenarCategorias(idsCategorias, usuario) {
   return resolver(ordenarCategoriasPrueba({ idsCategorias }, usuario))
@@ -73,4 +80,60 @@ export async function ordenarCategorias(idsCategorias, usuario) {
 // Real: return solicitarApi(`/categorias/${idCategoria}`, { metodo: 'DELETE' })
 export async function eliminarCategoria(idCategoria, usuario) {
   return resolver(eliminarCategoriaPrueba(idCategoria, usuario))
+}
+
+
+
+// 200 detalle del curso con lecciones y pasos (ajenos y retirados con puedeEditar: false)
+// Real: return solicitarApi(`/contenido/cursos/${idCurso}`)
+export async function obtenerCursoEditor(idCurso, usuario) {
+  return resolver(armarCursoEditor(String(idCurso), usuario))
+}
+
+// datos: { titulo, objetivo, duracionEstimadaMinutos } → 201 lección creada
+// Real: return solicitarApi(`/cursos/${idCurso}/lecciones`, { metodo: 'POST', datos })
+export async function crearLeccion(idCurso, datos, usuario) {
+  return resolver(crearLeccionPrueba(idCurso, datos, usuario))
+}
+
+// cambios: solo los campos que cambian. En publicados, solo titulo y objetivo. → 200 lección
+// Real: return solicitarApi(`/lecciones/${idLeccion}`, { metodo: 'PATCH', datos: cambios })
+export async function actualizarLeccion(idLeccion, cambios, usuario) {
+  return resolver(actualizarLeccionPrueba(idLeccion, cambios, usuario))
+}
+
+// 204 sin cuerpo
+// Real: return solicitarApi(`/lecciones/${idLeccion}`, { metodo: 'DELETE' })
+export async function eliminarLeccion(idLeccion, usuario) {
+  return resolver(eliminarLeccionPrueba(idLeccion, usuario))
+}
+
+// Lista completa, sin faltantes ni repetidos → 200 [{ idLeccion, orden }]
+// Real: return solicitarApi(`/cursos/${idCurso}/orden-lecciones`, { metodo: 'PUT', datos: { idsLecciones } })
+export async function ordenarLecciones(idCurso, idsLecciones, usuario) {
+  return resolver(ordenarLeccionesPrueba(idCurso, { idsLecciones }, usuario))
+}
+
+// paso: { instruccion, recursos, actividad }, el formato de docs/contenido/README.md → 201 paso creado
+// Real: return solicitarApi(`/lecciones/${idLeccion}/pasos`, { metodo: 'POST', datos: paso })
+export async function crearPaso(idLeccion, paso, usuario) {
+  return resolver(crearPasoPrueba(idLeccion, paso, usuario))
+}
+
+// Se manda el paso completo; en publicados el backend compara y solo acepta cambios de texto → 200 paso
+// Real: return solicitarApi(`/pasos/${idPaso}`, { metodo: 'PATCH', datos: paso })
+export async function actualizarPaso(idPaso, paso, usuario) {
+  return resolver(actualizarPasoPrueba(idPaso, paso, usuario))
+}
+
+// 204 sin cuerpo
+// Real: return solicitarApi(`/pasos/${idPaso}`, { metodo: 'DELETE' })
+export async function eliminarPaso(idPaso, usuario) {
+  return resolver(eliminarPasoPrueba(idPaso, usuario))
+}
+
+// → 200 [{ idPaso, orden }]
+// Real: return solicitarApi(`/lecciones/${idLeccion}/orden-pasos`, { metodo: 'PUT', datos: { idsPasos } })
+export async function ordenarPasos(idLeccion, idsPasos, usuario) {
+  return resolver(ordenarPasosPrueba(idLeccion, { idsPasos }, usuario))
 }

@@ -2,6 +2,15 @@ import { CATEGORIAS } from './contenidoDePrueba.js'
 import { armarMisCursos } from './progresoDePrueba.js'
 import { CURSO_RETIRADO, FECHAS_CIERRE } from './estadoCursosDePrueba.js'
 import { esFechaCalendario, hoyEnMexico } from '../../utils/fechas.js'
+import {
+  MAX_LECCIONES,
+  MAX_PASOS,
+  estructuraPaso,
+  limpiarPaso,
+  problemaParaPublicar,
+  validarLeccion,
+  validarPaso,
+} from '../../utils/pasos.js'
 
 
 const YO = '__yo__'
@@ -11,6 +20,7 @@ const OTRA_MAESTRA = { uid: 'maestra-demo', nombreCompleto: 'Laura Pérez Gómez
 let siguienteIdCategoria = 3
 let siguienteIdCurso = 15
 let siguienteIdLeccion = 90
+let siguienteIdPaso = 900
 
 function leccionDePrueba(titulo) {
   return {
@@ -39,7 +49,8 @@ const cursos = [
       estadoPublicacion: 'publicado',
       fechaCierre: FECHAS_CIERRE[curso.idCurso] ?? null,
       autor: ADMIN,
-      lecciones: curso.lecciones,
+      // Copia: lo que se edite aquí no cambia lo que ve el alumno simulado
+      lecciones: structuredClone(curso.lecciones),
       avanceFijo: null,
     })),
   ),
@@ -122,8 +133,16 @@ function resumenCurso(curso, usuario) {
 }
 
 
+// El orden se calcula por la posición, siempre de 1 a n
 function detalleCurso(curso, usuario) {
-  return { ...resumenCurso(curso, usuario), lecciones: curso.lecciones }
+  return {
+    ...resumenCurso(curso, usuario),
+    lecciones: curso.lecciones.map((leccion, posicion) => ({
+      ...leccion,
+      orden: posicion + 1,
+      pasos: leccion.pasos.map((paso, numero) => ({ ...paso, orden: numero + 1 })),
+    })),
+  }
 }
 
 function resumenCategoria(categoria) {
@@ -234,6 +253,9 @@ export function cambiarCursoPrueba(idCurso, cambios, usuario) {
     if (curso.lecciones.length === 0) {
       return error('Agrega al menos una lección antes de publicar el curso', 409, 'curso_sin_lecciones')
     }
+    // De 1 a 10 lecciones, de 3 a 8 pasos cada una y al menos una práctica
+    const problema = problemaParaPublicar(curso.lecciones)
+    if (problema) return error(problema, 409, 'contenido_incompleto')
     curso.estadoPublicacion = 'publicado'
   }
 
@@ -333,4 +355,233 @@ export function eliminarCategoriaPrueba(idCategoria, usuario) {
     actual.orden = posicion + 1
   })
   return { respuesta: undefined }
+}
+
+// ---- Editor de lecciones y pasos (3.23.10) ----
+// Rutas y respuestas acordadas con Angel. Cada escritura responde solo su recurso
+// (o 204 sin cuerpo); la pantalla vuelve a pedir el detalle del curso después.
+
+function errorDetallado(mensaje, estado, codigo, errores) {
+  return { error: { mensaje, estado, codigo, errores } }
+}
+
+// Agregar, quitar o reordenar no se permite en publicados ni con avance (igual que validarCambioEstructural)
+function cambioEstructural(curso) {
+  if (curso.estadoPublicacion === 'publicado') {
+    return error('Un curso publicado solo permite las correcciones autorizadas', 409, 'curso_publicado')
+  }
+  if (tieneAvance(curso)) {
+    return error('No se puede cambiar la estructura de un curso con avance registrado', 409, 'curso_con_avance')
+  }
+  return null
+}
+
+// 400 contenido_invalido con el desglose { ruta, codigo, mensaje } que manda el backend
+function datosInvalidos(errores, recurso) {
+  const lista = Object.entries(errores).map(([ruta, mensaje]) => ({
+    ruta: `${recurso}.${ruta.replace(/\.(\d+)/g, '[$1]')}`,
+    codigo: 'contenido_invalido',
+    mensaje,
+  }))
+  return lista.length ? errorDetallado('Revisa los datos del contenido', 400, 'contenido_invalido', lista) : null
+}
+
+function ubicarLeccion(idLeccion) {
+  for (const curso of cursos) {
+    const leccion = curso.lecciones.find((actual) => actual.idLeccion === idLeccion)
+    if (leccion) return { curso, leccion }
+  }
+  return null
+}
+
+function ubicarPaso(idPaso) {
+  for (const curso of cursos) {
+    for (const leccion of curso.lecciones) {
+      const paso = leccion.pasos.find((actual) => actual.idPaso === idPaso)
+      if (paso) return { curso, leccion, paso }
+    }
+  }
+  return null
+}
+
+function listaCompleta(ids, elementos, campo) {
+  return (
+    Array.isArray(ids) &&
+    ids.length === elementos.length &&
+    new Set(ids).size === ids.length &&
+    ids.every((id) => elementos.some((elemento) => elemento[campo] === id))
+  )
+}
+
+function reordenar(elementos, ids, campo) {
+  const copia = ids.map((id) => elementos.find((elemento) => elemento[campo] === id))
+  elementos.splice(0, elementos.length, ...copia)
+}
+
+function leccionRespuesta(curso, leccion) {
+  return {
+    ...leccion,
+    orden: curso.lecciones.indexOf(leccion) + 1,
+    pasos: leccion.pasos.map((paso, numero) => ({ ...paso, orden: numero + 1 })),
+  }
+}
+
+function pasoRespuesta(leccion, paso) {
+  return { ...paso, orden: leccion.pasos.indexOf(paso) + 1 }
+}
+
+// GET /api/contenido/cursos/:idCurso → 200 detalle (también ajenos y retirados, de solo lectura)
+export function armarCursoEditor(idCurso, usuario) {
+  const curso = cursos.find((actual) => actual.idCurso === idCurso)
+  if (!curso) return error('El curso no existe', 404, 'curso_no_encontrado')
+  return { respuesta: detalleCurso(curso, usuario) }
+}
+
+// POST /api/cursos/:idCurso/lecciones → 201 lección creada
+export function crearLeccionPrueba(idCurso, datos, usuario) {
+  const { curso, fallo } = buscarCurso(idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(curso)
+  if (bloqueo) return bloqueo
+  if (curso.lecciones.length >= MAX_LECCIONES) {
+    return error(`Un curso puede tener hasta ${MAX_LECCIONES} lecciones`, 409, 'limite_lecciones')
+  }
+  const invalido = datosInvalidos(validarLeccion(datos), 'leccion')
+  if (invalido) return invalido
+
+  const leccion = {
+    idLeccion: String(siguienteIdLeccion++),
+    titulo: datos.titulo.trim(),
+    objetivo: datos.objetivo.trim(),
+    duracionEstimadaMinutos: Number(datos.duracionEstimadaMinutos),
+    pasos: [],
+  }
+  curso.lecciones.push(leccion)
+  return { respuesta: leccionRespuesta(curso, leccion) }
+}
+
+// PATCH /api/lecciones/:idLeccion → 200 lección actualizada. Se mandan solo los campos que cambian.
+// En publicados (o con avance) solo se corrigen título y objetivo; la duración no.
+export function actualizarLeccionPrueba(idLeccion, cambios, usuario) {
+  const ubicada = ubicarLeccion(idLeccion)
+  if (!ubicada) return error('La lección no existe', 404, 'leccion_no_encontrada')
+  const { curso, leccion } = ubicada
+  const { fallo } = buscarCurso(curso.idCurso, usuario)
+  if (fallo) return fallo
+
+  const cambiaDuracion =
+    cambios.duracionEstimadaMinutos !== undefined &&
+    Number(cambios.duracionEstimadaMinutos) !== leccion.duracionEstimadaMinutos
+  if (cambiaDuracion && cambioEstructural(curso)) {
+    return error('En este curso solo se corrigen el título y el objetivo de la lección', 409, 'curso_publicado')
+  }
+
+  const resultado = { ...leccion, ...cambios }
+  const invalido = datosInvalidos(validarLeccion(resultado), 'leccion')
+  if (invalido) return invalido
+
+  if (cambios.titulo !== undefined) leccion.titulo = cambios.titulo.trim()
+  if (cambios.objetivo !== undefined) leccion.objetivo = cambios.objetivo.trim()
+  if (cambios.duracionEstimadaMinutos !== undefined) {
+    leccion.duracionEstimadaMinutos = Number(cambios.duracionEstimadaMinutos)
+  }
+  return { respuesta: leccionRespuesta(curso, leccion) }
+}
+
+// DELETE /api/lecciones/:idLeccion → 204 sin cuerpo
+export function eliminarLeccionPrueba(idLeccion, usuario) {
+  const ubicada = ubicarLeccion(idLeccion)
+  if (!ubicada) return error('La lección no existe', 404, 'leccion_no_encontrada')
+  const { fallo } = buscarCurso(ubicada.curso.idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(ubicada.curso)
+  if (bloqueo) return bloqueo
+
+  ubicada.curso.lecciones.splice(ubicada.curso.lecciones.indexOf(ubicada.leccion), 1)
+  return { respuesta: undefined }
+}
+
+// PUT /api/cursos/:idCurso/orden-lecciones con { idsLecciones } → 200 [{ idLeccion, orden }]
+export function ordenarLeccionesPrueba(idCurso, { idsLecciones }, usuario) {
+  const { curso, fallo } = buscarCurso(idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(curso)
+  if (bloqueo) return bloqueo
+  if (!listaCompleta(idsLecciones, curso.lecciones, 'idLeccion')) {
+    return error('El nuevo orden debe incluir todas las lecciones una sola vez', 400, 'orden_invalido')
+  }
+
+  reordenar(curso.lecciones, idsLecciones, 'idLeccion')
+  return { respuesta: curso.lecciones.map((leccion, posicion) => ({ idLeccion: leccion.idLeccion, orden: posicion + 1 })) }
+}
+
+// POST /api/lecciones/:idLeccion/pasos → 201 paso creado
+export function crearPasoPrueba(idLeccion, paso, usuario) {
+  const ubicada = ubicarLeccion(idLeccion)
+  if (!ubicada) return error('La lección no existe', 404, 'leccion_no_encontrada')
+  const { fallo } = buscarCurso(ubicada.curso.idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(ubicada.curso)
+  if (bloqueo) return bloqueo
+  if (ubicada.leccion.pasos.length >= MAX_PASOS) {
+    return error(`Una lección puede tener hasta ${MAX_PASOS} pasos`, 409, 'limite_pasos')
+  }
+  const invalido = datosInvalidos(validarPaso(paso), 'paso')
+  if (invalido) return invalido
+
+  const nuevo = { idPaso: String(siguienteIdPaso++), ...limpiarPaso(paso) }
+  ubicada.leccion.pasos.push(nuevo)
+  return { respuesta: pasoRespuesta(ubicada.leccion, nuevo) }
+}
+
+// PATCH /api/pasos/:idPaso → 200 paso actualizado.
+// En publicados (o con avance) el backend compara: solo se aceptan cambios de texto.
+export function actualizarPasoPrueba(idPaso, paso, usuario) {
+  const ubicado = ubicarPaso(idPaso)
+  if (!ubicado) return error('El paso no existe', 404, 'paso_no_encontrado')
+  const { fallo } = buscarCurso(ubicado.curso.idCurso, usuario)
+  if (fallo) return fallo
+  const invalido = datosInvalidos(validarPaso(paso), 'paso')
+  if (invalido) return invalido
+
+  const limpio = limpiarPaso(paso)
+  if (cambioEstructural(ubicado.curso) && estructuraPaso(limpio) !== estructuraPaso(ubicado.paso)) {
+    return error(
+      'En este curso solo puedes corregir textos: no se cambia el tipo, los recursos, las opciones ni la respuesta correcta',
+      409,
+      'curso_publicado',
+    )
+  }
+
+  Object.assign(ubicado.paso, limpio)
+  return { respuesta: pasoRespuesta(ubicado.leccion, ubicado.paso) }
+}
+
+// DELETE /api/pasos/:idPaso → 204 sin cuerpo
+export function eliminarPasoPrueba(idPaso, usuario) {
+  const ubicado = ubicarPaso(idPaso)
+  if (!ubicado) return error('El paso no existe', 404, 'paso_no_encontrado')
+  const { fallo } = buscarCurso(ubicado.curso.idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(ubicado.curso)
+  if (bloqueo) return bloqueo
+
+  ubicado.leccion.pasos.splice(ubicado.leccion.pasos.indexOf(ubicado.paso), 1)
+  return { respuesta: undefined }
+}
+
+// PUT /api/lecciones/:idLeccion/orden-pasos con { idsPasos } → 200 [{ idPaso, orden }]
+export function ordenarPasosPrueba(idLeccion, { idsPasos }, usuario) {
+  const ubicada = ubicarLeccion(idLeccion)
+  if (!ubicada) return error('La lección no existe', 404, 'leccion_no_encontrada')
+  const { fallo } = buscarCurso(ubicada.curso.idCurso, usuario)
+  if (fallo) return fallo
+  const bloqueo = cambioEstructural(ubicada.curso)
+  if (bloqueo) return bloqueo
+  if (!listaCompleta(idsPasos, ubicada.leccion.pasos, 'idPaso')) {
+    return error('El nuevo orden debe incluir todos los pasos una sola vez', 400, 'orden_invalido')
+  }
+
+  reordenar(ubicada.leccion.pasos, idsPasos, 'idPaso')
+  return { respuesta: ubicada.leccion.pasos.map((paso, posicion) => ({ idPaso: paso.idPaso, orden: posicion + 1 })) }
 }
