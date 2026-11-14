@@ -1,67 +1,49 @@
-import { clasesOpcion, useRespuesta } from '../../hooks/useRespuesta.js'
+import { useRespuesta } from '../../hooks/useRespuesta.js'
+import BotonesApp from '../simulador/BotonesApp.jsx'
+import EncabezadoAppBanco from '../simulador/EncabezadoAppBanco.jsx'
+import TelefonoSimulado from '../simulador/TelefonoSimulado.jsx'
 import { BotonContinuar, MensajesRespuesta } from './RespuestaActividad.jsx'
 import './Actividades.css'
 
+
 function ActividadToque({ actividad, guardando, onCompletar }) {
   const respuesta = useRespuesta(actividad.correcta)
-  const { acerto, ultimaIncorrecta, elegir } = respuesta
+  const { acerto, ultimaIncorrecta, intentosFallidos, elegir } = respuesta
+  const titulo = actividad.pantalla?.titulo ?? 'Banco Ejemplo'
+
+  let aviso = null
+  if (acerto) {
+    aviso = (
+      <p className="app-banco__aviso is-correcto" aria-hidden="true">
+        <span className="vt-icon">check_circle</span>
+        ¡Correcto!
+      </p>
+    )
+  } else if (ultimaIncorrecta) {
+    aviso = (
+      <p key={intentosFallidos} className="app-banco__aviso is-incorrecto" aria-hidden="true">
+        <span className="vt-icon">info</span>
+        Ese no es. Intenta otra vez
+      </p>
+    )
+  }
 
   return (
     <div className="vt-stack">
-      <div className="vt-simulator simulador">
-        <p className="vt-simulator__titlebar">
-          <span className="vt-cluster">
-            <span className="vt-icon" aria-hidden="true">
-              smartphone
-            </span>
-            {actividad.pantalla?.titulo}
-          </span>
-        </p>
-        <p className="vt-simulator__notice">
-          <span className="vt-icon" aria-hidden="true">
-            school
-          </span>
-          Práctica: no es la aplicación real de tu banco
-        </p>
-
-        <div className="vt-simulator__content vt-stack">
-          {actividad.pantalla?.subtitulo && (
-            <p className="vt-headline-sm">{actividad.pantalla.subtitulo}</p>
-          )}
-
-          <ul className="simulador__opciones" aria-label="Botones de la pantalla de práctica">
-            {actividad.opciones.map((opcion) => {
-              const esCorrectaElegida = acerto && opcion.id === actividad.correcta
-              const esIncorrectaElegida = opcion.id === ultimaIncorrecta
-
-              return (
-                <li key={opcion.id}>
-                  <button
-                    type="button"
-                    className={clasesOpcion('simulador__boton', { esCorrectaElegida, esIncorrectaElegida })}
-                    onClick={() => elegir(opcion.id)}
-                    aria-disabled={acerto && !esCorrectaElegida ? 'true' : undefined}
-                  >
-                    {opcion.icono && (
-                      <span className="vt-icon" aria-hidden="true">
-                        {opcion.icono}
-                      </span>
-                    )}
-                    <span className="simulador__texto">{opcion.texto}</span>
-                    {esCorrectaElegida && (
-                      <span className="vt-icon simulador__marca" aria-hidden="true">
-                        check_circle
-                      </span>
-                    )}
-                    {esCorrectaElegida && <span className="vt-visually-hidden"> (correcto)</span>}
-                    {esIncorrectaElegida && <span className="vt-visually-hidden"> (no es este)</span>}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+      <TelefonoSimulado etiqueta={`Pantalla de práctica: ${titulo}`} aviso={aviso}>
+        <EncabezadoAppBanco titulo={titulo} />
+        <div className="app-banco__contenido">
+          {actividad.pantalla?.subtitulo && <p className="app-banco__subtitulo">{actividad.pantalla.subtitulo}</p>}
+          <BotonesApp
+            opciones={actividad.opciones}
+            correcta={actividad.correcta}
+            acerto={acerto}
+            ultimaIncorrecta={ultimaIncorrecta}
+            intentosFallidos={intentosFallidos}
+            onElegir={elegir}
+          />
         </div>
-      </div>
+      </TelefonoSimulado>
 
       <MensajesRespuesta {...respuesta} mensajeAcierto={actividad.mensajeAcierto} pista={actividad.pista} />
 

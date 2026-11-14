@@ -1,0 +1,380 @@
+.telefono {
+  width: 100%;
+  max-width: 23rem;
+}
+
+.telefono__marco {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.5rem;
+  border-radius: 2.25rem;
+  background: linear-gradient(160deg, #2a3142, #131b2e);
+  box-shadow:
+    0 0 0 1px #0b1020,
+    0 18px 40px rgb(19 27 46 / 28%);
+}
+
+.telefono__barra-estado {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 1.1rem 0.4rem;
+  border-radius: 1.75rem 1.75rem 0 0;
+  background-color: var(--vt-primary);
+  color: #ffffff;
+  font-family: var(--vt-font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.telefono__camara {
+  position: absolute;
+  left: 50%;
+  top: 0.4rem;
+  width: 4.5rem;
+  height: 1rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background-color: #0b1020;
+}
+
+.telefono__iconos {
+  display: inline-flex;
+  gap: 0.15rem;
+}
+
+.telefono__iconos .vt-icon {
+  font-size: 1rem;
+}
+
+.telefono__practica {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vt-space-xs);
+  padding: 0.3rem var(--vt-space-sm);
+  background-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+  text-align: center;
+}
+
+.telefono__pantalla {
+  position: relative;
+  padding-bottom: var(--vt-space-xs);
+  background-color: var(--vt-surface);
+}
+
+.telefono__inicio {
+  width: 7rem;
+  height: 0.3rem;
+  margin: 0.55rem auto 0.25rem;
+  border-radius: 999px;
+  background-color: #8a93a8;
+}
+
+/* ---- App de ejemplo ---- */
+
+.app-banco__encabezado {
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-md);
+  padding-block-end: 2.25rem;
+  background: linear-gradient(135deg, var(--vt-primary) 0%, var(--vt-action) 100%);
+  color: #ffffff;
+}
+
+.app-banco__logo {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.8rem;
+  background-color: #ffffff;
+  color: var(--vt-primary);
+  font-family: var(--vt-font-heading);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-banco__titulos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-banco__marca {
+  font-size: var(--vt-label-md);
+  opacity: 0.92;
+}
+
+.app-banco__titulo {
+  overflow-wrap: anywhere;
+  font-family: var(--vt-font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.app-banco__perfil {
+  font-size: 1.9rem;
+  opacity: 0.9;
+}
+
+/* Tarjeta blanca que se monta sobre el encabezado, como en las apps reales */
+.app-banco__contenido {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-md);
+  margin: -1.5rem var(--vt-space-sm) var(--vt-space-sm);
+  padding: var(--vt-space-md);
+  border-radius: 1.25rem;
+  background-color: var(--vt-surface-lowest);
+  box-shadow: 0 6px 18px rgb(19 27 46 / 12%);
+}
+
+.app-banco__subtitulo {
+  overflow-wrap: anywhere;
+  font-family: var(--vt-font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--vt-on-surface);
+}
+
+/* Mosaico de accesos rápidos */
+.app-banco__mosaico {
+  display: grid;
+  grid-template-columns: repeat(var(--columnas, 2), minmax(0, 1fr));
+  gap: var(--vt-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-banco__acceso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--vt-space-xs);
+  width: 100%;
+  height: 100%;
+  min-height: 6rem;
+  padding: var(--vt-space-sm) var(--vt-space-xs);
+  border: var(--vt-border) solid var(--vt-outline);
+  border-radius: 1rem;
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  font: inherit;
+  font-family: var(--vt-font-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Lista tipo menú */
+.app-banco__lista {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--vt-border-thin) solid var(--vt-outline);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.app-banco__lista li + li {
+  border-top: var(--vt-border-thin) solid var(--vt-outline-variant);
+}
+
+.app-banco__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  width: 100%;
+  min-height: var(--vt-touch-target-mobile);
+  padding: var(--vt-space-sm) var(--vt-space-md);
+  border: 0;
+  background-color: var(--vt-surface-lowest);
+  color: var(--vt-on-surface);
+  font: inherit;
+  font-family: var(--vt-font-heading);
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.app-banco__burbuja {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background-color: var(--vt-primary-fixed);
+  color: var(--vt-on-primary-fixed-variant);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.app-banco__texto {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.app-banco__flecha {
+  color: var(--vt-on-surface-variant);
+}
+
+/* Estados: tocar, enfocar, correcto e incorrecto */
+.app-banco__acceso,
+.app-banco__fila {
+  transition: transform 0.12s ease, background-color 0.2s, border-color 0.2s;
+}
+
+.app-banco__acceso:hover,
+.app-banco__fila:hover {
+  background-color: var(--vt-surface-low);
+}
+
+.app-banco__acceso:active,
+.app-banco__fila:active {
+  transform: scale(0.97);
+}
+
+.app-banco__acceso:focus-visible,
+.app-banco__fila:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--vt-action);
+  outline-offset: 2px;
+}
+
+.app-banco__acceso[aria-disabled="true"],
+.app-banco__fila[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.app-banco__acceso.is-correcta,
+.app-banco__fila.is-correcta {
+  border-color: var(--vt-secondary);
+  background-color: var(--vt-secondary-container);
+  color: var(--vt-on-secondary-fixed-variant);
+}
+
+.is-correcta .app-banco__burbuja {
+  background-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+  animation: aparecer-palomita 0.35s ease-out;
+}
+
+.is-correcta .app-banco__flecha {
+  color: var(--vt-secondary);
+}
+
+.app-banco__acceso.is-incorrecta,
+.app-banco__fila.is-incorrecta {
+  border-color: var(--vt-error);
+  box-shadow: inset 0 0 0 2px var(--vt-error);
+  animation-duration: 0.35s;
+  animation-timing-function: ease-in-out;
+}
+
+/* Avisos dentro del celular (lo que se lee en voz alta está fuera) */
+.app-banco__aviso {
+  position: absolute;
+  z-index: 2;
+  top: var(--vt-space-sm);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  max-width: calc(100% - 1.5rem);
+  padding: 0.4rem 0.85rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgb(19 27 46 / 22%);
+  /* Aparece, se queda un momento y se oculta solo, como los avisos de una app real */
+  animation: aviso-temporal 2.8s ease-out forwards;
+  pointer-events: none;
+}
+
+.app-banco__aviso.is-correcto {
+  background-color: var(--vt-secondary);
+  color: var(--vt-on-secondary);
+}
+
+.app-banco__aviso.is-incorrecto {
+  background-color: var(--vt-on-surface);
+  color: #ffffff;
+}
+
+@keyframes sacudir-a {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+@keyframes sacudir-b {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+@keyframes aparecer-palomita {
+  from { transform: scale(0.4); }
+  to { transform: scale(1); }
+}
+
+@keyframes aviso-temporal {
+  0% { opacity: 0; transform: translate(-50%, -0.6rem); }
+  10%, 85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; visibility: hidden; transform: translate(-50%, -0.6rem); }
+}
+
+/* Quien pide menos movimiento no ve animaciones */
+@media (prefers-reduced-motion: reduce) {
+  /* Sin animación el aviso no se ocultaría: se muestra fijo arriba de la pantalla */
+  .app-banco__aviso {
+    position: static;
+    margin: var(--vt-space-xs) auto 0;
+    transform: none;
+    width: fit-content;
+  }
+
+  .telefono *,
+  .telefono *::before,
+  .telefono *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Celulares muy angostos: el marco se adelgaza */
+@media (max-width: 22rem) {
+  .telefono__marco {
+    padding: 0.3rem;
+    border-radius: 1.6rem;
+  }
+
+  .app-banco__acceso {
+    min-height: 5.25rem;
+    font-size: 0.85rem;
+  }
+}
