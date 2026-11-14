@@ -4,7 +4,7 @@ import { EstadoCarga, EstadoError } from '../../components/panel/EstadosCarga.js
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { obtenerMisCursos } from '../../services/cursosService.js'
-import { cursosVigentes, rutaLeccion, siguienteLeccion } from '../../utils/cursos.js'
+import { cursosVigentes, rutaLeccion, siguienteLeccion, todosLosCursos } from '../../utils/cursos.js'
 import { plural } from '../../utils/formato.js'
 import { nombreParaSaludo } from '../../utils/nombreParaSaludo.js'
 import './Estudiante.css'
@@ -35,6 +35,8 @@ function ResumenAlumno({ categorias }) {
     curso.lecciones.some((leccion) => leccion.estado !== 'pendiente')
   ).length
   const siguiente = siguienteLeccion(categorias)
+  // Los certificados cuentan todos los cursos, también los retirados
+  const totalCertificados = todosLosCursos(categorias).filter((curso) => curso.certificado).length
   const continuar = siguiente?.leccion.estado === 'en_progreso'
 
   let aviso = 'Empieza tu primera lección'
@@ -94,9 +96,18 @@ function ResumenAlumno({ categorias }) {
           <h2 id="titulo-certificados" className="vt-headline-sm">
             Mis certificados
           </h2>
-          <p className="vt-text-muted">
-            Aún no tienes certificados. Los obtendrás al terminar un curso.
-          </p>
+          {totalCertificados > 0 ? (
+            <>
+              <p className="vt-text-muted">Tienes {plural(totalCertificados, 'certificado', 'certificados')}.</p>
+              <div>
+                <Link className="vt-btn vt-btn-secondary vt-btn-sm" to="/estudiante/certificados">
+                  Ver mis certificados
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="vt-text-muted">Aún no tienes certificados. Los obtendrás al terminar un curso.</p>
+          )}
         </section>
       </div>
 

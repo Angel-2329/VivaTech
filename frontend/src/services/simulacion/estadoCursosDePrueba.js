@@ -13,6 +13,8 @@ export const CURSO_RETIRADO = {
   titulo: 'Usar el cajero automático',
   descripcion: 'Retira efectivo y consulta tu saldo en el cajero sin prisas.',
   cursoCompletado: true,
+  leccionesAlRetirar: ['Encontrar un cajero seguro', 'Retirar efectivo paso a paso', 'Consultar tu saldo en el cajero'],
+  fechaFinalizacionCurso: '2026-10-28T18:00:00.000Z',
 }
 
 export function estadoSegunFecha(fechaCierre) {

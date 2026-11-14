@@ -1,21 +1,58 @@
-import { useId } from 'react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { useSesion } from '../../context/SesionContext.jsx'
+import { obtenerCertificado } from '../../services/certificadosService.js'
 
-// "Obtener certificado" o "Ver certificado".
-// Desactivado hasta la 3.26.3, que hace la pantalla de certificados.
-function BotonCertificado({ certificado }) {
-  const id = useId()
 
-  return (
-    <span className="vt-stack vt-stack-sm">
-      <button type="button" className="vt-btn vt-btn-success" disabled aria-describedby={`${id}-pronto`}>
+function BotonCertificado({ idCurso, tituloCurso, certificado }) {
+  const { usuario } = useSesion()
+  const navegar = useNavigate()
+  const [obteniendo, setObteniendo] = useState(false)
+  const [error, setError] = useState('')
+
+  if (certificado) {
+    return (
+      <Link className="vt-btn vt-btn-success" to={`/estudiante/certificados/${certificado.idCertificado}`}>
         <span className="vt-icon" aria-hidden="true">
           workspace_premium
         </span>
-        {certificado ? 'Ver certificado' : 'Obtener certificado'}
+        Ver certificado
+        {tituloCurso && <span className="vt-visually-hidden"> de {tituloCurso}</span>}
+      </Link>
+    )
+  }
+
+  async function obtener() {
+    if (obteniendo) return
+    setObteniendo(true)
+    setError('')
+    try {
+      const nuevo = await obtenerCertificado(idCurso, usuario)
+      navegar(`/estudiante/certificados/${nuevo.idCertificado}`)
+    } catch (errorAlObtener) {
+      setError(
+        errorAlObtener.codigo === 'curso_incompleto'
+          ? 'Primero termina todas las lecciones del curso.'
+          : errorAlObtener.message || 'No pudimos obtener tu certificado. Inténtalo otra vez.',
+      )
+      setObteniendo(false)
+    }
+  }
+
+  return (
+    <span className="vt-stack vt-stack-sm">
+      <button type="button" className="vt-btn vt-btn-success" onClick={obtener} disabled={obteniendo} aria-busy={obteniendo}>
+        <span className="vt-icon" aria-hidden="true">
+          workspace_premium
+        </span>
+        {obteniendo ? 'Preparando tu certificado…' : 'Obtener certificado'}
+        {!obteniendo && tituloCurso && <span className="vt-visually-hidden"> de {tituloCurso}</span>}
       </button>
-      <span id={`${id}-pronto`} className="vt-btn-hint">
-        Disponible pronto
-      </span>
+      {error && (
+        <span className="vt-field-error" role="alert">
+          {error}
+        </span>
+      )}
     </span>
   )
 }

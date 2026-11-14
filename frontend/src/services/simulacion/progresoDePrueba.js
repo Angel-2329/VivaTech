@@ -1,4 +1,4 @@
-// AVANCE SIMULADO del alumno con sesión (Sprint 4, tarea 3.23.1).
+// AVANCE SIMULADO del alumno con sesión.
 import { CATEGORIAS } from './contenidoDePrueba.js'
 import { CURSO_RETIRADO, FECHAS_CIERRE, estadoSegunFecha } from './estadoCursosDePrueba.js'
 
@@ -8,7 +8,9 @@ const progresos = new Map([
   ['22', { estado: 'en_progreso', idUltimoPasoCompletado: '108', fechaFinalizacion: null }],
 ])
 
+
 const certificados = new Map()
+let siguienteFolio = 7
 
 function buscarLeccion(idLeccion) {
   for (const categoria of CATEGORIAS) {
@@ -68,6 +70,12 @@ function resumenProgreso(leccion) {
   }
 }
 
+// En GET /api/mis-cursos el certificado llega como { idCertificado, folio } o null
+function resumenCertificado(idCurso) {
+  const certificado = certificados.get(idCurso)
+  return certificado ? { idCertificado: certificado.idCertificado, folio: certificado.folio } : null
+}
+
 function tieneAvance(curso) {
   return curso.lecciones.some((leccion) => estadoDe(leccion.idLeccion) !== 'pendiente')
 }
@@ -81,7 +89,7 @@ function resumenCursoAlumno(curso) {
     estadoCurso: estadoSegunFecha(fechaCierre),
     fechaCierre,
     cursoCompletado: cursoCompletado(curso),
-    certificado: certificados.get(curso.idCurso) ?? null,
+    certificado: resumenCertificado(curso.idCurso),
     lecciones: curso.lecciones.map((leccion) => ({
       idLeccion: leccion.idLeccion,
       titulo: leccion.titulo,
@@ -100,7 +108,7 @@ function resumenCursoRetirado() {
     estadoCurso: 'retirado',
     fechaCierre: null,
     cursoCompletado: CURSO_RETIRADO.cursoCompletado,
-    certificado: certificados.get(CURSO_RETIRADO.idCurso) ?? null,
+    certificado: resumenCertificado(CURSO_RETIRADO.idCurso),
     lecciones: [],
   }
 }
@@ -183,4 +191,85 @@ export function registrarPaso(idLeccion, idPaso) {
       cursoCompletado: cursoCompletado(curso),
     },
   }
+}
+
+
+
+function buscarCurso(idCurso) {
+  for (const categoria of CATEGORIAS) {
+    const curso = categoria.cursos.find((actual) => actual.idCurso === idCurso)
+    if (curso) return curso
+  }
+  return null
+}
+
+const CURSO_INCOMPLETO = {
+  error: { mensaje: 'Primero termina todas las lecciones del curso', estado: 409, codigo: 'curso_incompleto' },
+}
+
+// Copia para responder: así nadie puede cambiar la instantánea guardada
+function copiaCertificado(certificado) {
+  return { ...certificado, lecciones: certificado.lecciones.map((leccion) => ({ ...leccion })) }
+}
+
+// POST /api/cursos/:idCurso/certificado
+// 201 al crearlo; si ya existe, 200 con el mismo (creado: false). Sin terminar: 409 curso_incompleto.
+export function emitirCertificado(idCurso, usuario) {
+  const existente = certificados.get(idCurso)
+  if (existente) return { respuesta: copiaCertificado(existente), creado: false }
+
+  let tituloCurso
+  let lecciones
+  let fechaFinalizacionCurso
+
+  if (idCurso === CURSO_RETIRADO.idCurso) {
+    // Emitido después del retiro: instantánea del retiro + finalización histórica del alumno
+    if (!CURSO_RETIRADO.cursoCompletado) return CURSO_INCOMPLETO
+    tituloCurso = CURSO_RETIRADO.titulo
+    lecciones = CURSO_RETIRADO.leccionesAlRetirar.map((titulo) => ({ titulo }))
+    fechaFinalizacionCurso = CURSO_RETIRADO.fechaFinalizacionCurso
+  } else {
+    const curso = buscarCurso(idCurso)
+    if (!curso) return { error: { mensaje: 'El curso no existe', estado: 404, codigo: 'curso_no_encontrado' } }
+    if (!cursoCompletado(curso)) return CURSO_INCOMPLETO
+    tituloCurso = curso.titulo
+    lecciones = curso.lecciones.map((leccion) => ({ titulo: leccion.titulo }))
+    // La más reciente de las fechas ORIGINALES de finalización (un repaso no la cambia)
+    fechaFinalizacionCurso = curso.lecciones
+      .map((leccion) => progresos.get(leccion.idLeccion)?.fechaFinalizacion)
+      .sort()
+      .at(-1)
+  }
+
+  const numero = siguienteFolio++
+  const certificado = {
+    idCertificado: String(numero),
+    idCurso,
+    folio: `VT-2026-${String(numero).padStart(6, '0')}`,
+    codigoVerificacion: crypto.randomUUID(),
+    // Nombre completo actual al emitirlo; después queda congelado
+    nombreCompleto: usuario.nombreCompleto,
+    tituloCurso,
+    lecciones,
+    fechaFinalizacionCurso,
+    fechaEmision: new Date().toISOString(),
+  }
+  certificados.set(idCurso, certificado)
+  return { respuesta: copiaCertificado(certificado), creado: true }
+}
+
+// GET /api/mis-certificados → los recursos completos del alumno, el más reciente primero
+export function armarMisCertificados() {
+  return [...certificados.values()]
+    .sort((a, b) => b.fechaEmision.localeCompare(a.fechaEmision))
+    .map(copiaCertificado)
+}
+
+// GET /api/certificados/verificar/:codigo (pública).
+// Sin UID, teléfono, idCurso ni idCertificado. Código inválido o inexistente → null (404).
+export function verificarCodigo(codigo) {
+  const certificado = [...certificados.values()].find((actual) => actual.codigoVerificacion === codigo)
+  if (!certificado) return null
+  const { nombreCompleto, tituloCurso, lecciones, folio, fechaFinalizacionCurso, fechaEmision } = copiaCertificado(certificado)
+  return { nombreCompleto, tituloCurso, lecciones, folio, fechaFinalizacionCurso, fechaEmision }
 }
