@@ -126,6 +126,12 @@ function Curso({ curso }) {
 
       <BarraAvance completadas={contarCompletadas(curso.lecciones)} total={curso.lecciones.length} />
 
+      {curso.cursoCompletado && (
+        <div>
+          <BotonCertificado idCurso={curso.idCurso} tituloCurso={curso.titulo} certificado={curso.certificado} />
+        </div>
+      )}
+
       <ol className="vt-lesson-list" aria-label={`Lecciones de ${curso.titulo}`}>
         {curso.lecciones.map((leccion, posicion) => (
           <li
@@ -167,8 +173,7 @@ function Curso({ curso }) {
   )
 }
 
-// Curso retirado: solo título y descripción, sin lecciones.
-// El certificado se decide con cursoCompletado y certificado, no con el arreglo de lecciones.
+
 function CursoRetirado({ curso }) {
   return (
     <section className="vt-card vt-card-flat vt-stack" aria-labelledby={`curso-${curso.idCurso}`}>
@@ -192,7 +197,7 @@ function CursoRetirado({ curso }) {
 
       {curso.cursoCompletado && (
         <div>
-          <BotonCertificado certificado={curso.certificado} />
+          <BotonCertificado idCurso={curso.idCurso} tituloCurso={curso.titulo} certificado={curso.certificado} />
         </div>
       )}
     </section>

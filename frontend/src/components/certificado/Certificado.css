@@ -1,0 +1,377 @@
+
+.certificado {
+  max-width: 50rem;
+  padding: 0.6rem;
+  border: 0;
+  border-radius: var(--vt-radius-xl);
+  background:
+    linear-gradient(135deg, var(--vt-action) 0%, var(--vt-primary) 45%, var(--vt-tertiary-container) 100%);
+  box-shadow: 0 14px 34px rgb(19 27 46 / 16%);
+  break-inside: avoid;
+}
+
+.certificado__marco {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-lg);
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  border-radius: calc(var(--vt-radius-xl) - 0.35rem);
+  background-color: var(--vt-surface-lowest);
+  background-image:
+    radial-gradient(circle at 0 0, var(--vt-primary-fixed) 0, transparent 9rem),
+    radial-gradient(circle at 100% 100%, var(--vt-tertiary-fixed) 0, transparent 9rem),
+    repeating-linear-gradient(45deg, rgb(0 97 148 / 2.5%) 0 2px, transparent 2px 12px);
+  outline: 1px solid var(--vt-tertiary-fixed-dim);
+  outline-offset: -0.75rem;
+}
+
+/* Encabezado: logo, institución y folio */
+.certificado__encabezado {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+}
+
+.certificado__logo {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, var(--vt-action), var(--vt-primary));
+  color: #ffffff;
+}
+
+.certificado__institucion {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.certificado__marca {
+  font-family: var(--vt-font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--vt-primary);
+}
+
+.certificado__lema {
+  font-size: var(--vt-body-sm);
+  color: var(--vt-on-surface-variant);
+}
+
+.certificado__folio {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--vt-outline);
+  border-radius: 999px;
+  background-color: var(--vt-surface-lowest);
+  font-family: var(--vt-font-mono);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--vt-on-surface);
+}
+
+/* Cuerpo: título, nombre y curso, centrados */
+.certificado__cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  text-align: center;
+}
+
+.certificado__titulo {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: var(--vt-font-heading);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vt-primary);
+}
+
+.certificado__subtitulo {
+  margin-top: 0.3rem;
+  font-size: 0.42em;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--vt-tertiary-container);
+}
+
+.certificado__adorno {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: min(18rem, 80%);
+}
+
+.certificado__adorno span:not(.certificado__rombo) {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--vt-tertiary-fixed-dim), transparent);
+}
+
+.certificado__rombo {
+  width: 0.6rem;
+  height: 0.6rem;
+  transform: rotate(45deg);
+  background-color: var(--vt-tertiary-container);
+}
+
+.certificado__frase {
+  font-size: var(--vt-body-md);
+  color: var(--vt-on-surface-variant);
+}
+
+.certificado__nombre {
+  max-width: 100%;
+  padding: 0 var(--vt-space-md) var(--vt-space-xs);
+  border-bottom: 2px solid var(--vt-tertiary-fixed-dim);
+  overflow-wrap: anywhere;
+  font-family: var(--vt-font-heading);
+  font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--vt-action);
+}
+
+.certificado__curso {
+  max-width: 100%;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--vt-radius-md);
+  background-color: var(--vt-tertiary-fixed);
+  overflow-wrap: anywhere;
+  font-family: var(--vt-font-heading);
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  font-weight: 700;
+  color: var(--vt-on-tertiary-fixed-variant);
+}
+
+/* Lecciones en dos columnas cuando hay espacio */
+.certificado__lecciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-sm);
+}
+
+.certificado__etiqueta {
+  margin: 0;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-lg);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vt-on-surface-variant);
+}
+
+.certificado__lecciones ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--vt-space-xs) var(--vt-space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.certificado__lecciones li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-xs);
+  overflow-wrap: anywhere;
+}
+
+.certificado__lecciones .vt-icon {
+  flex-shrink: 0;
+  color: var(--vt-secondary);
+}
+
+/* Pie: datos, sello y QR */
+.certificado__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--vt-space-md);
+  padding-top: var(--vt-space-md);
+  border-top: 1px solid var(--vt-outline-variant);
+}
+
+.certificado__datos {
+  display: grid;
+  flex: 1 1 13rem;
+  gap: var(--vt-space-xs);
+  margin: 0;
+}
+
+.certificado__datos dt {
+  font-size: var(--vt-body-sm);
+  color: var(--vt-on-surface-variant);
+}
+
+.certificado__datos dd {
+  margin: 0;
+  font-family: var(--vt-font-heading);
+  font-weight: 700;
+  color: var(--vt-on-surface);
+}
+
+.certificado__folio-dato {
+  font-family: var(--vt-font-mono);
+  letter-spacing: 0.04em;
+}
+
+.certificado__sello {
+  flex: 0 0 auto;
+  width: 7.5rem;
+  height: 7.5rem;
+  transform: rotate(-8deg);
+}
+
+.certificado__sello-fondo {
+  fill: var(--vt-tertiary-fixed);
+  stroke: var(--vt-tertiary-container);
+  stroke-width: 2;
+}
+
+.certificado__sello-linea {
+  fill: none;
+  stroke: var(--vt-tertiary-container);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.certificado__sello-texto {
+  fill: var(--vt-tertiary-container);
+  font-family: var(--vt-font-heading);
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.certificado__sello-centro {
+  fill: var(--vt-tertiary-container);
+}
+
+.certificado__sello-palomita {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.certificado__sello-anio {
+  fill: #ffffff;
+  font-family: var(--vt-font-heading);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.certificado__qr {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--vt-space-xs);
+  margin: 0;
+  padding: var(--vt-space-sm);
+  border: 1px solid var(--vt-outline);
+  border-radius: var(--vt-radius-md);
+  background-color: #ffffff;
+  font-family: var(--vt-font-heading);
+  font-size: var(--vt-label-md);
+  font-weight: 700;
+  color: var(--vt-on-surface);
+}
+
+.certificado__qr svg {
+  width: 7rem;
+  height: 7rem;
+}
+
+.certificado__aviso {
+  font-size: var(--vt-body-sm);
+  line-height: var(--vt-lh-body-sm);
+  text-align: center;
+  color: var(--vt-on-surface-variant);
+}
+
+/* Celular: el pie se apila y el sello se hace más chico */
+@media (max-width: 30rem) {
+  .certificado__pie {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .certificado__sello {
+    align-self: center;
+    width: 6rem;
+    height: 6rem;
+  }
+
+  .certificado__qr {
+    align-self: center;
+  }
+}
+
+/* Al imprimir o guardar como PDF solo sale el certificado */
+@media print {
+  .certificado__no-imprimir,
+  body:has(.certificado) .vt-back-link,
+  body:has(.certificado) .vt-main h1,
+  body:has(.certificado) .vt-main h1 + p {
+    display: none !important;
+  }
+
+  .certificado {
+    max-width: none;
+    box-shadow: none;
+  }
+
+  .certificado,
+  .certificado * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+.certificado__enlace {
+  overflow-wrap: anywhere;
+  font-family: var(--vt-font-mono);
+  font-size: var(--vt-body-sm);
+}
+
+.mis-certificados {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Página pública de verificación (3.26.4) */
+.verificar__lecciones {
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+
+.verificar {
+  max-width: 48rem;
+}
+
+.verificar__icono {
+  font-size: 2.5rem;
+}
+
+.verificar__folio {
+  font-family: var(--vt-font-mono);
+  letter-spacing: 0.04em;
+}
+
+.vt-verify-status.is-invalid .verificar__icono {
+  color: var(--vt-error);
+}

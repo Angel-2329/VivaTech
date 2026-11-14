@@ -6,6 +6,9 @@ import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
 import Leccion from './pages/estudiante/Leccion.jsx'
+import MisCertificados from './pages/estudiante/MisCertificados.jsx'
+import VistaCertificado from './pages/estudiante/VistaCertificado.jsx'
+import VerificarCertificado from './pages/VerificarCertificado.jsx'
 import ListaGrupos from './pages/grupos/ListaGrupos.jsx'
 import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
@@ -21,6 +24,8 @@ function App() {
       <Route path="/" element={<Navigate to="/acceso" replace />} />
       <Route path="/acceso" element={<Acceso />} />
       <Route path="/aviso-de-privacidad" element={<AvisoPrivacidad />} />
+      {/* Pública: se abre al escanear el QR, con o sin sesión */}
+      <Route path="/verificar/:codigo" element={<VerificarCertificado />} />
 
       {/* Cualquier persona que ya confirmó su código */}
       <Route element={<RutaProtegida />}>
@@ -32,6 +37,8 @@ function App() {
         <Route path="/estudiante" element={<InicioEstudiante />} />
         <Route path="/estudiante/cursos" element={<MisCursos />} />
         <Route path="/estudiante/lecciones/:idLeccion" element={<Leccion />} />
+        <Route path="/estudiante/certificados" element={<MisCertificados />} />
+        <Route path="/estudiante/certificados/:idCertificado" element={<VistaCertificado />} />
       </Route>
 
       {/* Solo maestros */}

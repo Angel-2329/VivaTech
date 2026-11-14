@@ -32,8 +32,10 @@ function LeccionTerminada({ leccion, cursoCompletado, certificado, onRepasar }) 
       </div>
 
       <div className="leccion__acciones">
-        {/* El certificado se activa en la tarea 3.26.3 */}
-        {cursoCompletado && <BotonCertificado certificado={certificado} />}
+        
+        {cursoCompletado && (
+          <BotonCertificado idCurso={leccion.idCurso} tituloCurso={leccion.tituloCurso} certificado={certificado} />
+        )}
 
         {leccion.siguienteLeccion && (
           <Link
