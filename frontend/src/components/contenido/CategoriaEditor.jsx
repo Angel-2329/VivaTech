@@ -100,7 +100,7 @@ function CategoriaEditor({
           {categoria.cursos.map((curso) => (
             <TarjetaCursoEditor
               key={curso.idCurso}
-              curso={curso}
+              curso={{ ...curso, idCategoria: categoria.idCategoria }}
               usuario={usuario}
               categorias={categorias}
               bloqueado={bloqueado}

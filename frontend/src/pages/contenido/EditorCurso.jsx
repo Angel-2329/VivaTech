@@ -51,6 +51,7 @@ function EditorCurso() {
 
   
   async function ejecutar(accion, textoExito) {
+    if (recargaFallo) throw new Error('Vuelve a cargar el curso antes de hacer otro cambio.')
     if (operacionRef.current) return
     operacionRef.current = true
     setModificando(true)
@@ -64,7 +65,26 @@ function EditorCurso() {
         setDatos(await obtenerCursoEditor(idCurso, usuario))
       } catch {
         setRecargaFallo(true)
+        setAgregandoLeccion(false)
+        setDialogo(null)
+        setErrorDialogo('')
       }
+    } finally {
+      operacionRef.current = false
+      setModificando(false)
+    }
+  }
+
+  async function recuperarCurso() {
+    if (operacionRef.current) return
+    operacionRef.current = true
+    setModificando(true)
+    setErrorDialogo('')
+    try {
+      setDatos(await obtenerCursoEditor(idCurso))
+      setRecargaFallo(false)
+    } catch (errorRecarga) {
+      setErrorDialogo(errorRecarga.message || 'No pudimos actualizar el curso. Vuelve a intentarlo.')
     } finally {
       operacionRef.current = false
       setModificando(false)
@@ -93,6 +113,25 @@ function EditorCurso() {
     } finally {
       setProcesandoDialogo(false)
     }
+  }
+
+  if (recargaFallo) {
+    return (
+      <PlantillaPanel titulo="Actualizar curso" regresarA={rutaContenido} textoRegresar="Regresar a Contenido">
+        <MensajeExito texto={mensaje} />
+        <div className="vt-alert vt-alert-warning" role="alert">
+          <div className="vt-alert__content vt-stack vt-stack-sm">
+            <p>El cambio se guardó, pero no pudimos actualizar el curso. Vuelve a cargarlo antes de seguir editando.</p>
+            {errorDialogo && <p>{errorDialogo}</p>}
+            <div>
+              <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" onClick={recuperarCurso} disabled={modificando} aria-busy={modificando}>
+                {modificando ? 'Cargando…' : 'Volver a cargar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </PlantillaPanel>
+    )
   }
 
   if (cargando || error || !curso) {
@@ -131,22 +170,6 @@ function EditorCurso() {
       <AvisoEdicion curso={curso} soloLectura={soloLectura} estructuraBloqueada={estructuraBloqueada} />
 
       <MensajeExito texto={mensaje} />
-
-      {recargaFallo && (
-        <div className="vt-alert vt-alert-warning" role="alert">
-          <span className="vt-icon" aria-hidden="true">
-            sync_problem
-          </span>
-          <div className="vt-alert__content vt-stack vt-stack-sm">
-            <p>El cambio se guardó, pero no pudimos actualizar la lista.</p>
-            <div>
-              <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" onClick={reintentar}>
-                Volver a cargar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {curso.lecciones.length === 0 ? (
         <EstadoVacio icono="menu_book" titulo="Este curso todavía no tiene lecciones">
