@@ -1,0 +1,16 @@
+# SOLO tras eliminar con autorización el progreso exclusivo del ensayo, pasos, lección y curso.
+# Verificar ID, nombre temporal y categoría vacía. No ejecutar la carpeta completa.
+info:
+  name: 289 - Eliminar categoría temporal tras limpieza - 204
+  type: http
+  seq: 289
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaPublicacion}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

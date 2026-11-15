@@ -1,0 +1,16 @@
+# SOLO después de limpieza SQL autorizada del certificado, historiales, cursos y perfil exclusivos del fixture.
+# Confirmar categoría vacía. No usar DELETE idempotente de retirado para intentar purgar historial.
+info:
+  name: 315 - Eliminar categoría temporal tras limpieza - 204
+  type: http
+  seq: 315
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaRetiro}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

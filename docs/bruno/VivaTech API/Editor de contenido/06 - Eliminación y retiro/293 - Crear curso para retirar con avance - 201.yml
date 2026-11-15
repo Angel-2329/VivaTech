@@ -1,0 +1,23 @@
+# Copiar idCurso a idCursoRetiroConAvance. Detenerse después de 294 para preparar fixture SQL.
+info:
+  name: 293 - Crear curso para retirar con avance - 201
+  type: http
+  seq: 293
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaRetiro}}",
+        "titulo": "[PRUEBA S4 RETIRO] Curso con avance",
+        "descripcion": "Curso ficticio para preservar historiales parciales y completos."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

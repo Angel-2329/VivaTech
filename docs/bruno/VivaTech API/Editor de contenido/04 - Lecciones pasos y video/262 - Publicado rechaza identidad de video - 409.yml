@@ -1,0 +1,27 @@
+info:
+  name: 262 - Publicado rechaza identidad de video - 409
+  type: http
+  seq: 262
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/pasos/{{idPasoLPV01Lectura}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "recursos": [{ "tipo": "video", 
+        "plataforma": "youtube", 
+        "idVideo": "xyzDEF12345", 
+        "titulo": "NO DEBE GUARDARSE" }] 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

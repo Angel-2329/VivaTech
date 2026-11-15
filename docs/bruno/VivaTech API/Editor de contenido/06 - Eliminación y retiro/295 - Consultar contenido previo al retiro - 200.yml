@@ -1,0 +1,16 @@
+# SOLO tras fixture SQL autorizado: dos lecciones con tres pasos cada una y avance del perfil ficticio completo.
+# Confirmar IDs de A/B y primer paso A en las variables; comprobar título, autoría y parentescos por SQL.
+info:
+  name: 295 - Consultar contenido previo al retiro - 200
+  type: http
+  seq: 295
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/{{idCursoRetiroConAvance}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

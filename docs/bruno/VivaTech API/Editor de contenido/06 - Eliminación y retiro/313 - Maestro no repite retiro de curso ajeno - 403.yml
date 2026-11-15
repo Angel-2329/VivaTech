@@ -1,0 +1,15 @@
+# Curso del administrador ya retirado. La idempotencia no elimina la comprobación de autoría.
+info:
+  name: 313 - Maestro no repite retiro de curso ajeno - 403
+  type: http
+  seq: 313
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroCertificado}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

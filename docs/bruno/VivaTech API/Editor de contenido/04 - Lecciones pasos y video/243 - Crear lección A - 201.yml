@@ -1,0 +1,23 @@
+# Copiar idLeccion a idLeccionLPV01A. Respuesta inicial pasos [].
+info:
+  name: 243 - Crear lección A - 201
+  type: http
+  seq: 243
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoLPV01Maestro}}/lecciones"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "[PRUEBA S4 LPV01] Leccion A",
+        "objetivo": "Practicar con ejemplos ficticios.",
+        "duracionEstimadaMinutos": 3
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

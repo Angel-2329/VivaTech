@@ -1,0 +1,26 @@
+info:
+  name: 254 - Maestro no crea lección ajena - 403
+  type: http
+  seq: 254
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoLPV01Admin}}/lecciones"
+  body:
+    type: json
+    data: |-
+      { 
+        "titulo": "[PRUEBA S4 LPV01] NO DEBE CREARSE", 
+        "objetivo": "Peticion ajena rechazada.", 
+        "duracionEstimadaMinutos": 3 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

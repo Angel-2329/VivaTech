@@ -1,0 +1,25 @@
+info:
+  name: 261 - Publicado rechaza cambiar duración - 409
+  type: http
+  seq: 261
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "titulo": "[PRUEBA S4 LPV01] NO DEBE GUARDARSE", 
+        "duracionEstimadaMinutos": 5 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

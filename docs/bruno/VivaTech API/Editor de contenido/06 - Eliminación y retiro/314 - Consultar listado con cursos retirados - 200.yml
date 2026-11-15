@@ -1,0 +1,17 @@
+# Retirados como resumen, totalLecciones 0, tieneAvance true y puedeEditar false para ambos.
+# Conservar categorías/cursos iniciales; no exponer UID, certificados completos o historiales.
+# Detenerse después para control SQL y autorización de limpieza.
+info:
+  name: 314 - Consultar listado con cursos retirados - 200
+  type: http
+  seq: 314
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

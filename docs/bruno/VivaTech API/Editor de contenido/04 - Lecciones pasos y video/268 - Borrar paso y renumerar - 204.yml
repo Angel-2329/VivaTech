@@ -1,0 +1,15 @@
+# SOLO tras limpiar el progreso ficticio con autorización y verificar borrador sin avance.
+info:
+  name: 268 - Borrar paso y renumerar - 204
+  type: http
+  seq: 268
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/pasos/{{idPasoLPV01Extra}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

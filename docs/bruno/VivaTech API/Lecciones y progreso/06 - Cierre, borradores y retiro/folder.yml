@@ -1,0 +1,7 @@
+info:
+  name: 06 - Cierre, borradores y retiro
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit

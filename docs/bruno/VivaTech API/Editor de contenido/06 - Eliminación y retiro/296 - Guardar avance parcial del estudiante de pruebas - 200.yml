@@ -1,0 +1,24 @@
+info:
+  name: 296 - Guardar avance parcial del estudiante de pruebas - 200
+  type: http
+  seq: 296
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionRetiroA}}/progreso"
+  body:
+    type: json
+    data: |-
+      { 
+        "idPaso": "{{idPasoRetiroAInicial}}" 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

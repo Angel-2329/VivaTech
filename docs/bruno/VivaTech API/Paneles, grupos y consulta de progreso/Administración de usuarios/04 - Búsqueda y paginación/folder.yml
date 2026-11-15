@@ -1,0 +1,7 @@
+info:
+  name: 04 - Búsqueda y paginación
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit

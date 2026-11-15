@@ -1,0 +1,21 @@
+info:
+  name: 257 - Escritura sin token - 401
+  type: http
+  seq: 257
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "titulo": "[PRUEBA S4 LPV01] NO DEBE GUARDARSE" 
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -1,0 +1,18 @@
+info:
+  name: 219 - Detalle borrador incompleto del maestro - 200
+  type: http
+  seq: 219
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/34"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

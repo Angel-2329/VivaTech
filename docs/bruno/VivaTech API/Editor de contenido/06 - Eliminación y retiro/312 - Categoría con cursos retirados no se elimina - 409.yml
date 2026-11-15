@@ -1,0 +1,16 @@
+# Después de 299/300/302/309, solo deben quedar los dos cursos retirados en esta categoría.
+# Cero lecciones operativas no convierte la categoría en vacía ni autoriza purgar historial.
+info:
+  name: 312 - Categoría con cursos retirados no se elimina - 409
+  type: http
+  seq: 312
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaRetiro}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

@@ -1,0 +1,15 @@
+# B está vacía; su eliminación debe dejar A en orden 1.
+info:
+  name: 269 - Borrar lección y renumerar - 204
+  type: http
+  seq: 269
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01B}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

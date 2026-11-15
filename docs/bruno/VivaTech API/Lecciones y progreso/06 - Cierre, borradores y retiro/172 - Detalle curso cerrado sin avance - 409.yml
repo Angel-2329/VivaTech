@@ -1,0 +1,18 @@
+info:
+  name: 172 - Detalle curso cerrado sin avance - 409
+  type: http
+  seq: 172
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/lecciones/25"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,23 @@
+# Copiar idPaso a idPasoPublicacionLectura. Orden esperado 1.
+info:
+  name: 276 - Crear primer paso de lectura - 201
+  type: http
+  seq: 276
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionPublicacion}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "En esta práctica utiliza solo datos ficticios, nunca información bancaria real.",
+        "recursos": [],
+        "actividad": { "tipo": "lectura" }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

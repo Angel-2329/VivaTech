@@ -1,0 +1,7 @@
+info:
+  name: Editor de contenido
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit

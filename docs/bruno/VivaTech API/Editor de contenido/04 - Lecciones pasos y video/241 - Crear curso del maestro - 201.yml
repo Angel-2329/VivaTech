@@ -1,0 +1,23 @@
+# Copiar idCurso a idCursoLPV01Maestro. No repetir POST después de un 201.
+info:
+  name: 241 - Crear curso del maestro - 201
+  type: http
+  seq: 241
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaLPV01}}",
+        "titulo": "[PRUEBA S4 LPV01] Curso maestro",
+        "descripcion": "Curso temporal para probar lecciones pasos y video."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

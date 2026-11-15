@@ -1,0 +1,18 @@
+info:
+  name: 203 - Listado del editor administrador activo - 200
+  type: http
+  seq: 203
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

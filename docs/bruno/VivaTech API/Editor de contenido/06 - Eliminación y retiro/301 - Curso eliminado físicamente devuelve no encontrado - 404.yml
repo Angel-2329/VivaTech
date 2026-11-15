@@ -1,0 +1,15 @@
+# Requiere éxito y verificación SQL de 300. Este reenvío es un caso de prueba deliberado.
+info:
+  name: 301 - Curso eliminado físicamente devuelve no encontrado - 404
+  type: http
+  seq: 301
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoEliminarPublicado}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

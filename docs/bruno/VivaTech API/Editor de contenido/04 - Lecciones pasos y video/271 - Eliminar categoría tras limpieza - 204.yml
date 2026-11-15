@@ -1,0 +1,16 @@
+# SOLO después de limpiar los dos cursos LPV01 y sus hijos por SQL autorizado con IDs observados.
+# Verificar categoría temporal vacía antes de enviar. No ejecutar la carpeta completa.
+info:
+  name: 271 - Eliminar categoría tras limpieza - 204
+  type: http
+  seq: 271
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaLPV01}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

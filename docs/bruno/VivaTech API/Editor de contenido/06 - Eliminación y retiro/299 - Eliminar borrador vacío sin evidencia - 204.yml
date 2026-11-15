@@ -1,0 +1,16 @@
+# Verificar por SQL nombre/autoría/estado y cero lecciones, progreso, historial o certificados.
+# Un solo envío. Esperar 204 sin cuerpo; no sustituirlo por JSON de retiro.
+info:
+  name: 299 - Eliminar borrador vacío sin evidencia - 204
+  type: http
+  seq: 299
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoEliminarBorrador}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
