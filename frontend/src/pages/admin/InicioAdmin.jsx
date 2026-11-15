@@ -26,6 +26,12 @@ const ACCESOS = [
     titulo: 'Progreso general',
     texto: 'Consulta el avance de todos los estudiantes.',
   },
+  {
+    ruta: '/admin/contenido',
+    icono: 'auto_stories',
+    titulo: 'Contenido',
+    texto: 'Organiza categorías y cursos, y publícalos.',
+  },
 ]
 
 

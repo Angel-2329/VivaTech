@@ -1,0 +1,108 @@
+{
+  "orden": 1,
+  "titulo": "Abrir la aplicación de forma segura",
+  "objetivo": "Instalar y abrir la aplicación de tu banco reconociendo las señales de que es segura.",
+  "duracionEstimadaMinutos": 10,
+  "pasos": [
+    {
+      "orden": 1,
+      "instruccion": "La aplicación de tu banco te deja ver tu dinero y hacer pagos desde el celular. Para usarla con tranquilidad, primero asegúrate de que sea la verdadera.",
+      "recursos": [
+        { "tipo": "icono", "nombre": "smartphone", "alt": "Celular" },
+        {
+          "tipo": "lista",
+          "elementos": [
+            "Descárgala solo de la tienda de tu celular: Play Store o App Store.",
+            "Revisa que el creador de la aplicación sea tu banco.",
+            "Nunca la instales desde un enlace que te mandaron por mensaje."
+          ]
+        }
+      ],
+      "actividad": { "tipo": "lectura" }
+    },
+    {
+      "orden": 2,
+      "instruccion": "Te llega este mensaje: \"Descarga aquí la nueva aplicación de tu banco\", con un enlace.",
+      "recursos": [{ "tipo": "icono", "nombre": "sms", "alt": "Mensaje de texto" }],
+      "actividad": {
+        "tipo": "opcion",
+        "pregunta": "¿Qué haces?",
+        "opciones": [
+          { "id": "a", "texto": "Toco el enlace y la instalo" },
+          { "id": "b", "texto": "Busco la aplicación en la tienda oficial de mi celular" },
+          { "id": "c", "texto": "Le reenvío el mensaje a mi familia" }
+        ],
+        "correcta": "b",
+        "pista": "No instales aplicaciones desde mensajes inesperados. Busca la aplicación en la tienda oficial.",
+        "mensajeAcierto": "¡Exacto! Así te aseguras de tener la aplicación verdadera."
+      }
+    },
+    {
+      "orden": 3,
+      "instruccion": "Para entrar, la aplicación te pide tu contraseña, tu huella o tu cara. Esa forma de entrar es solo tuya.",
+      "recursos": [
+        { "tipo": "icono", "nombre": "lock", "alt": "Candado" },
+        {
+          "tipo": "lista",
+          "elementos": [
+            "No compartas tu contraseña con nadie.",
+            "No la escribas en un papel junto a tu celular.",
+            "Tu huella o tu cara ayudan a proteger el acceso. Mantén también una contraseña segura."
+          ]
+        },
+        { "tipo": "aviso", "texto": "El banco nunca te pide tu contraseña por llamada, mensaje o correo." }
+      ],
+      "actividad": { "tipo": "lectura" }
+    },
+    {
+      "orden": 4,
+      "instruccion": "Abriste la aplicación de Banco Ejemplo. Toca el botón para entrar con tu huella.",
+      "recursos": [],
+      "actividad": {
+        "tipo": "toque",
+        "pantalla": { "titulo": "Banco Ejemplo", "subtitulo": "Hola, ¿cómo quieres entrar?" },
+        "opciones": [
+          { "id": "huella", "texto": "Entrar con huella", "icono": "fingerprint" },
+          { "id": "olvide", "texto": "Olvidé mi contraseña", "icono": "help" },
+          { "id": "cuenta", "texto": "Abrir una cuenta nueva", "icono": "person_add" }
+        ],
+        "correcta": "huella",
+        "pista": "Busca el botón con el dibujo de una huella digital.",
+        "mensajeAcierto": "¡Muy bien! Elegiste cómo entrar con tu huella en esta práctica."
+      }
+    },
+    {
+      "orden": 5,
+      "instruccion": "Cuando termines, cierra tu sesión y cuida desde dónde te conectas.",
+      "recursos": [
+        { "tipo": "icono", "nombre": "logout", "alt": "Cerrar sesión" },
+        {
+          "tipo": "lista",
+          "elementos": [
+            "Toca \"Cerrar sesión\" antes de guardar el celular.",
+            "Usa tus datos móviles o el internet de tu casa, no el wifi público.",
+            "Ponle bloqueo de pantalla a tu celular."
+          ]
+        }
+      ],
+      "actividad": { "tipo": "lectura" }
+    },
+    {
+      "orden": 6,
+      "instruccion": "Estás en un café con wifi gratis y quieres revisar tu saldo.",
+      "recursos": [{ "tipo": "icono", "nombre": "wifi", "alt": "Wifi" }],
+      "actividad": {
+        "tipo": "opcion",
+        "pregunta": "¿Qué es lo más seguro?",
+        "opciones": [
+          { "id": "a", "texto": "Conectarme al wifi del café" },
+          { "id": "b", "texto": "Usar mis datos móviles" },
+          { "id": "c", "texto": "Pedirle prestado el celular a alguien" }
+        ],
+        "correcta": "b",
+        "pista": "Una red pública puede ser falsa o insegura. Prefiere una conexión de confianza.",
+        "mensajeAcierto": "¡Correcto! Tus datos móviles son más seguros para entrar al banco."
+      }
+    }
+  ]
+}

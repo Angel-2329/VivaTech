@@ -4,6 +4,17 @@ export const TEXTO_ESTADO_LECCION = {
   pendiente: 'Sin empezar',
 }
 
+
+export const TEXTO_BOTON_LECCION = {
+  pendiente: 'Empezar',
+  en_progreso: 'Continuar',
+  completada: 'Repasar',
+}
+
+export function rutaLeccion(idLeccion) {
+  return `/estudiante/lecciones/${idLeccion}`
+}
+
 export function contarCompletadas(lecciones) {
   return lecciones.filter((leccion) => leccion.estado === 'completada').length
 }
@@ -14,8 +25,12 @@ export function todosLosCursos(categorias) {
 }
 
 
+export function cursosVigentes(categorias) {
+  return todosLosCursos(categorias).filter((curso) => curso.estadoCurso !== 'retirado')
+}
+
 export function siguienteLeccion(categorias) {
-  const cursos = todosLosCursos(categorias)
+  const cursos = cursosVigentes(categorias)
 
   for (const estado of ['en_progreso', 'pendiente']) {
     for (const curso of cursos) {

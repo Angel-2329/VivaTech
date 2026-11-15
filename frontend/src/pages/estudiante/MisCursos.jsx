@@ -1,9 +1,12 @@
+import { Link } from 'react-router'
+import BotonCertificado from '../../components/certificado/BotonCertificado.jsx'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { obtenerMisCursos } from '../../services/cursosService.js'
-import { TEXTO_ESTADO_LECCION, contarCompletadas } from '../../utils/cursos.js'
+import { TEXTO_BOTON_LECCION, TEXTO_ESTADO_LECCION, contarCompletadas, rutaLeccion } from '../../utils/cursos.js'
+import { textoFecha } from '../../utils/fechas.js'
 import { plural } from '../../utils/formato.js'
 import './Estudiante.css'
 
@@ -14,6 +17,12 @@ const CLASE_INSIGNIA = {
   completada: 'vt-badge vt-badge-success',
   en_progreso: 'vt-badge vt-badge-primary',
   pendiente: 'vt-badge vt-badge-neutral',
+}
+
+const CLASE_BOTON = {
+  en_progreso: 'vt-btn vt-btn-primary vt-btn-sm',
+  pendiente: 'vt-btn vt-btn-secondary vt-btn-sm',
+  completada: 'vt-btn vt-btn-outline vt-btn-sm',
 }
 
 
@@ -82,6 +91,8 @@ function Categoria({ categoria, icono, abiertaAlInicio }) {
 }
 
 function Curso({ curso }) {
+  if (curso.estadoCurso === 'retirado') return <CursoRetirado curso={curso} />
+
   const minutos = curso.lecciones.reduce((suma, leccion) => suma + leccion.duracionEstimadaMinutos, 0)
 
   return (
@@ -94,9 +105,32 @@ function Curso({ curso }) {
         <p className="vt-body-sm vt-text-muted">
           {plural(curso.lecciones.length, 'lección', 'lecciones')} · {minutos} min en total
         </p>
+        {curso.estadoCurso === 'disponible' && curso.fechaCierre && (
+          <p className="vt-cluster vt-body-sm">
+            <span className="vt-icon" aria-hidden="true">
+              event
+            </span>
+            Disponible hasta el {textoFecha(curso.fechaCierre)}
+          </p>
+        )}
       </div>
 
+      {curso.estadoCurso === 'cerrado' && (
+        <div className="vt-alert vt-alert-warning">
+          <span className="vt-icon" aria-hidden="true">
+            event_busy
+          </span>
+          <p className="vt-alert__content">Este curso cerró, pero puedes terminarlo.</p>
+        </div>
+      )}
+
       <BarraAvance completadas={contarCompletadas(curso.lecciones)} total={curso.lecciones.length} />
+
+      {curso.cursoCompletado && (
+        <div>
+          <BotonCertificado idCurso={curso.idCurso} tituloCurso={curso.titulo} certificado={curso.certificado} />
+        </div>
+      )}
 
       <ol className="vt-lesson-list" aria-label={`Lecciones de ${curso.titulo}`}>
         {curso.lecciones.map((leccion, posicion) => (
@@ -128,13 +162,44 @@ function Curso({ curso }) {
               </p>
             </div>
 
-            {/* Las lecciones se abren en el Sprint 4 */}
-            <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" disabled>
-              Disponible pronto
-            </button>
+            <Link className={CLASE_BOTON[leccion.estado]} to={rutaLeccion(leccion.idLeccion)}>
+              {TEXTO_BOTON_LECCION[leccion.estado]}
+              <span className="vt-visually-hidden">: {leccion.titulo}</span>
+            </Link>
           </li>
         ))}
       </ol>
+    </section>
+  )
+}
+
+
+function CursoRetirado({ curso }) {
+  return (
+    <section className="vt-card vt-card-flat vt-stack" aria-labelledby={`curso-${curso.idCurso}`}>
+      <div className="vt-stack vt-stack-sm">
+        <p>
+          <span className="vt-badge vt-badge-neutral">
+            <span className="vt-icon" aria-hidden="true">
+              archive
+            </span>
+            Curso retirado
+          </span>
+        </p>
+        <h2 id={`curso-${curso.idCurso}`} className="vt-headline-md">
+          {curso.titulo}
+        </h2>
+        <p>{curso.descripcion}</p>
+        <p className="vt-body-sm vt-text-muted">
+          Sus lecciones ya no están disponibles. Tu avance quedó guardado.
+        </p>
+      </div>
+
+      {curso.cursoCompletado && (
+        <div>
+          <BotonCertificado idCurso={curso.idCurso} tituloCurso={curso.titulo} certificado={curso.certificado} />
+        </div>
+      )}
     </section>
   )
 }
