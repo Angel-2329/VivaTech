@@ -111,7 +111,7 @@ export function limpiarPaso(paso) {
     if (recurso.tipo === 'aviso') return { tipo: 'aviso', texto: recortar(recurso.texto) }
     // Nunca se mandan url e idVideo juntos: enlace nuevo con url, video existente con idVideo
     if (recurso.tipo === 'video') {
-      if (recurso.url !== undefined) return { tipo: 'video', url: conProtocolo(recortar(recurso.url)), titulo: recortar(recurso.titulo) }
+      if (recurso.url !== undefined) return { tipo: 'video', plataforma: 'youtube', url: conProtocolo(recortar(recurso.url)), titulo: recortar(recurso.titulo) }
       return { tipo: 'video', plataforma: 'youtube', idVideo: recurso.idVideo, titulo: recortar(recurso.titulo) }
     }
     return recurso

@@ -289,7 +289,14 @@ function dialogoDeCurso(curso, tipo, usuario) {
         </p>
       </>
     ) : (
-      <p>Nadie tiene avance en este curso. Se borrará todo: el curso, sus lecciones y sus pasos. Esta acción no se puede deshacer.</p>
+      <>
+        <p>No se muestra avance activo en este curso.</p>
+        <p>
+          El servidor comprobará si hay avance, historial o certificados que conservar. Si existen, el curso quedará
+          retirado y se conservará esa evidencia; si no existen, se eliminarán el curso, sus lecciones y sus pasos.
+          Esta acción no se puede deshacer.
+        </p>
+      </>
     ),
     textoConfirmar: curso.tieneAvance ? 'Sí, retirar el curso' : 'Sí, eliminar',
     peligro: true,
