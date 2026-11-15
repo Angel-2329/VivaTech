@@ -1,0 +1,16 @@
+# Esperar un curso publicado, una lección, tres pasos y tieneAvance true.
+# Detenerse después para revisar PostgreSQL y acordar limpieza específica.
+info:
+  name: 288 - Consultar control de publicación y avance - 200
+  type: http
+  seq: 288
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/{{idCursoPublicacion}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

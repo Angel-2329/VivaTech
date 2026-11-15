@@ -1,0 +1,24 @@
+info:
+  name: 308 - Curso retirado no permite editar fecha - 409
+  type: http
+  seq: 308
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroConAvance}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "fechaCierre": null 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

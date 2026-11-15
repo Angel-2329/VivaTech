@@ -1,0 +1,15 @@
+# Token estudiante: rechazar por rol sin alterar el progreso temporal ni contenido.
+info:
+  name: 298 - Estudiante no elimina ni retira cursos - 403
+  type: http
+  seq: 298
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroConAvance}}"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

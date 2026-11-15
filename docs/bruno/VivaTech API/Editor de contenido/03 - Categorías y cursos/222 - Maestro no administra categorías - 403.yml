@@ -1,0 +1,24 @@
+info:
+  name: 222 - Maestro no administra categorías - 403
+  type: http
+  seq: 222
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/categorias"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Banca móvil"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

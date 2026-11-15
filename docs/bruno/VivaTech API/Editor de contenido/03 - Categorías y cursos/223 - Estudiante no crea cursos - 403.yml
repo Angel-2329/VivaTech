@@ -1,0 +1,26 @@
+info:
+  name: 223 - Estudiante no crea cursos - 403
+  type: http
+  seq: 223
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "9223372036854775807",
+        "titulo": "[PRUEBA S4 CC01] Curso sin permiso",
+        "descripcion": "Peticion ficticia que debe rechazarse por rol."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

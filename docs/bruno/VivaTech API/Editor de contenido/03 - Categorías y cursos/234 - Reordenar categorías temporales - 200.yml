@@ -1,0 +1,24 @@
+info:
+  name: 234 - Reordenar categorías temporales - 200
+  type: http
+  seq: 234
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/categorias/orden"
+  body:
+    type: json
+    data: |-
+      {
+        "idsCategorias": ["1", "2", "{{idCategoriaPruebaB}}", "{{idCategoriaPruebaA}}"]
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

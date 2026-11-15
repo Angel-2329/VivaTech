@@ -1,0 +1,16 @@
+# Requiere éxito de 302 y foto SQL posterior completa de curso/historiales/fechas.
+# Mismo cuerpo 200, ninguna escritura ni cambio de fecha_retiro.
+info:
+  name: 303 - Repetir retiro sin rearchivar - 200
+  type: http
+  seq: 303
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroConAvance}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

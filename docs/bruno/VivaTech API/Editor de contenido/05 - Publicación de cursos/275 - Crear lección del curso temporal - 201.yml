@@ -1,0 +1,23 @@
+# Copiar idLeccion a idLeccionPublicacion.
+info:
+  name: 275 - Crear lección del curso temporal - 201
+  type: http
+  seq: 275
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}/lecciones"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "[PRUEBA S4 PUBLICACION] Leccion temporal",
+        "objetivo": "Reconocer qué datos usar en una práctica ficticia.",
+        "duracionEstimadaMinutos": 3
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

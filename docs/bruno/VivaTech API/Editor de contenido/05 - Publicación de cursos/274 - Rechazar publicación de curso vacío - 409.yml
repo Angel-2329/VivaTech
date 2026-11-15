@@ -1,0 +1,22 @@
+# Tomar referencia SQL antes; después comparar estado, textos y fechas sin cambios.
+info:
+  name: 274 - Rechazar publicación de curso vacío - 409
+  type: http
+  seq: 274
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}"
+  body:
+    type: json
+    data: |-
+      {
+        "estadoPublicacion": "publicado",
+        "titulo": "[PRUEBA S4 PUBLICACION] NO DEBE GUARDARSE"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

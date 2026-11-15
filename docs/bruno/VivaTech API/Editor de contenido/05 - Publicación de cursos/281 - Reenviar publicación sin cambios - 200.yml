@@ -1,0 +1,20 @@
+# Requiere el éxito de 280 y referencia SQL posterior a ese éxito.
+# Deben conservarse todos los datos y fechas del curso, lección y pasos.
+info:
+  name: 281 - Reenviar publicación sin cambios - 200
+  type: http
+  seq: 281
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}"
+  body:
+    type: json
+    data: |-
+      { "estadoPublicacion": "publicado" }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

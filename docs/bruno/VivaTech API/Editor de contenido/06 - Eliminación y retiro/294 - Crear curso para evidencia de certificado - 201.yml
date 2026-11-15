@@ -1,0 +1,24 @@
+# Copiar idCurso a idCursoRetiroCertificado. Autor administrador; sin progreso operativo.
+# El certificado se preparará como fixture SQL autorizado, no mediante emisión todavía pendiente.
+info:
+  name: 294 - Crear curso para evidencia de certificado - 201
+  type: http
+  seq: 294
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaRetiro}}",
+        "titulo": "[PRUEBA S4 RETIRO] Curso con certificado",
+        "descripcion": "Curso ficticio con evidencia histórica sin progreso operativo."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

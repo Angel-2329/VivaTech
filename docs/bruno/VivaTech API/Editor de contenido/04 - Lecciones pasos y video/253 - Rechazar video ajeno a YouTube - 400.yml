@@ -1,0 +1,21 @@
+info:
+  name: 253 - Rechazar video ajeno a YouTube - 400
+  type: http
+  seq: 253
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/pasos/{{idPasoLPV01Lectura}}"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "NO DEBE GUARDARSE",
+        "recursos": [{ "tipo": "video", "plataforma": "youtube", "url": "https://youtube.com.ejemplo.invalid/watch?v=abcDEF12345", "titulo": "Rechazado" }]
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

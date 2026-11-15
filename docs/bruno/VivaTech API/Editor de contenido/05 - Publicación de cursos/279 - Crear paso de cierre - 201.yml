@@ -1,0 +1,23 @@
+# Copiar idPaso a idPasoPublicacionCierre. Orden esperado 3.
+info:
+  name: 279 - Crear paso de cierre - 201
+  type: http
+  seq: 279
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionPublicacion}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Recuerda: esta práctica no usa dinero ni datos bancarios reales.",
+        "recursos": [],
+        "actividad": { "tipo": "lectura" }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

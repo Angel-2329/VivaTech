@@ -1,0 +1,26 @@
+info:
+  name: 231 - Editar textos y fecha del curso propio - 200
+  type: http
+  seq: 231
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPruebaMaestro}}"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "[PRUEBA S4 CC01] Curso del maestro editado",
+        "descripcion": "Descripcion temporal corregida.",
+        "fechaCierre": "2099-12-31"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
