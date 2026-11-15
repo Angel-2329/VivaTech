@@ -4,6 +4,7 @@ const cargarUsuario = require('../middlewares/cargar-usuario');
 const requiereRol = require('../middlewares/requiere-rol');
 const { ErrorReglaCurso } = require('../services/reglas-cursos');
 const { obtenerDetalleLeccion, guardarPasoLeccion } = require('../services/lecciones');
+const { editarLeccion, eliminarLeccion, crearPaso, reordenarPasos } = require('../services/editor-lecciones-pasos');
 
 const router = express.Router();
 
@@ -65,5 +66,36 @@ router.put('/:idLeccion/progreso', verificarTokenFirebase, cargarUsuario, requie
     });
   }
 });
+
+const permisosEditor = [verificarTokenFirebase, cargarUsuario, requiereRol('maestro', 'administrador')];
+
+async function responderEditor(res, operacion, estado) {
+  try {
+    const resultado = await operacion();
+    if (estado === 204) return res.status(204).end();
+    return res.status(estado).json(resultado);
+  } catch (error) {
+    if (error instanceof ErrorReglaCurso) {
+      const cuerpo = { ok: false, mensaje: error.message, codigo: error.codigo };
+      if (Array.isArray(error.errores)) cuerpo.errores = error.errores.map(({ ruta, codigo, mensaje }) => ({ ruta, codigo, mensaje }));
+      return res.status(error.estado).json(cuerpo);
+    }
+    console.error('No fue posible completar la escritura de contenido');
+    return res.status(503).json({ ok: false, mensaje: 'No fue posible guardar el contenido. Intenta más tarde', codigo: 'operacion_contenido_no_disponible' });
+  }
+}
+
+router.patch('/:idLeccion', ...permisosEditor, (req, res) => responderEditor(
+  res, () => editarLeccion(req.usuario, req.params.idLeccion, req.body), 200
+));
+router.delete('/:idLeccion', ...permisosEditor, (req, res) => responderEditor(
+  res, () => eliminarLeccion(req.usuario, req.params.idLeccion), 204
+));
+router.post('/:idLeccion/pasos', ...permisosEditor, (req, res) => responderEditor(
+  res, () => crearPaso(req.usuario, req.params.idLeccion, req.body), 201
+));
+router.put('/:idLeccion/orden-pasos', ...permisosEditor, (req, res) => responderEditor(
+  res, () => reordenarPasos(req.usuario, req.params.idLeccion, req.body), 200
+));
 
 module.exports = router;

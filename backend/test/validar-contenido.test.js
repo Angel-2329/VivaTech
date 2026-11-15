@@ -264,7 +264,7 @@ test('Contenido: valida listas de dos a cinco elementos y nombre no vacío de ic
 for (const escenario of [
   { ruta: 'paso.recursos', codigo: 'arreglo_requerido', cambiar: (p) => { p.recursos = null; } },
   { ruta: 'paso.recursos[0]', codigo: 'objeto_requerido', cambiar: (p) => { p.recursos = [null]; } },
-  { ruta: 'paso.recursos[0].tipo', codigo: 'tipo_recurso_invalido', cambiar: (p) => { p.recursos = [{ tipo: 'video' }]; } },
+  { ruta: 'paso.recursos[0].tipo', codigo: 'tipo_recurso_invalido', cambiar: (p) => { p.recursos = [{ tipo: 'archivo' }]; } },
   { ruta: 'paso.actividad', codigo: 'objeto_requerido', cambiar: (p) => { p.actividad = []; } },
   { ruta: 'paso.actividad.tipo', codigo: 'tipo_actividad_invalido', cambiar: (p) => { p.actividad = { tipo: 'examen' }; } },
   { ruta: 'paso.actividad.pantalla', codigo: 'objeto_requerido', cambiar: (p) => { p.actividad.pantalla = null; } },
@@ -353,3 +353,42 @@ test('Comando: modo borrador explícito acepta el curso vacío; modo normal lo r
   assert.equal(await comprobarArchivos(['--curso', 'curso'], dependencias), 1);
   assert.equal(await comprobarArchivos(['--borrador', '--curso', 'curso'], dependencias), 0);
 });
+
+const videoPersistido = () => ({ tipo: 'video', plataforma: 'youtube', idVideo: 'abcDEF12345', titulo: 'Video de ejemplo' });
+
+test('Contenido video: acepta recurso persistido en lectura sin modificarlo', () => {
+  const paso = crearPaso();
+  paso.recursos = [videoPersistido()];
+  const antes = structuredClone(paso);
+  assert.deepEqual(validarPaso(paso), { valido: true, errores: [] });
+  assert.deepEqual(paso, antes);
+});
+
+for (const [cambio, ruta, codigo] of [
+  [{ plataforma: 'otra' }, 'paso.recursos[0].plataforma', 'plataforma_video_invalida'],
+  [{ idVideo: 'corto' }, 'paso.recursos[0].idVideo', 'id_video_invalido'],
+  [{ titulo: '' }, 'paso.recursos[0].titulo', 'longitud_invalida'],
+  [{ titulo: '😀'.repeat(101) }, 'paso.recursos[0].titulo', 'longitud_invalida'],
+  [{ url: 'https://youtu.be/abcDEF12345' }, 'paso.recursos[0]', 'campos_video_invalidos'],
+  [{ iframe: '<iframe>' }, 'paso.recursos[0]', 'campos_video_invalidos']
+]) {
+  test(`Contenido video: rechaza ${codigo} en ${ruta}`, () => {
+    const paso = crearPaso();
+    paso.recursos = [{ ...videoPersistido(), ...cambio }];
+    contieneError(validarPaso(paso), ruta, codigo);
+  });
+}
+
+test('Contenido video: máximo uno por paso', () => {
+  const paso = crearPaso();
+  paso.recursos = [videoPersistido(), videoPersistido()];
+  contieneError(validarPaso(paso), 'paso.recursos', 'video_duplicado');
+});
+
+for (const tipo of ['opcion', 'toque']) {
+  test(`Contenido video: no se agrega a actividad ${tipo}`, () => {
+    const paso = crearPaso(1, tipo);
+    paso.recursos = [videoPersistido()];
+    contieneError(validarPaso(paso), 'paso.recursos', 'video_solo_lectura');
+  });
+}

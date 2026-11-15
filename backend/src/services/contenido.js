@@ -123,10 +123,10 @@ async function listarContenido(usuario) {
   return Array.from(categorias.values());
 }
 
-async function obtenerContenidoCurso(usuario, idCurso) {
+async function obtenerContenidoCurso(usuario, idCurso, { conexion = pool } = {}) {
   comprobarEditor(usuario);
   comprobarIdCurso(idCurso);
-  const resultado = await pool.query(CONSULTA_DETALLE, [idCurso]);
+  const resultado = await conexion.query(CONSULTA_DETALLE, [idCurso]);
   if (resultado.rows.length === 0) {
     throw new ErrorReglaCurso(404, 'El curso no está disponible', 'curso_no_encontrado');
   }

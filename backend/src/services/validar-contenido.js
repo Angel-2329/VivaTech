@@ -95,8 +95,19 @@ function crearContexto(publicable) {
       }
     } else if (valor.tipo === 'aviso') {
       texto(valor.texto, `${ruta}.texto`, LIMITES_TEXTO.aviso);
+    } else if (valor.tipo === 'video') {
+      if (valor.plataforma !== 'youtube') {
+        error(`${ruta}.plataforma`, 'plataforma_video_invalida', 'La plataforma debe ser youtube');
+      }
+      if (typeof valor.idVideo !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(valor.idVideo)) {
+        error(`${ruta}.idVideo`, 'id_video_invalido', 'El identificador de video debe tener 11 caracteres válidos');
+      }
+      texto(valor.titulo, `${ruta}.titulo`, LIMITES_TEXTO.titulo);
+      if (Object.keys(valor).some((clave) => !['tipo', 'plataforma', 'idVideo', 'titulo'].includes(clave))) {
+        error(ruta, 'campos_video_invalidos', 'El recurso persistido solo admite tipo, plataforma, idVideo y titulo');
+      }
     } else {
-      error(`${ruta}.tipo`, 'tipo_recurso_invalido', 'El recurso debe ser icono, lista o aviso');
+      error(`${ruta}.tipo`, 'tipo_recurso_invalido', 'El recurso debe ser icono, lista, aviso o video');
     }
   }
 
@@ -165,6 +176,11 @@ function crearContexto(publicable) {
       error(`${ruta}.recursos`, 'arreglo_requerido', 'Los recursos deben ser un arreglo, aunque esté vacío');
     } else {
       valor.recursos.forEach((elemento, indice) => recurso(elemento, `${ruta}.recursos[${indice}]`));
+      const videos = valor.recursos.filter((elemento) => esObjeto(elemento) && elemento.tipo === 'video');
+      if (videos.length > 1) error(`${ruta}.recursos`, 'video_duplicado', 'Solo se permite un video por paso');
+      if (videos.length && valor.actividad?.tipo !== 'lectura') {
+        error(`${ruta}.recursos`, 'video_solo_lectura', 'El video solo se permite en pasos de lectura');
+      }
     }
 
     actividad(valor.actividad, `${ruta}.actividad`);

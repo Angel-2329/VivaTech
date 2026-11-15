@@ -10,6 +10,9 @@ const adminProgresoRouter = require('./routes/admin-progreso');
 const misCursosRouter = require('./routes/mis-cursos');
 const leccionesRouter = require('./routes/lecciones');
 const contenidoRouter = require('./routes/contenido');
+const categoriasRouter = require('./routes/categorias');
+const cursosRouter = require('./routes/cursos');
+const pasosRouter = require('./routes/pasos');
 const manejarJsonInvalido =
   require('./middlewares/manejar-json-invalido');
 
@@ -18,7 +21,7 @@ const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_ORIGIN
 }));
-app.use('/api/lecciones', (req, res, next) => {
+app.use(['/api/lecciones', '/api/categorias', '/api/cursos', '/api/pasos'], (req, res, next) => {
   res.set('Cache-Control', 'no-store');
   next();
 });
@@ -31,6 +34,9 @@ app.use('/api/admin', adminProgresoRouter);
 app.use('/api/mis-cursos', misCursosRouter);
 app.use('/api/lecciones', leccionesRouter);
 app.use('/api/contenido', contenidoRouter);
+app.use('/api/categorias', categoriasRouter);
+app.use('/api/cursos', cursosRouter);
+app.use('/api/pasos', pasosRouter);
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
