@@ -1,0 +1,24 @@
+info:
+  name: 283 - Republicar curso como administrador - 200
+  type: http
+  seq: 283
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "estadoPublicacion": "publicado" 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

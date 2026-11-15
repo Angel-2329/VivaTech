@@ -1,0 +1,24 @@
+info:
+  name: 284 - Guardar primer paso del curso temporal - 200
+  type: http
+  seq: 284
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionPublicacion}}/progreso"
+  body:
+    type: json
+    data: |-
+      { 
+        "idPaso": "{{idPasoPublicacionLectura}}" 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

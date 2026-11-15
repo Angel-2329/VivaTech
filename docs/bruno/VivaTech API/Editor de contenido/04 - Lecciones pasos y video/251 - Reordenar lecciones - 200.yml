@@ -1,0 +1,24 @@
+info:
+  name: 251 - Reordenar lecciones - 200
+  type: http
+  seq: 251
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/cursos/{{idCursoLPV01Maestro}}/orden-lecciones"
+  body:
+    type: json
+    data: |-
+      { 
+        "idsLecciones": ["{{idLeccionLPV01B}}", "{{idLeccionLPV01A}}"] 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

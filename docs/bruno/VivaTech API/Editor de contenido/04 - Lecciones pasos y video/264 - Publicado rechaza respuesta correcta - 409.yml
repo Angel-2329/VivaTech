@@ -1,0 +1,25 @@
+# SOLO con fixture publicado autorizado. Correcta original: a.
+info:
+  name: 264 - Publicado rechaza respuesta correcta - 409
+  type: http
+  seq: 264
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/pasos/{{idPasoLPV01Opcion}}"
+  body:
+    type: json
+    data: |-
+      {
+        "actividad": {
+          "tipo": "opcion", "pregunta": "Que datos son seguros para esta practica?",
+          "opciones": [{ "id": "a", "texto": "Ejemplos ficticios" }, { "id": "b", "texto": "Informacion real" }],
+          "correcta": "b", "pista": "No uses informacion personal.", "mensajeAcierto": "Elegiste el ejemplo seguro!"
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

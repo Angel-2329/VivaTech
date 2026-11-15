@@ -1,0 +1,16 @@
+# SOLO tras guardar referencia SQL de ambos alumnos: dos lecciones/seis pasos y tres progresos.
+# Archivar antes de eliminar datos operativos; comprobar curso retirado y dos historiales íntegros.
+info:
+  name: 302 - Retirar curso y preservar avance parcial y completo - 200
+  type: http
+  seq: 302
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroConAvance}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

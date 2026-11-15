@@ -1,0 +1,16 @@
+# Requiere fixture SQL autorizado y referencia completa del certificado ficticio.
+# Conservar certificado sin modificar; archivar su instantánea sin inventar IDs ni fechas por lección.
+info:
+  name: 309 - Retirar curso con certificado sin progreso operativo - 200
+  type: http
+  seq: 309
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoRetiroCertificado}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

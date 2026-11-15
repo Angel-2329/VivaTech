@@ -1,0 +1,24 @@
+info:
+  name: 252 - Rechazar lista incompleta de pasos - 400
+  type: http
+  seq: 252
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}/orden-pasos"
+  body:
+    type: json
+    data: |-
+      { 
+        "idsPasos": ["{{idPasoLPV01Lectura}}"] 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

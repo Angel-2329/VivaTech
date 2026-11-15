@@ -1,0 +1,23 @@
+# Copiar idPaso a idPasoLPV01Lectura. El ID ficticio no acredita existencia del video.
+info:
+  name: 245 - Crear lectura con video - 201
+  type: http
+  seq: 245
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Lee este ejemplo ficticio.",
+        "recursos": [{ "tipo": "video", "plataforma": "youtube", "url": "https://youtu.be/abcDEF12345", "titulo": " Video de ejemplo " }],
+        "actividad": { "tipo": "lectura" }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

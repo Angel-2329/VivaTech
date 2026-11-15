@@ -1,0 +1,25 @@
+# Administrador también debe respetar el bloqueo por avance.
+# Comparar filas completas, fecha_cierre, textos, estados y fechas antes/después.
+info:
+  name: 286 - Rechazar despublicación combinada sin cambios parciales - 409
+  type: http
+  seq: 286
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}"
+  body:
+    type: json
+    data: |-
+      {
+        "estadoPublicacion": "borrador",
+        "titulo": "[PRUEBA S4 PUBLICACION] NO DEBE GUARDARSE",
+        "descripcion": "NO DEBE GUARDARSE",
+        "fechaCierre": "2099-12-31"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

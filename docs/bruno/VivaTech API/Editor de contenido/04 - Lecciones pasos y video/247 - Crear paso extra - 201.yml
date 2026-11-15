@@ -1,0 +1,26 @@
+info:
+  name: 247 - Crear paso extra - 201
+  type: http
+  seq: 247
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}/pasos"
+  body:
+    type: json
+    data: |-
+      { 
+        "instruccion": "Recuerda usar solo ejemplos ficticios.", 
+        "recursos": [], 
+        "actividad": { "tipo": "lectura" } 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

@@ -1,0 +1,15 @@
+# Detenerse aquí: verificar SQL antes de preparar los escenarios protegidos.
+info:
+  name: 259 - Consultar control previo - 200
+  type: http
+  seq: 259
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/{{idCursoLPV01Maestro}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

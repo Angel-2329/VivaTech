@@ -1,0 +1,16 @@
+# SOLO tras fixture SQL y control: publicado, una lección/tres pasos, sin avance/historial/certificado/marca.
+# Registrar IDs de sus hijos para comprobar ausencia después. No apuntar a cursos iniciales.
+info:
+  name: 300 - Eliminar publicado sin evidencia y sus hijos - 204
+  type: http
+  seq: 300
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoEliminarPublicado}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

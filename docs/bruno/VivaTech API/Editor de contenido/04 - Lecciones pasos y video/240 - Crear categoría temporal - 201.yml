@@ -1,0 +1,24 @@
+info:
+  name: 240 - Crear categoría temporal - 201
+  type: http
+  seq: 240
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/categorias"
+  body:
+    type: json
+    data: |-
+      { 
+        "nombre": "[PRUEBA S4 LPV01] Categoria temporal" 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

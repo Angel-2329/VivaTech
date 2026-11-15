@@ -1,0 +1,26 @@
+info:
+  name: 260 - Publicado rechaza crear lección - 409
+  type: http
+  seq: 260
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoLPV01Maestro}}/lecciones"
+  body:
+    type: json
+    data: |-
+      { 
+        "titulo": "[PRUEBA S4 LPV01] NO DEBE CREARSE", 
+        "objetivo": "Estructura protegida.", 
+        "duracionEstimadaMinutos": 3 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

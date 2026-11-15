@@ -1,0 +1,19 @@
+# Ejecutar tras el traslado a B y la restauración del orden A/B.
+info:
+  name: 238 - Eliminar categoría A vacía intermedia - 204
+  type: http
+  seq: 238
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaPruebaA}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
