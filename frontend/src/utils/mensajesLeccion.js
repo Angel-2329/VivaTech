@@ -17,11 +17,18 @@ const ERRORES_AL_GUARDAR = {
 }
 
 export function mensajeErrorAlGuardar(error) {
+  if (error?.estado === 401) return ERRORES_AL_GUARDAR.sesion_requerida
+  if (error?.estado === 403) {
+    return error.codigo === 'cuenta_desactivada'
+      ? 'Tu cuenta está desactivada. Consulta a la persona responsable de Viva Tech.'
+      : 'No tienes permiso para guardar el avance de esta lección.'
+  }
   return ERRORES_AL_GUARDAR[error?.codigo] ?? 'Algo falló al guardar. Espera un momento y vuelve a intentarlo.'
 }
 
 
 export function sePuedeReintentar(error) {
+  if (error?.estado === 401 || error?.estado === 403) return false
   return !['paso_fuera_de_secuencia', 'curso_cerrado', 'curso_retirado', 'sesion_requerida'].includes(
     error?.codigo,
   )
