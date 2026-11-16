@@ -6,6 +6,7 @@ const { ErrorReglaCurso } = require('../services/reglas-cursos');
 const { crearCurso, editarCurso } = require('../services/cursos');
 const { eliminarCurso } = require('../services/retiro-cursos');
 const { crearLeccion, reordenarLecciones } = require('../services/editor-lecciones-pasos');
+const { emitirCertificado } = require('../services/certificados');
 
 const router = express.Router();
 const permisosEditor = [verificarTokenFirebase, cargarUsuario, requiereRol('maestro', 'administrador')];
@@ -57,5 +58,24 @@ router.post('/:idCurso/lecciones', ...permisosEditor, (req, res) => responder(
 router.put('/:idCurso/orden-lecciones', ...permisosEditor, (req, res) => responder(
   res, () => reordenarLecciones(req.usuario, req.params.idCurso, req.body), 200
 ));
+
+router.post('/:idCurso/certificado', verificarTokenFirebase, cargarUsuario, requiereRol('estudiante'), async (req, res) => {
+  if (req.body !== undefined && (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body))) {
+    return res.status(400).json({ ok: false, mensaje: 'No se requiere un cuerpo para solicitar el certificado', codigo: 'cuerpo_invalido' });
+  }
+  if (req.body && Object.keys(req.body).length) {
+    return res.status(400).json({ ok: false, mensaje: 'La identidad y la finalización se comprueban en el servidor; no envíes campos', codigo: 'campos_invalidos' });
+  }
+  try {
+    const { creado, certificado } = await emitirCertificado(req.usuario, req.params.idCurso);
+    return res.status(creado ? 201 : 200).json(certificado);
+  } catch (error) {
+    if (error instanceof ErrorReglaCurso) {
+      return res.status(error.estado).json({ ok: false, mensaje: error.message, codigo: error.codigo });
+    }
+    console.error('No fue posible emitir el certificado');
+    return res.status(503).json({ ok: false, mensaje: 'No fue posible obtener tu certificado. Intenta más tarde', codigo: 'emision_certificado_no_disponible' });
+  }
+});
 
 module.exports = router;
