@@ -199,4 +199,40 @@ async function listarMisCertificados(usuario) {
   });
 }
 
-module.exports = { emitirCertificado, listarMisCertificados };
+const UUID_CANONICO = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function noEncontrado() {
+  return new ErrorReglaCurso(404, 'No encontramos un certificado con ese código', 'certificado_no_encontrado');
+}
+
+function recursoPublico(fila) {
+  if (!fila || !esTexto(fila.folio) || !esTexto(fila.nombreCompleto) || !esTexto(fila.tituloCurso)
+    || !Array.isArray(fila.lecciones) || fila.lecciones.length === 0
+    || fila.lecciones.some((leccion) => !leccion || !esTexto(leccion.titulo))
+    || !esInstante(fila.fechaFinalizacionCurso) || !esInstante(fila.fechaEmision)) {
+    throw new TypeError('El certificado almacenado es inconsistente');
+  }
+  return {
+    nombreCompleto: fila.nombreCompleto, tituloCurso: fila.tituloCurso,
+    lecciones: fila.lecciones.map(({ titulo }) => ({ titulo })),
+    folio: fila.folio,
+    fechaFinalizacionCurso: fila.fechaFinalizacionCurso, fechaEmision: fila.fechaEmision
+  };
+}
+
+async function verificarCertificado(codigo) {
+  if (typeof codigo !== 'string' || !UUID_CANONICO.test(codigo)) throw noEncontrado();
+  const { rows } = await pool.query(`
+    SELECT folio, nombre_en_certificado AS "nombreCompleto",
+      titulo_curso_en_certificado AS "tituloCurso",
+      lecciones_en_certificado AS lecciones,
+      to_jsonb(fecha_finalizacion_curso) AS "fechaFinalizacionCurso",
+      to_jsonb(fecha_emision) AS "fechaEmision"
+    FROM certificados WHERE codigo_verificacion = $1::uuid
+  `, [codigo.toLowerCase()]);
+  if (!rows.length) throw noEncontrado();
+  if (rows.length !== 1) throw new TypeError('Código de verificación duplicado');
+  return recursoPublico(rows[0]);
+}
+
+module.exports = { emitirCertificado, listarMisCertificados, verificarCertificado };
