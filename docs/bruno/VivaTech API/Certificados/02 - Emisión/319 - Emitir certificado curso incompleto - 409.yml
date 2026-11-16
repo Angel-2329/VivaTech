@@ -1,0 +1,18 @@
+info:
+  name: 319 - Emitir certificado curso incompleto - 409
+  type: http
+  seq: 319
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

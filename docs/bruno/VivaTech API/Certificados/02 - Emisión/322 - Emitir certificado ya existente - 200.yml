@@ -1,0 +1,18 @@
+info:
+  name: 322 - Emitir certificado ya existente - 200
+  type: http
+  seq: 322
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/3/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

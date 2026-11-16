@@ -1,0 +1,15 @@
+info:
+  name: 317 - Emitir certificado sin token - 401
+  type: http
+  seq: 317
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

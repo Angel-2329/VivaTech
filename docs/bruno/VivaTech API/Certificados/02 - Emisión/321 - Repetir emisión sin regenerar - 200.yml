@@ -1,0 +1,18 @@
+info:
+  name: 321 - Repetir emisión sin regenerar - 200
+  type: http
+  seq: 321
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
