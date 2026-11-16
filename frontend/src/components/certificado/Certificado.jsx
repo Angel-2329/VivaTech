@@ -1,12 +1,12 @@
 import { useId } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { fechaLarga, urlVerificacion } from '../../utils/certificados.js'
+import { anioEmision, fechaLarga, urlVerificacion } from '../../utils/certificados.js'
 import './Certificado.css'
 
 
 function Certificado({ certificado }) {
   const enlaceVerificacion = urlVerificacion(certificado.codigoVerificacion)
-  const anio = new Date(certificado.fechaEmision).getFullYear()
+  const anio = anioEmision(certificado.fechaEmision)
 
   return (
     <article className="vt-certificate certificado" aria-labelledby="certificado-titulo">
@@ -79,16 +79,22 @@ function Certificado({ certificado }) {
 
           <Sello anio={anio} />
 
-          <figure className="certificado__qr">
-            <QRCodeSVG
-              value={enlaceVerificacion}
-              size={112}
-              level="M"
-              marginSize={1}
-              title={`Código QR para verificar el certificado ${certificado.folio}`}
-            />
-            <figcaption>Escanea para verificar</figcaption>
-          </figure>
+          {enlaceVerificacion ? (
+            <figure className="certificado__qr">
+              <QRCodeSVG
+                value={enlaceVerificacion}
+                size={112}
+                level="M"
+                marginSize={1}
+                title={`Código QR para verificar el certificado ${certificado.folio}`}
+              />
+              <figcaption>Escanea para verificar</figcaption>
+            </figure>
+          ) : (
+            <p className="vt-body-sm vt-text-muted">
+              El código QR estará disponible cuando la plataforma tenga su dirección pública.
+            </p>
+          )}
         </footer>
 
         <p className="certificado__aviso">

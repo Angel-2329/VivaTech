@@ -1,3 +1,4 @@
+// Cliente para rutas públicas: nunca envía token ni cookies.
 function crearError(mensaje, estado, codigo) {
   return Object.assign(new Error(mensaje), { estado, codigo })
 }
@@ -11,7 +12,13 @@ export async function solicitarApiPublica(ruta, { signal } = {}) {
 
   let respuesta
   try {
-    respuesta = await fetch(`${urlBase.replace(/\/+$/, '')}/${ruta.replace(/^\/+/, '')}`, { signal })
+    respuesta = await fetch(`${urlBase.replace(/\/+$/, '')}/${ruta.replace(/^\/+/, '')}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'omit',
+      cache: 'no-store',
+      signal,
+    })
   } catch (error) {
     if (error.name === 'AbortError') throw error
     throw crearError(
@@ -25,6 +32,10 @@ export async function solicitarApiPublica(ruta, { signal } = {}) {
 
   if (!respuesta.ok) {
     throw crearError(cuerpo?.mensaje || 'No se pudo completar la solicitud', respuesta.status, cuerpo?.codigo)
+  }
+
+  if (cuerpo === null) {
+    throw crearError('El servidor devolvió una respuesta inesperada', respuesta.status, 'respuesta_invalida')
   }
 
   return cuerpo

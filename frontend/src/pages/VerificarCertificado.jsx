@@ -15,8 +15,8 @@ function VerificarCertificado() {
   const { datos, cargando, error, reintentar } = useDatos(cargar)
   const tituloRef = useRef(null)
 
-  // 404 o 400: el código no corresponde a ningún certificado
   const noValido = error && (error.estado === 404 || error.estado === 400)
+  const noDisponible = error && error.codigo === 'verificacion_no_disponible'
 
   useEffect(() => {
     if (!cargando) tituloRef.current?.focus()
@@ -112,7 +112,15 @@ function VerificarCertificado() {
               <h1 ref={tituloRef} tabIndex={-1} className="vt-headline-lg">
                 Verificar certificado
               </h1>
-              <EstadoError error={error} onReintentar={reintentar} titulo="No pudimos verificar el certificado" />
+              <EstadoError
+                error={
+                  noDisponible
+                    ? { message: 'La verificación no está disponible en este momento. Inténtalo más tarde.' }
+                    : error
+                }
+                onReintentar={reintentar}
+                titulo="No pudimos verificar el certificado"
+              />
             </>
           )}
         </div>
