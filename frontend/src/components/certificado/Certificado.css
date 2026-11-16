@@ -321,17 +321,63 @@
 }
 
 /* Al imprimir o guardar como PDF solo sale el certificado */
+/* Impresión: el certificado en una sola hoja, sin la interfaz de la app */
+@page {
+  margin: 12mm;
+}
+
 @media print {
   .certificado__no-imprimir,
   body:has(.certificado) .vt-back-link,
-  body:has(.certificado) .vt-main h1,
-  body:has(.certificado) .vt-main h1 + p {
+  body:has(.certificado) .vt-main .vt-stack:has(> h1) {
     display: none !important;
+  }
+
+  body:has(.certificado) .vt-page {
+    min-height: 0;
+  }
+
+  body:has(.certificado) .vt-main,
+  body:has(.certificado) .vt-container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
   }
 
   .certificado {
     max-width: none;
+    padding: 0.35rem;
     box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .certificado__marco {
+    gap: var(--vt-space-sm);
+    padding: 1.5rem 2rem;
+    outline-offset: -0.5rem;
+  }
+
+  .certificado__titulo {
+    font-size: 2rem;
+  }
+
+  .certificado__nombre {
+    font-size: 1.9rem;
+  }
+
+  .certificado__curso {
+    font-size: 1.2rem;
+  }
+
+  .certificado__pie {
+    padding-top: var(--vt-space-sm);
+  }
+
+  .certificado__sello,
+  .certificado__qr svg {
+    width: 6rem;
+    height: 6rem;
   }
 
   .certificado,

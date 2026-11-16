@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { useSesion } from '../../context/SesionContext.jsx'
 import { obtenerCertificado } from '../../services/certificadosService.js'
 
 
 function BotonCertificado({ idCurso, tituloCurso, certificado }) {
-  const { usuario } = useSesion()
   const navegar = useNavigate()
   const [obteniendo, setObteniendo] = useState(false)
   const [error, setError] = useState('')
@@ -27,7 +25,7 @@ function BotonCertificado({ idCurso, tituloCurso, certificado }) {
     setObteniendo(true)
     setError('')
     try {
-      const nuevo = await obtenerCertificado(idCurso, usuario)
+      const nuevo = await obtenerCertificado(idCurso)
       navegar(`/estudiante/certificados/${nuevo.idCertificado}`)
     } catch (errorAlObtener) {
       setError(

@@ -1,21 +1,30 @@
-// Bloqueo temporal hasta conectar la API real de certificados en el bloque 3.
-// No mezclar progreso real con emisiones o verificaciones simuladas.
-function rechazarOperacionPendiente() {
-  throw Object.assign(
-    new Error('Los certificados todavía no están disponibles en esta versión. Tu avance en los cursos sigue guardado.'),
-    { estado: 503, codigo: 'certificados_pendientes_integracion' },
+import { solicitarApi } from './api.js'
+import { solicitarApiPublica } from './apiPublica.js'
+
+function respuestaInvalida() {
+  return Object.assign(new Error('El servidor devolvió una respuesta inesperada'), {
+    estado: 0,
+    codigo: 'respuesta_invalida',
+  })
+}
+
+export function obtenerCertificado(idCurso) {
+  return solicitarApi(`/cursos/${encodeURIComponent(idCurso)}/certificado`, { metodo: 'POST' })
+}
+
+function masRecientePrimero(a, b) {
+  return (
+    String(b.fechaEmision).localeCompare(String(a.fechaEmision)) ||
+    String(b.folio).localeCompare(String(a.folio))
   )
 }
 
-export async function obtenerCertificado() {
-  return rechazarOperacionPendiente()
-}
-
 export async function listarMisCertificados() {
-  return rechazarOperacionPendiente()
+  const certificados = await solicitarApi('/mis-certificados')
+  if (!Array.isArray(certificados)) throw respuestaInvalida()
+  return [...certificados].sort(masRecientePrimero)
 }
 
-// La futura consulta pública utilizará apiPublica.js, sin token.
-export async function verificarCertificado() {
-  return rechazarOperacionPendiente()
+export function verificarCertificado(codigo) {
+  return solicitarApiPublica(`/certificados/verificar/${encodeURIComponent(codigo)}`)
 }
