@@ -1,9 +1,5 @@
-// SERVICIO SIMULADO de cursos (Sprint 4, tarea 3.23.1).
-
-
-import { responder } from './simulacion/datosDePrueba.js'
-import { armarMisCursos } from './simulacion/progresoDePrueba.js'
+import { solicitarApi } from './api.js'
 
 export function obtenerMisCursos() {
-  return responder(armarMisCursos())
+  return solicitarApi('/mis-cursos')
 }

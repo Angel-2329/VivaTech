@@ -1,0 +1,25 @@
+# Ejecutar solo después de que la 226 haya renombrado A correctamente.
+info:
+  name: 227 - Rechazar categoría duplicada - 409
+  type: http
+  seq: 227
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/categorias"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA S4 CC01] Categoria A editada"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

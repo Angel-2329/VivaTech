@@ -1,0 +1,27 @@
+# Copiar idPaso a idPasoLPV01Opcion.
+info:
+  name: 246 - Crear paso de opción - 201
+  type: http
+  seq: 246
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Elige los datos para practicar.",
+        "recursos": [],
+        "actividad": {
+          "tipo": "opcion", "pregunta": "Que datos debes usar?",
+          "opciones": [{ "id": "a", "texto": "Datos ficticios" }, { "id": "b", "texto": "Datos reales" }],
+          "correcta": "a", "pista": "Esta es una practica.", "mensajeAcierto": "Muy bien!"
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

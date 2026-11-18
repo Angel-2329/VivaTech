@@ -1,28 +1,30 @@
-import { fallar, responder } from './simulacion/datosDePrueba.js'
-import { armarMisCertificados, emitirCertificado, verificarCodigo } from './simulacion/progresoDePrueba.js'
+import { solicitarApi } from './api.js'
+import { solicitarApiPublica } from './apiPublica.js'
 
-
-export async function obtenerCertificado(idCurso, usuario) {
-  const resultado = emitirCertificado(String(idCurso), usuario)
-  if (resultado.error) {
-    const { mensaje, estado, codigo } = resultado.error
-    return fallar(mensaje, estado, codigo)
-  }
-  return responder(resultado.respuesta)
+function respuestaInvalida() {
+  return Object.assign(new Error('El servidor devolvió una respuesta inesperada'), {
+    estado: 0,
+    codigo: 'respuesta_invalida',
+  })
 }
 
+export function obtenerCertificado(idCurso) {
+  return solicitarApi(`/cursos/${encodeURIComponent(idCurso)}/certificado`, { metodo: 'POST' })
+}
 
-// Real: return solicitarApi('/mis-certificados')
+function masRecientePrimero(a, b) {
+  return (
+    String(b.fechaEmision).localeCompare(String(a.fechaEmision)) ||
+    String(b.folio).localeCompare(String(a.folio))
+  )
+}
+
 export async function listarMisCertificados() {
-  return responder(armarMisCertificados())
+  const certificados = await solicitarApi('/mis-certificados')
+  if (!Array.isArray(certificados)) throw respuestaInvalida()
+  return [...certificados].sort(masRecientePrimero)
 }
 
-// Pública, sin token (cliente aparte: apiPublica.js).
-// { nombreCompleto, tituloCurso, lecciones, folio, fechaFinalizacionCurso, fechaEmision }
-// Código inválido o inexistente: 404 certificado_no_encontrado.
-// Real: return solicitarApiPublica(`/certificados/verificar/${encodeURIComponent(codigo)}`)
-export async function verificarCertificado(codigo) {
-  const datos = verificarCodigo(String(codigo))
-  if (!datos) return fallar('Este certificado no es válido', 404, 'certificado_no_encontrado')
-  return responder(datos)
+export function verificarCertificado(codigo) {
+  return solicitarApiPublica(`/certificados/verificar/${encodeURIComponent(codigo)}`)
 }

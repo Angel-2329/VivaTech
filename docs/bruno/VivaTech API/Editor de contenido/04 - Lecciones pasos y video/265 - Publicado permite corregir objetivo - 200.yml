@@ -1,0 +1,24 @@
+info:
+  name: 265 - Publicado permite corregir objetivo - 200
+  type: http
+  seq: 265
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}"
+  body:
+    type: json
+    data: |-
+      { 
+        "objetivo": "Objetivo corregido en publicado." 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

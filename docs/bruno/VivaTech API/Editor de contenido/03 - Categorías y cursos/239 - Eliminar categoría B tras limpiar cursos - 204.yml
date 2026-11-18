@@ -1,0 +1,19 @@
+# NO ejecutar antes de la limpieza SQL autorizada de los dos cursos CC01.
+info:
+  name: 239 - Eliminar categoría B tras limpiar cursos - 204
+  type: http
+  seq: 239
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaPruebaB}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

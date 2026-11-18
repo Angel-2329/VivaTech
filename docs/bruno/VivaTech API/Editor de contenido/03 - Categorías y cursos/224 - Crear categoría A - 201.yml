@@ -1,0 +1,25 @@
+# Tras el 201, copiar idCategoria a la variable idCategoriaPruebaA del entorno Local.
+info:
+  name: 224 - Crear categoría A - 201
+  type: http
+  seq: 224
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/categorias"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA S4 CC01] Categoria A"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

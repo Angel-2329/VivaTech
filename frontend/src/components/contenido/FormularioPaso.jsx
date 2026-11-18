@@ -89,11 +89,11 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     } catch (errorAlGuardar) {
       // 400 contenido_invalido: cada error junto a su campo, y el mensaje general de respaldo
       const delServidor = erroresDelServidor(errorAlGuardar)
-      // 400 video_invalido no trae ruta: el error va en el campo del enlace
+      // video_invalido puede afectar al recurso completo, no solo al enlace.
       const posicionVideo = paso.recursos.findIndex((recurso) => recurso.tipo === 'video')
       if (errorAlGuardar.codigo === 'video_invalido' && posicionVideo !== -1) {
         delServidor[`recursos.${posicionVideo}.url`] =
-          'Ese enlace no es de un video de YouTube. Cópialo desde el botón "Compartir" del video.'
+          errorAlGuardar.message || 'No se pudo guardar el recurso de video. Revisa el enlace HTTPS de YouTube y el título.'
       }
       setErrores(delServidor)
       setErrorGeneral(errorAlGuardar.message || 'No pudimos guardar el paso. Inténtalo otra vez.')

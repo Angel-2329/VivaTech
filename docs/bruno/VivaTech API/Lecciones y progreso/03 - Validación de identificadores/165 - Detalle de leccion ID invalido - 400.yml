@@ -1,0 +1,18 @@
+info:
+  name: 165 - Detalle de leccion ID invalido - 400
+  type: http
+  seq: 165
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/lecciones/0"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

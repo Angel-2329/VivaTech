@@ -1,0 +1,18 @@
+info:
+  name: 318 - Emitir certificado maestro sin permiso - 403
+  type: http
+  seq: 318
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

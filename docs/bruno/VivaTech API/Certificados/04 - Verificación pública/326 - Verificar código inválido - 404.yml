@@ -1,0 +1,15 @@
+info:
+  name: 326 - Verificar código inválido - 404
+  type: http
+  seq: 326
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/certificados/verificar/codigo-invalido"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

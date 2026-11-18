@@ -1,0 +1,16 @@
+# Detalle privado del editor: retirado, tieneAvance true, puedeEditar false, lecciones [].
+# Nunca devolver expedientes ni instantáneas de los alumnos.
+info:
+  name: 304 - Consultar resumen del curso retirado - 200
+  type: http
+  seq: 304
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido/cursos/{{idCursoRetiroConAvance}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

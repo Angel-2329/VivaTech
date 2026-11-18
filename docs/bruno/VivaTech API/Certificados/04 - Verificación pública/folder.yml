@@ -1,0 +1,7 @@
+info:
+  name: 04 - Verificación pública
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit

@@ -1,0 +1,23 @@
+# Copiar idCurso a idCursoPublicacion. El curso debe nacer en borrador y vacío.
+info:
+  name: 273 - Crear curso del maestro - 201
+  type: http
+  seq: 273
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaPublicacion}}",
+        "titulo": "[PRUEBA S4 PUBLICACION] Curso temporal",
+        "descripcion": "Contenido ficticio para verificar publicación y despublicación."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

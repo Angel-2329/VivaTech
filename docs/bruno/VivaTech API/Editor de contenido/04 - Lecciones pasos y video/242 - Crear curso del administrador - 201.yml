@@ -1,0 +1,23 @@
+# Copiar idCurso a idCursoLPV01Admin. Debe permanecer sin lecciones.
+info:
+  name: 242 - Crear curso del administrador - 201
+  type: http
+  seq: 242
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaLPV01}}",
+        "titulo": "[PRUEBA S4 LPV01] Curso administrador",
+        "descripcion": "Curso temporal ajeno al maestro."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

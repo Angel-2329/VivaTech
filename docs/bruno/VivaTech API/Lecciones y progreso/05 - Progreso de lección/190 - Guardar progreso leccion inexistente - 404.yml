@@ -1,0 +1,24 @@
+info:
+  name: 190 - Guardar progreso leccion inexistente - 404
+  type: http
+  seq: 14
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/9223372036854775807/progreso"
+  body:
+    type: json
+    data: |-
+      {
+        "idPaso": "1"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

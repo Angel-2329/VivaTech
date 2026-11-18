@@ -1,0 +1,24 @@
+info:
+  name: 192 - Guardar paso de otra leccion - 400
+  type: http
+  seq: 16
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/33/progreso"
+  body:
+    type: json
+    data: |-
+      {
+        "idPaso": "86"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

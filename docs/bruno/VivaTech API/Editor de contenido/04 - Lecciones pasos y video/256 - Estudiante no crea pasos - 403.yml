@@ -1,0 +1,26 @@
+info:
+  name: 256 - Estudiante no crea pasos - 403
+  type: http
+  seq: 256
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionLPV01A}}/pasos"
+  body:
+    type: json
+    data: |-
+      { 
+        "instruccion": "NO DEBE CREARSE", 
+        "recursos": [], 
+        "actividad": { "tipo": "lectura" } 
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

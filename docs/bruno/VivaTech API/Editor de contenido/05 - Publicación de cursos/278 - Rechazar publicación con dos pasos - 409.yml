@@ -1,0 +1,23 @@
+# La lección tiene lectura y práctica válidas, pero falta el mínimo de tres pasos.
+# Tomar referencia SQL y comprobar que tampoco se guarda parcialmente la descripción.
+info:
+  name: 278 - Rechazar publicación con dos pasos - 409
+  type: http
+  seq: 278
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPublicacion}}"
+  body:
+    type: json
+    data: |-
+      {
+        "estadoPublicacion": "publicado",
+        "descripcion": "NO DEBE GUARDARSE"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

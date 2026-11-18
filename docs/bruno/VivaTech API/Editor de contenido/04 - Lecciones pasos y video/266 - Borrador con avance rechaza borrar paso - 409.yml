@@ -1,0 +1,15 @@
+# SOLO tras fixture SQL autorizado: borrador con progreso ficticio en A que referencia extra.
+info:
+  name: 266 - Borrador con avance rechaza borrar paso - 409
+  type: http
+  seq: 266
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/pasos/{{idPasoLPV01Lectura}}"
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

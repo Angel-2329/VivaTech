@@ -11,6 +11,7 @@ function VistaCertificado() {
   const { datos: certificados, cargando, error, reintentar } = useDatos(listarMisCertificados)
   const certificado = certificados?.find((actual) => actual.idCertificado === idCertificado) ?? null
   const noExiste = Boolean(certificados) && !certificado
+  const enlaceVerificacion = certificado ? urlVerificacion(certificado.codigoVerificacion) : null
 
   return (
     <PlantillaPanel
@@ -55,42 +56,44 @@ function VistaCertificado() {
               Para guardarlo como PDF, en la ventana de impresión elige "Guardar como PDF" en el destino.
             </p>
 
-            <section className="vt-card vt-card-subtle vt-stack vt-stack-sm" aria-labelledby="titulo-linkedin">
-              <h2 id="titulo-linkedin" className="vt-headline-sm">
-                Compártelo en LinkedIn (opcional)
-              </h2>
-              <p>
-                Es gratis. Si no tienes cuenta, LinkedIn te pedirá iniciar sesión y tú decides si sigues. Quien lo vea
-                podrá comprobarlo en{' '}
-                <span className="certificado__enlace">{urlVerificacion(certificado.codigoVerificacion)}</span>
-              </p>
-              <div className="vt-cluster">
-                <a
-                  className="vt-btn vt-btn-secondary"
-                  href={urlAgregarLinkedIn(certificado)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Agregar a mi perfil de LinkedIn
-                  <span className="vt-visually-hidden"> (se abre en una pestaña nueva)</span>
-                  <span className="vt-icon" aria-hidden="true">
-                    open_in_new
-                  </span>
-                </a>
-                <a
-                  className="vt-btn vt-btn-outline"
-                  href={urlCompartirLinkedIn(certificado)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Compartir en LinkedIn
-                  <span className="vt-visually-hidden"> (se abre en una pestaña nueva)</span>
-                  <span className="vt-icon" aria-hidden="true">
-                    open_in_new
-                  </span>
-                </a>
-              </div>
-            </section>
+            {enlaceVerificacion && (
+              <section className="vt-card vt-card-subtle vt-stack vt-stack-sm" aria-labelledby="titulo-linkedin">
+                <h2 id="titulo-linkedin" className="vt-headline-sm">
+                  Compártelo en LinkedIn (opcional)
+                </h2>
+                <p>
+                  Es gratis. Si no tienes cuenta, LinkedIn te pedirá iniciar sesión y tú decides si sigues. Quien lo vea
+                  podrá comprobarlo en{' '}
+                  <span className="certificado__enlace">{enlaceVerificacion}</span>
+                </p>
+                <div className="vt-cluster">
+                  <a
+                    className="vt-btn vt-btn-secondary"
+                    href={urlAgregarLinkedIn(certificado)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Agregar a mi perfil de LinkedIn
+                    <span className="vt-visually-hidden"> (se abre en una pestaña nueva)</span>
+                    <span className="vt-icon" aria-hidden="true">
+                      open_in_new
+                    </span>
+                  </a>
+                  <a
+                    className="vt-btn vt-btn-outline"
+                    href={urlCompartirLinkedIn(certificado)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Compartir en LinkedIn
+                    <span className="vt-visually-hidden"> (se abre en una pestaña nueva)</span>
+                    <span className="vt-icon" aria-hidden="true">
+                      open_in_new
+                    </span>
+                  </a>
+                </div>
+              </section>
+            )}
           </div>
         </>
       )}

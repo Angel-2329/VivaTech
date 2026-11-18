@@ -1,0 +1,24 @@
+info:
+  name: 226 - Renombrar categoría A - 200
+  type: http
+  seq: 226
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaPruebaA}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA S4 CC01] Categoria A editada"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

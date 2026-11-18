@@ -1,0 +1,24 @@
+info:
+  name: 233 - Administrador traslada curso al final - 200
+  type: http
+  seq: 233
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoPruebaMaestro}}"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaPruebaB}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

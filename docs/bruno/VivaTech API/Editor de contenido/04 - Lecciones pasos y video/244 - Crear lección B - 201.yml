@@ -1,0 +1,23 @@
+# Copiar idLeccion a idLeccionLPV01B. Orden esperado 2.
+info:
+  name: 244 - Crear lección B - 201
+  type: http
+  seq: 244
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoLPV01Maestro}}/lecciones"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "[PRUEBA S4 LPV01] Leccion B",
+        "objetivo": "Leccion temporal para reordenado y eliminacion.",
+        "duracionEstimadaMinutos": 2
+      }
+  auth:
+    type: bearer
+    token: "{{tokenNuevo}}"
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false

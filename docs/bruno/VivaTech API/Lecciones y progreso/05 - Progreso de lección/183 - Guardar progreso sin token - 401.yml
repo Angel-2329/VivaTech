@@ -1,0 +1,21 @@
+info:
+  name: 183 - Guardar progreso sin token - 401
+  type: http
+  seq: 7
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/9223372036854775807/progreso"
+  body:
+    type: json
+    data: |-
+      {
+        "idPaso": "1"
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
