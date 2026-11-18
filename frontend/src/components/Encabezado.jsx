@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { useSesion } from '../context/SesionContext.jsx'
 import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
-import { MENU_POR_ROL } from '../utils/menuPorRol.js'
+import { MENU_POR_ROL, estaActiva } from '../utils/menuPorRol.js'
+import MenuCuenta from './MenuCuenta.jsx'
+import './Encabezado.css'
 
 const ESCALAS = ['100', '115', '130']
 const CLAVE_GUARDADO = 'vt-escala-texto'
@@ -22,6 +24,7 @@ function Encabezado({ variante = 'acceso' }) {
   const [errorSalida, setErrorSalida] = useState('')
   const { usuario, cerrarSesion } = useSesion()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const posicion = ESCALAS.indexOf(escala)
   const esLaMasChica = posicion === 0
@@ -68,35 +71,36 @@ function Encabezado({ variante = 'acceso' }) {
   const menu = MENU_POR_ROL[usuario?.rol] ?? []
 
   return (
-    <header className="vt-header">
-      <div className="vt-cluster">
-        <Link className="vt-header__brand" to="/">
-          <span className="vt-header__logo" aria-hidden="true">
-            V
-          </span>
-          <span className="vt-header__name">
-            Viva Tech
-            <small>Capacitación Digital</small>
-          </span>
-        </Link>
+    <header className="vt-header vt-encabezado">
+      <Link className="vt-header__brand vt-encabezado__marca" to="/">
+        <span className="vt-header__logo" aria-hidden="true">
+          V
+        </span>
+        <span className="vt-header__name">
+          Viva Tech
+          <small>Capacitación Digital</small>
+        </span>
+      </Link>
 
-        {conSesion && menu.length > 0 && (
-          <nav className="vt-nav" aria-label="Menú principal">
-            {menu.map((opcion) => (
-              <NavLink
+      {conSesion && menu.length > 0 && (
+        <nav className="vt-nav vt-encabezado__menu" aria-label="Menú principal">
+          {menu.map((opcion) => {
+            const activa = estaActiva(opcion, pathname)
+            return (
+              <Link
                 key={opcion.ruta}
                 className="vt-nav-link"
                 to={opcion.ruta}
-                end={opcion.exacta}
+                aria-current={activa ? 'page' : undefined}
               >
                 {opcion.texto}
-              </NavLink>
-            ))}
-          </nav>
-        )}
-      </div>
+              </Link>
+            )
+          })}
+        </nav>
+      )}
 
-      <div className="vt-header__actions">
+      <div className="vt-header__actions vt-encabezado__acciones">
         <div className="vt-font-controls" role="group" aria-label="Tamaño del texto">
           <button
             type="button"
@@ -104,7 +108,8 @@ function Encabezado({ variante = 'acceso' }) {
             onClick={reducirTexto}
             aria-disabled={esLaMasChica}
           >
-            A− Reducir texto
+            <span aria-hidden="true">A−</span>
+            <span className="vt-encabezado__texto-largo">Reducir texto</span>
           </button>
           <button
             type="button"
@@ -112,35 +117,27 @@ function Encabezado({ variante = 'acceso' }) {
             onClick={aumentarTexto}
             aria-disabled={esLaMasGrande}
           >
-            A+ Aumentar texto
+            <span aria-hidden="true">A+</span>
+            <span className="vt-encabezado__texto-largo">Aumentar texto</span>
           </button>
         </div>
 
-        {mostrarUsuario && (
-          <span className="vt-user-chip">
-            <span className="vt-avatar" aria-hidden="true">
-              {nombre ? nombre[0].toUpperCase() : <span className="vt-icon">person</span>}
+        {conSesion ? (
+          <MenuCuenta
+            nombre={nombre}
+            rol={usuario.rol}
+            saliendo={saliendo}
+            errorSalida={errorSalida}
+            onSalir={salir}
+          />
+        ) : (
+          mostrarUsuario && (
+            <span className="vt-user-chip">
+              <span className="vt-avatar" aria-hidden="true">
+                {nombre ? nombre[0].toUpperCase() : <span className="vt-icon">person</span>}
+              </span>
             </span>
-            {conSesion && (nombre || 'Mi cuenta')}
-          </span>
-        )}
-
-        {conSesion && (
-          <div className="vt-stack vt-stack-sm">
-            <button
-              type="button"
-              className="vt-btn vt-btn-secondary vt-btn-sm"
-              onClick={salir}
-              disabled={saliendo}
-              aria-busy={saliendo}
-            >
-              {saliendo ? 'Cerrando sesión…' : 'Cerrar sesión'}
-            </button>
-
-            {errorSalida && (
-              <p role="alert">{errorSalida}</p>
-            )}
-          </div>
+          )
         )}
       </div>
     </header>
