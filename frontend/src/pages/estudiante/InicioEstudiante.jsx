@@ -1,18 +1,24 @@
 import { Link } from 'react-router'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
+import TarjetaMiGrupo from '../../components/panel/TarjetaMiGrupo.jsx'
 import { EstadoCarga, EstadoError } from '../../components/panel/EstadosCarga.jsx'
 import { useSesion } from '../../context/SesionContext.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { listarMisCertificados } from '../../services/certificadosService.js'
 import { obtenerCursosEnCurso } from '../../services/cursosService.js'
+import { obtenerMisGrupos } from '../../services/gruposService.js'
 import { RUTA_CURSOS_DISPONIBLES, RUTA_MIS_CURSOS, rutaLeccion } from '../../utils/cursos.js'
 import { plural } from '../../utils/formato.js'
 import { nombreParaSaludo } from '../../utils/nombreParaSaludo.js'
 import './Estudiante.css'
 
 async function cargarInicio() {
-  const [enCurso, certificados] = await Promise.all([obtenerCursosEnCurso(), listarMisCertificados()])
-  return { enCurso, certificados }
+  const [enCurso, certificados, grupos] = await Promise.all([
+    obtenerCursosEnCurso(),
+    listarMisCertificados(),
+    obtenerMisGrupos().catch(() => null),
+  ])
+  return { enCurso, certificados, grupos }
 }
 
 function InicioEstudiante() {
@@ -28,12 +34,12 @@ function InicioEstudiante() {
     >
       {cargando && <EstadoCarga texto="Cargando tu inicio…" />}
       {error && <EstadoError error={error} onReintentar={reintentar} />}
-      {datos && <ResumenAlumno enCurso={datos.enCurso} certificados={datos.certificados} />}
+      {datos && <ResumenAlumno enCurso={datos.enCurso} certificados={datos.certificados} grupos={datos.grupos} />}
     </PlantillaPanel>
   )
 }
 
-function ResumenAlumno({ enCurso, certificados }) {
+function ResumenAlumno({ enCurso, certificados, grupos }) {
   const reciente = enCurso[0]
 
   return (
@@ -117,6 +123,8 @@ function ResumenAlumno({ enCurso, certificados }) {
             <p className="vt-text-muted">Aún no tienes certificados. Los obtendrás al terminar un curso.</p>
           )}
         </section>
+
+        <TarjetaMiGrupo grupos={grupos} />
       </div>
 
       <aside className="vt-alert vt-alert-info vt-alert-soft">

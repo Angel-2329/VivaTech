@@ -81,3 +81,13 @@
     border-bottom: 3px solid Highlight;
   }
 }
+
+.mi-grupo__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mi-grupo__lista p {
+  margin: 0;
+}
