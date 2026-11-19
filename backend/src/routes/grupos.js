@@ -11,9 +11,13 @@ const {
   obtenerDetalleGrupo,
   asignarEstudiante,
   retirarEstudiante,
+  retirarTodosEstudiantes,
+  retirarEstudiantesSeleccionados,
   asignarMaestro,
   retirarMaestro
 } = require('../services/grupos');
+
+const MAXIMO_SELECCION = 100;
 
 const router = express.Router();
 
@@ -96,6 +100,36 @@ function validarUidParticipante(req, res, next) {
   }
 
   req.uidParticipante = uid;
+  return next();
+}
+
+function esUidValido(uid) {
+  return typeof uid === 'string'
+    && uid.length <= 128
+    && uid.trim().length > 0;
+}
+
+function validarSeleccion(req, res, next) {
+  const uids = req.body !== null
+    && typeof req.body === 'object'
+    && !Array.isArray(req.body)
+    ? req.body.uids
+    : undefined;
+
+  if (
+    !Array.isArray(uids)
+    || uids.length < 1
+    || uids.length > MAXIMO_SELECCION
+    || !uids.every(esUidValido)
+  ) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: `Selecciona entre 1 y ${MAXIMO_SELECCION} estudiantes válidos`,
+      codigo: 'seleccion_invalida'
+    });
+  }
+
+  req.uidsSeleccion = [...new Set(uids)];
   return next();
 }
 
@@ -184,6 +218,48 @@ router.post(
         req.uidParticipante
       );
       return res.status(201).json(estudiante);
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
+
+router.delete(
+  '/:idGrupo/estudiantes',
+  validarIdGrupo,
+  async (req, res) => {
+    if (req.path.endsWith('/')) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El identificador de la cuenta no es válido',
+        codigo: 'uid_invalido'
+      });
+    }
+
+    try {
+      const resultado = await retirarTodosEstudiantes(
+        req.auth.uid,
+        req.params.idGrupo
+      );
+      return res.json(resultado);
+    } catch (error) {
+      return responderError(error, res);
+    }
+  }
+);
+
+router.post(
+  '/:idGrupo/estudiantes/retiros',
+  validarIdGrupo,
+  validarSeleccion,
+  async (req, res) => {
+    try {
+      const resultado = await retirarEstudiantesSeleccionados(
+        req.auth.uid,
+        req.params.idGrupo,
+        req.uidsSeleccion
+      );
+      return res.json(resultado);
     } catch (error) {
       return responderError(error, res);
     }
