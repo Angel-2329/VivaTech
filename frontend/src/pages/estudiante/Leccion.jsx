@@ -6,9 +6,9 @@ import IndicadorPasos from '../../components/leccion/IndicadorPasos.jsx'
 import LeccionTerminada from '../../components/leccion/LeccionTerminada.jsx'
 import PasoLeccion from '../../components/leccion/PasoLeccion.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
-import { obtenerMisCursos } from '../../services/cursosService.js'
+import { obtenerCursosTerminados } from '../../services/cursosService.js'
 import { guardarPaso, obtenerLeccion } from '../../services/leccionesService.js'
-import { todosLosCursos } from '../../utils/cursos.js'
+import { RUTA_MIS_CURSOS } from '../../utils/cursos.js'
 import { mensajeDeAvance, mensajeErrorAlGuardar, sePuedeReintentar } from '../../utils/mensajesLeccion.js'
 import './Leccion.css'
 
@@ -48,7 +48,7 @@ function Leccion() {
     <PlantillaPanel
       titulo={leccion?.titulo ?? 'Lección'}
       descripcion={leccion ? `Curso: ${leccion.tituloCurso}` : undefined}
-      regresarA="/estudiante/cursos"
+      regresarA={RUTA_MIS_CURSOS}
       textoRegresar="Salir de la lección"
     >
       {cargando && <EstadoCarga texto="Cargando la lección…" />}
@@ -57,7 +57,7 @@ function Leccion() {
         <EstadoVacio icono={errorConocido.icono} titulo={errorConocido.titulo}>
           <p>{errorConocido.texto}</p>
           <div>
-            <Link className="vt-btn vt-btn-primary" to="/estudiante/cursos">
+            <Link className="vt-btn vt-btn-primary" to={RUTA_MIS_CURSOS}>
               Ir a Mis cursos
             </Link>
           </div>
@@ -117,7 +117,25 @@ function RecorridoLeccion({ leccion }) {
   }
 
   
+  // En un paso ya guardado no se vuelve a mandar el avance: solo se avanza
+  async function repasarPaso() {
+    if (!esUltimo) {
+      irAlPaso(posicion + 1)
+      return
+    }
+
+    setGuardando(true)
+    const curso = await buscarCursoTerminado(leccion.idCurso)
+    setTerminada({ cursoCompletado: Boolean(curso), certificado: curso?.certificado ?? null })
+    setGuardando(false)
+  }
+
   async function completarPaso() {
+    if (pasoHecho) {
+      await repasarPaso()
+      return
+    }
+
     setGuardando(true)
     setErrorGuardado(null)
 
@@ -126,8 +144,8 @@ function RecorridoLeccion({ leccion }) {
       setProgreso(respuesta)
 
       if (esUltimo && respuesta.leccionCompletada) {
-        const certificado = respuesta.cursoCompletado ? await buscarCertificado(leccion.idCurso) : null
-        setTerminada({ cursoCompletado: respuesta.cursoCompletado, certificado })
+        const curso = respuesta.cursoCompletado ? await buscarCursoTerminado(leccion.idCurso) : null
+        setTerminada({ cursoCompletado: respuesta.cursoCompletado, certificado: curso?.certificado ?? null })
       } else if (!esUltimo) {
         setMensajeAvance(mensajeDeAvance(posicion))
         enfocarPaso.current = true
@@ -241,11 +259,10 @@ function RecorridoLeccion({ leccion }) {
 }
 
 
-async function buscarCertificado(idCurso) {
+async function buscarCursoTerminado(idCurso) {
   try {
-    const categorias = await obtenerMisCursos()
-    const curso = todosLosCursos(categorias).find((actual) => actual.idCurso === idCurso)
-    return curso?.certificado ?? null
+    const terminados = await obtenerCursosTerminados()
+    return terminados.find((curso) => curso.idCurso === idCurso) ?? null
   } catch {
     return null
   }

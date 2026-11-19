@@ -26,3 +26,58 @@
   display: flex;
   flex-direction: column;
 }
+
+.cursos__lista,
+.mis-cursos__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cursos__tarjeta {
+  height: 100%;
+}
+
+.cursos__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--vt-space-sm);
+  margin-top: auto;
+}
+
+.mis-cursos__secciones .vt-tab {
+  text-decoration: none;
+}
+
+.mis-cursos__secciones .vt-tab[aria-current="page"] {
+  border-bottom-color: var(--vt-action);
+  color: var(--vt-action);
+  font-weight: 700;
+}
+
+.mis-cursos__siguiente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--vt-space-sm);
+}
+
+.mis-cursos__lecciones > summary {
+  width: fit-content;
+  list-style: none;
+}
+
+.mis-cursos__lecciones > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mis-cursos__lecciones[open] > summary {
+  margin-bottom: var(--vt-space-sm);
+}
+
+@media (forced-colors: active) {
+  .mis-cursos__secciones .vt-tab[aria-current="page"] {
+    border-bottom: 3px solid Highlight;
+  }
+}

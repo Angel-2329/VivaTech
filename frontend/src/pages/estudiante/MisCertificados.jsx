@@ -4,6 +4,7 @@ import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/Es
 import { useDatos } from '../../hooks/useDatos.js'
 import { listarMisCertificados } from '../../services/certificadosService.js'
 import { fechaLarga } from '../../utils/certificados.js'
+import { RUTA_MIS_CURSOS } from '../../utils/cursos.js'
 import '../../components/certificado/Certificado.css'
 
 function MisCertificados() {
@@ -21,9 +22,9 @@ function MisCertificados() {
 
       {certificados?.length === 0 && (
         <EstadoVacio icono="workspace_premium" titulo="Aún no tienes certificados">
-          <p>Cuando termines un curso, presiona "Obtener certificado" en Mis cursos.</p>
+          <p>Cuando termines un curso, presiona «Obtener certificado» en Mis cursos, sección Terminados.</p>
           <div>
-            <Link className="vt-btn vt-btn-primary" to="/estudiante/cursos">
+            <Link className="vt-btn vt-btn-primary" to={RUTA_MIS_CURSOS}>
               Ir a Mis cursos
             </Link>
           </div>
