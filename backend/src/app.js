@@ -8,12 +8,14 @@ const adminUsuariosRouter = require('./routes/admin-usuarios');
 const gruposRouter = require('./routes/grupos');
 const adminProgresoRouter = require('./routes/admin-progreso');
 const misCursosRouter = require('./routes/mis-cursos');
+const cursosDisponiblesRouter = require('./routes/cursos-disponibles');
 const leccionesRouter = require('./routes/lecciones');
 const contenidoRouter = require('./routes/contenido');
 const categoriasRouter = require('./routes/categorias');
 const cursosRouter = require('./routes/cursos');
 const pasosRouter = require('./routes/pasos');
 const misCertificadosRouter = require('./routes/mis-certificados');
+const misGruposRouter = require('./routes/mis-grupos');
 const certificadosRouter = require('./routes/certificados');
 const manejarJsonInvalido =
   require('./middlewares/manejar-json-invalido');
@@ -34,12 +36,14 @@ app.use('/api/admin/usuarios', adminUsuariosRouter);
 app.use('/api/grupos', gruposRouter);
 app.use('/api/admin', adminProgresoRouter);
 app.use('/api/mis-cursos', misCursosRouter);
+app.use('/api/cursos-disponibles', cursosDisponiblesRouter);
 app.use('/api/lecciones', leccionesRouter);
 app.use('/api/contenido', contenidoRouter);
 app.use('/api/categorias', categoriasRouter);
 app.use('/api/cursos', cursosRouter);
 app.use('/api/pasos', pasosRouter);
 app.use('/api/mis-certificados', misCertificadosRouter);
+app.use('/api/mis-grupos', misGruposRouter);
 app.use('/api/certificados', certificadosRouter);
 app.get('/api/health', (req, res) => {
   res.json({
