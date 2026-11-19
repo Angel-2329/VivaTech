@@ -68,3 +68,7 @@ export function buscarEstudiantes(
 
   return solicitarApi(`/estudiantes?${parametros}`, { signal })
 }
+
+export function obtenerMisGrupos() {
+  return solicitarApi('/mis-grupos')
+}
