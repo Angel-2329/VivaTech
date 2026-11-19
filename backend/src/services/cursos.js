@@ -119,6 +119,19 @@ async function siguienteOrden(cliente, idCategoria) {
   return ultimo + 1;
 }
 
+const INDICE_TITULO_NORMALIZADO = 'uq_cursos_titulo_normalizado';
+
+async function escribirCurso(cliente, sql, parametros) {
+  try {
+    return await cliente.query(sql, parametros);
+  } catch (error) {
+    if (error && error.code === '23505' && error.constraint === INDICE_TITULO_NORMALIZADO) {
+      throw new ErrorReglaCurso(409, 'Ya existe un curso con ese título en esta categoría.', 'curso_duplicado');
+    }
+    throw error;
+  }
+}
+
 async function crearCurso(usuario, datos, { reloj = () => new Date() } = {}) {
   comprobarEditor(usuario);
   const entrada = validarDatos(datos, true);
@@ -127,7 +140,7 @@ async function crearCurso(usuario, datos, { reloj = () => new Date() } = {}) {
     await bloquearCategoria(cliente, entrada.idCategoria);
     const fecha = validarFechaCierre(Object.hasOwn(entrada, 'fechaCierre') ? entrada.fechaCierre : null, { ahora: reloj() });
     const orden = await siguienteOrden(cliente, entrada.idCategoria);
-    const resultado = await cliente.query(`
+    const resultado = await escribirCurso(cliente, `
       INSERT INTO cursos (id_categoria, titulo, descripcion, estado_publicacion,
         creado_por, orden, fecha_cierre)
       VALUES ($1::bigint, $2, $3, 'borrador', $4, $5, $6::date)
@@ -219,7 +232,7 @@ async function editarCurso(usuario, idCurso, datos, { reloj = () => new Date() }
       validarDespublicacionCurso(editor, curso, { tieneAvance: avance?.tieneAvance });
     }
     if (destino !== curso.idCategoria || titulo !== curso.titulo || descripcion !== curso.descripcion || fecha !== fechaActual || cambiaEstado) {
-      const actualizado = await cliente.query(`
+      const actualizado = await escribirCurso(cliente, `
         UPDATE cursos SET id_categoria = $1::bigint, titulo = $2, descripcion = $3,
           orden = $4, fecha_cierre = $5::date, estado_publicacion = $7
         WHERE id_curso = $6::bigint RETURNING id_curso::text AS "idCurso"
