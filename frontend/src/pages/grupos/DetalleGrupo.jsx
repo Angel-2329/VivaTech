@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import BuscadorPersonas from '../../components/grupos/BuscadorPersonas.jsx'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
@@ -19,7 +19,9 @@ import {
   buscarEstudiantes,
   obtenerGrupo,
   retirarEstudiante,
+  retirarEstudiantesSeleccionados,
   retirarMaestro,
+  retirarTodosLosEstudiantes,
 } from '../../services/gruposService.js'
 import { formatearFecha, ordenarPorNombre, plural } from '../../utils/formato.js'
 import './Grupos.css'
@@ -27,6 +29,13 @@ import './Grupos.css'
 
 function buscarMaestros(texto, opciones = {}) {
   return buscarCuentas({ ...opciones, buscar: texto, rol: 'maestro' })
+}
+
+const MAXIMO_NOMBRES = 5
+const ERROR_RETIRO_MASIVO = 'No pudimos quitar a los estudiantes. Nadie fue retirado del grupo. Inténtalo otra vez.'
+
+function textoEstudiantes(cantidad) {
+  return plural(cantidad, 'estudiante', 'estudiantes')
 }
 
 
@@ -44,6 +53,74 @@ function DetalleGrupo() {
   const [aRetirar, setARetirar] = useState(null)
   const [retirando, setRetirando] = useState(false)
   const [errorRetirar, setErrorRetirar] = useState('')
+
+  const [marcados, setMarcados] = useState([])
+  const [retiroMasivo, setRetiroMasivo] = useState(null)
+  const [errorMasivo, setErrorMasivo] = useState('')
+  const tituloEstudiantesRef = useRef(null)
+  const enfocarEstudiantes = useRef(false)
+
+  const seleccionados = grupo ? grupo.estudiantes.filter((estudiante) => marcados.includes(estudiante.uid)) : []
+
+  useEffect(() => {
+    if (enfocarEstudiantes.current) {
+      enfocarEstudiantes.current = false
+      tituloEstudiantesRef.current?.focus()
+    }
+  }, [grupo])
+
+  function alternarMarcado(uid) {
+    setMarcados((anteriores) =>
+      anteriores.includes(uid) ? anteriores.filter((actual) => actual !== uid) : [...anteriores, uid]
+    )
+  }
+
+  function abrirRetiroMasivo(tipo) {
+    if (operacionRef.current) return
+    if (tipo === 'seleccion' && seleccionados.length === 0) return
+    setErrorMasivo('')
+    setRetiroMasivo({
+      tipo,
+      personas: tipo === 'seleccion' ? ordenarPorNombre(seleccionados) : grupo.estudiantes,
+    })
+  }
+
+  async function confirmarRetiroMasivo() {
+    if (operacionRef.current || !retiroMasivo) return
+    setRetirando(true)
+    setErrorMasivo('')
+
+    try {
+      await ejecutarCambioParticipante(async () => {
+        let texto
+        if (retiroMasivo.tipo === 'todos') {
+          const { retirados } = await retirarTodosLosEstudiantes(grupo.idGrupo)
+          setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? { ...anterior, estudiantes: [] } : anterior)
+          texto = `Se retiró a ${textoEstudiantes(retirados)} del grupo. Sus cuentas y su avance se conservan.`
+        } else {
+          const uids = retiroMasivo.personas.map((persona) => persona.uid)
+          const { retirados, noEstaban } = await retirarEstudiantesSeleccionados(grupo.idGrupo, uids)
+          setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? {
+            ...anterior,
+            estudiantes: anterior.estudiantes.filter((estudiante) => !retirados.includes(estudiante.uid)),
+          } : anterior)
+          texto = `Se quitó del grupo a ${textoEstudiantes(retirados.length)}. Sus cuentas y su avance se conservan.`
+          if (noEstaban.length > 0) {
+            texto += ` ${textoEstudiantes(noEstaban.length)} ya no ${noEstaban.length === 1 ? 'estaba' : 'estaban'} en el grupo.`
+          }
+        }
+
+        setMarcados([])
+        setRetiroMasivo(null)
+        enfocarEstudiantes.current = true
+        setMensaje(texto)
+      })
+    } catch (errorAlRetirar) {
+      setErrorMasivo(errorAlRetirar.estado === 404 ? errorAlRetirar.message : ERROR_RETIRO_MASIVO)
+    } finally {
+      setRetirando(false)
+    }
+  }
 
   async function ejecutarCambioParticipante(accion) {
     if (operacionRef.current) {
@@ -161,6 +238,12 @@ function DetalleGrupo() {
             grupo={grupo}
             procesando={procesandoParticipante}
             onRetirar={(estudiante) => abrirRetirar('estudiante', estudiante)}
+            marcados={marcados}
+            totalSeleccionados={seleccionados.length}
+            onMarcar={alternarMarcado}
+            onQuitarSeleccionados={() => abrirRetiroMasivo('seleccion')}
+            onRetirarTodos={() => abrirRetiroMasivo('todos')}
+            tituloRef={tituloEstudiantesRef}
           />
 
           <section className="vt-card vt-stack" aria-labelledby="titulo-agregar">
@@ -201,75 +284,165 @@ function DetalleGrupo() {
               <p>Su avance no se borra. Puedes volver a agregarlo cuando quieras.</p>
             )}
           </DialogoConfirmacion>
+
+          <DialogoConfirmacion
+            abierto={retiroMasivo !== null}
+            titulo={
+              retiroMasivo?.tipo === 'todos'
+                ? `¿Retirar a todos los estudiantes de ${grupo.nombre}?`
+                : `¿Quitar a ${textoEstudiantes(retiroMasivo?.personas.length ?? 0)} de ${grupo.nombre}?`
+            }
+            textoConfirmar={retiroMasivo?.tipo === 'todos' ? 'Sí, retirar a todos' : 'Sí, quitar del grupo'}
+            peligro
+            procesando={retirando}
+            error={errorMasivo}
+            onConfirmar={confirmarRetiroMasivo}
+            onCancelar={() => setRetiroMasivo(null)}
+          >
+            {retiroMasivo && <TextoRetiroMasivo retiro={retiroMasivo} nombreGrupo={grupo.nombre} />}
+          </DialogoConfirmacion>
         </>
       )}
     </PlantillaPanel>
   )
 }
 
-function TablaEstudiantes({ grupo, onRetirar, procesando }) {
-  if (grupo.estudiantes.length === 0) {
-    return (
-      <EstadoVacio icono="group_add" titulo="Este grupo todavía no tiene estudiantes">
-        <p>Búscalos por su nombre en la sección de abajo para agregarlos.</p>
-      </EstadoVacio>
-    )
-  }
+function TextoRetiroMasivo({ retiro, nombreGrupo }) {
+  const total = retiro.personas.length
+  const visibles = retiro.personas.slice(0, MAXIMO_NOMBRES)
+
+  return (
+    <>
+      <p>
+        {retiro.tipo === 'todos'
+          ? `Vas a quitar a ${textoEstudiantes(total)} del grupo ${nombreGrupo}. Sus cuentas y su avance se conservan. El grupo no se borra.`
+          : `Vas a quitar a ${textoEstudiantes(total)} del grupo ${nombreGrupo}. Sus cuentas y su avance se conservan.`}
+      </p>
+      {retiro.tipo === 'seleccion' && (
+        <ul className="grupos__nombres">
+          {visibles.map((persona) => (
+            <li key={persona.uid}>{persona.nombreCompleto}</li>
+          ))}
+          {total > MAXIMO_NOMBRES && <li>y {total - MAXIMO_NOMBRES} más</li>}
+        </ul>
+      )}
+    </>
+  )
+}
+
+function TablaEstudiantes({
+  grupo,
+  onRetirar,
+  procesando,
+  marcados,
+  totalSeleccionados,
+  onMarcar,
+  onQuitarSeleccionados,
+  onRetirarTodos,
+  tituloRef,
+}) {
+  const sinSeleccion = totalSeleccionados === 0
 
   return (
     <section className="vt-stack" aria-labelledby="titulo-estudiantes">
-      <h2 id="titulo-estudiantes" className="vt-headline-md">
+      <h2 id="titulo-estudiantes" ref={tituloRef} tabIndex={-1} className="vt-headline-md">
         Estudiantes y su avance
       </h2>
-      <div className="vt-table-wrap">
-        <table className="vt-table vt-table-responsive">
-          <caption className="vt-visually-hidden">Estudiantes del grupo {grupo.nombre}</caption>
-          <thead>
-            <tr>
-              <th scope="col">Estudiante</th>
-              <th scope="col">Avance</th>
-              <th scope="col">Última actividad</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ordenarPorNombre(grupo.estudiantes).map((estudiante) => (
-              <tr key={estudiante.uid}>
-                <td data-label="Estudiante">
-                  <strong>{estudiante.nombreCompleto}</strong>
-                  <span className={estudiante.activo ? 'vt-badge vt-badge-success' : 'vt-badge vt-badge-neutral'}>
-                    {estudiante.activo ? 'Cuenta activa' : 'Cuenta desactivada'}
-                  </span>
-                  {estudiante.apodo && (
-                    <span className="vt-text-muted"> ({estudiante.apodo})</span>
-                  )}
-                </td>
-                <td data-label="Avance" className="grupos__avance">
-                  <BarraAvance
-                    pequena
-                    completadas={estudiante.leccionesCompletadas}
-                    total={grupo.totalLeccionesPublicadas}
-                  />
-                </td>
-                <td data-label="Última actividad">
-                  {formatearFecha(estudiante.ultimaActividad, 'Sin actividad registrada')}
-                </td>
-                <td data-label="Acciones">
-                  <button
-                    type="button"
-                    className="vt-btn vt-btn-danger-soft vt-btn-sm"
-                    onClick={() => onRetirar(estudiante)}
-                    disabled={procesando}
-                  >
-                    Retirar
-                    <span className="vt-visually-hidden"> a {estudiante.nombreCompleto}</span>
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {grupo.estudiantes.length === 0 ? (
+        <EstadoVacio icono="group_add" titulo="Este grupo todavía no tiene estudiantes">
+          <p>Búscalos por su nombre en la sección de abajo para agregarlos.</p>
+        </EstadoVacio>
+      ) : (
+        <>
+          <div className="vt-toolbar grupos__acciones-masivas">
+            <button
+              type="button"
+              className="vt-btn vt-btn-danger-soft"
+              onClick={onQuitarSeleccionados}
+              aria-disabled={sinSeleccion || procesando}
+            >
+              <span className="vt-icon" aria-hidden="true">
+                group_remove
+              </span>
+              Quitar del grupo ({totalSeleccionados})
+            </button>
+            <button
+              type="button"
+              className="vt-btn vt-btn-outline"
+              onClick={onRetirarTodos}
+              aria-disabled={procesando}
+            >
+              Retirar a todos
+            </button>
+          </div>
+          <p className="vt-body-sm vt-text-muted">
+            Marca las casillas de los estudiantes que quieres quitar del grupo. Sus cuentas y su avance se conservan.
+          </p>
+
+          <div className="vt-table-wrap">
+            <table className="vt-table vt-table-responsive">
+              <caption className="vt-visually-hidden">Estudiantes del grupo {grupo.nombre}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">
+                    <span className="vt-visually-hidden">Seleccionar</span>
+                  </th>
+                  <th scope="col">Estudiante</th>
+                  <th scope="col">Avance</th>
+                  <th scope="col">Última actividad</th>
+                  <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordenarPorNombre(grupo.estudiantes).map((estudiante) => (
+                  <tr key={estudiante.uid}>
+                    <td data-label="Seleccionar" className="grupos__casilla">
+                      <label className="vt-check">
+                        <input
+                          type="checkbox"
+                          checked={marcados.includes(estudiante.uid)}
+                          onChange={() => onMarcar(estudiante.uid)}
+                          disabled={procesando}
+                        />
+                        <span className="vt-visually-hidden">Seleccionar a {estudiante.nombreCompleto}</span>
+                      </label>
+                    </td>
+                    <td data-label="Estudiante">
+                      <strong>{estudiante.nombreCompleto}</strong>
+                      <span className={estudiante.activo ? 'vt-badge vt-badge-success' : 'vt-badge vt-badge-neutral'}>
+                        {estudiante.activo ? 'Cuenta activa' : 'Cuenta desactivada'}
+                      </span>
+                      {estudiante.apodo && <span className="vt-text-muted"> ({estudiante.apodo})</span>}
+                    </td>
+                    <td data-label="Avance" className="grupos__avance">
+                      <BarraAvance
+                        pequena
+                        completadas={estudiante.leccionesCompletadas}
+                        total={grupo.totalLeccionesPublicadas}
+                      />
+                    </td>
+                    <td data-label="Última actividad">
+                      {formatearFecha(estudiante.ultimaActividad, 'Sin actividad registrada')}
+                    </td>
+                    <td data-label="Acciones">
+                      <button
+                        type="button"
+                        className="vt-btn vt-btn-danger-soft vt-btn-sm"
+                        onClick={() => onRetirar(estudiante)}
+                        disabled={procesando}
+                      >
+                        Retirar
+                        <span className="vt-visually-hidden"> a {estudiante.nombreCompleto}</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </section>
   )
 }
