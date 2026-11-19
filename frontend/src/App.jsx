@@ -5,6 +5,7 @@ import Acceso from './pages/Acceso.jsx'
 import PrimerAcceso from './pages/PrimerAcceso.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
+import CursosDisponibles from './pages/estudiante/CursosDisponibles.jsx'
 import MisCursos from './pages/estudiante/MisCursos.jsx'
 import Leccion from './pages/estudiante/Leccion.jsx'
 import MisCertificados from './pages/estudiante/MisCertificados.jsx'
@@ -37,7 +38,11 @@ function App() {
         {/* Solo estudiantes */}
         <Route element={<RutaProtegida roles={['estudiante']} />}>
           <Route path="/estudiante" element={<InicioEstudiante />} />
-          <Route path="/estudiante/cursos" element={<MisCursos />} />
+          <Route path="/estudiante/cursos-disponibles" element={<CursosDisponibles />} />
+          <Route path="/estudiante/mis-cursos" element={<Navigate to="/estudiante/mis-cursos/en-curso" replace />} />
+          <Route path="/estudiante/mis-cursos/en-curso" element={<MisCursos seccion="en-curso" />} />
+          <Route path="/estudiante/mis-cursos/terminados" element={<MisCursos seccion="terminados" />} />
+          <Route path="/estudiante/cursos" element={<Navigate to="/estudiante/mis-cursos/en-curso" replace />} />
           <Route path="/estudiante/lecciones/:idLeccion" element={<Leccion />} />
           <Route path="/estudiante/certificados" element={<MisCertificados />} />
           <Route path="/estudiante/certificados/:idCertificado" element={<VistaCertificado />} />

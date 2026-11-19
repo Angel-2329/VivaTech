@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import BotonCertificado from '../certificado/BotonCertificado.jsx'
+import { RUTA_EN_CURSO, RUTA_TERMINADOS } from '../../utils/cursos.js'
 
 
 function LeccionTerminada({ leccion, cursoCompletado, certificado, onRepasar }) {
@@ -51,7 +52,7 @@ function LeccionTerminada({ leccion, cursoCompletado, certificado, onRepasar }) 
 
         <Link
           className={leccion.siguienteLeccion || cursoCompletado ? 'vt-btn vt-btn-outline' : 'vt-btn vt-btn-primary'}
-          to="/estudiante/cursos"
+          to={cursoCompletado ? RUTA_TERMINADOS : RUTA_EN_CURSO}
         >
           Volver a Mis cursos
         </Link>

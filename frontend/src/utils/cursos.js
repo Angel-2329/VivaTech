@@ -1,9 +1,15 @@
+import { plural } from './formato.js'
+
+export const RUTA_CURSOS_DISPONIBLES = '/estudiante/cursos-disponibles'
+export const RUTA_MIS_CURSOS = '/estudiante/mis-cursos'
+export const RUTA_EN_CURSO = '/estudiante/mis-cursos/en-curso'
+export const RUTA_TERMINADOS = '/estudiante/mis-cursos/terminados'
+
 export const TEXTO_ESTADO_LECCION = {
   completada: 'Terminada',
   en_progreso: 'En curso',
   pendiente: 'Sin empezar',
 }
-
 
 export const TEXTO_BOTON_LECCION = {
   pendiente: 'Empezar',
@@ -15,29 +21,7 @@ export function rutaLeccion(idLeccion) {
   return `/estudiante/lecciones/${idLeccion}`
 }
 
-export function contarCompletadas(lecciones) {
-  return lecciones.filter((leccion) => leccion.estado === 'completada').length
-}
-
-
-export function todosLosCursos(categorias) {
-  return categorias.flatMap((categoria) => categoria.cursos)
-}
-
-
-export function cursosVigentes(categorias) {
-  return todosLosCursos(categorias).filter((curso) => curso.estadoCurso !== 'retirado')
-}
-
-export function siguienteLeccion(categorias) {
-  const cursos = cursosVigentes(categorias)
-
-  for (const estado of ['en_progreso', 'pendiente']) {
-    for (const curso of cursos) {
-      const leccion = curso.lecciones.find((actual) => actual.estado === estado)
-      if (leccion) return { curso, leccion }
-    }
-  }
-
-  return null
+export function textoDuracion(curso) {
+  const lecciones = plural(curso.totalLecciones, 'lección', 'lecciones')
+  return curso.duracionTotalMinutos ? `${lecciones} · ${curso.duracionTotalMinutos} min aprox.` : lecciones
 }

@@ -32,3 +32,9 @@ export function textoFecha(valor) {
 export function yaCerro(fechaCierre) {
   return esFechaCalendario(fechaCierre) && fechaCierre < hoyEnMexico()
 }
+
+export function textoInstante(valor) {
+  const fecha = new Date(valor)
+  if (!valor || Number.isNaN(fecha.getTime())) return ''
+  return textoFecha(formatoMexico.format(fecha))
+}

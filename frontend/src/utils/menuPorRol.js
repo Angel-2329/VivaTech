@@ -1,7 +1,8 @@
 export const MENU_POR_ROL = {
   estudiante: [
     { ruta: '/estudiante', texto: 'Inicio', exacta: true },
-    { ruta: '/estudiante/cursos', texto: 'Mis cursos', activaEn: ['/estudiante/lecciones'] },
+    { ruta: '/estudiante/cursos-disponibles', texto: 'Cursos disponibles' },
+    { ruta: '/estudiante/mis-cursos', texto: 'Mis cursos', activaEn: ['/estudiante/lecciones'] },
     { ruta: '/estudiante/certificados', texto: 'Mis certificados' },
   ],
   maestro: [
