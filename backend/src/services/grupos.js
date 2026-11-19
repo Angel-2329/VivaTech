@@ -192,6 +192,28 @@ async function ejecutarOperacion(uid, operacion, opciones = {}) {
   }
 }
 
+const INDICE_NOMBRE_NORMALIZADO = 'uq_grupos_nombre_normalizado';
+
+async function escribirNombreGrupo(cliente, sql, parametros) {
+  try {
+    return await cliente.query(sql, parametros);
+  } catch (error) {
+    if (
+      error
+      && error.code === '23505'
+      && error.constraint === INDICE_NOMBRE_NORMALIZADO
+    ) {
+      throw new ErrorOperacionGrupo(
+        409,
+        'Ya existe un grupo con ese nombre.',
+        'grupo_duplicado'
+      );
+    }
+
+    throw error;
+  }
+}
+
 async function bloquearGrupoDisponible(cliente, usuario, idGrupo) {
   const resultado = await cliente.query(
     `
@@ -260,7 +282,8 @@ async function listarGrupos(uid) {
 
 async function crearGrupo(uid, nombre) {
   return ejecutarOperacion(uid, async (cliente, usuario) => {
-    const resultado = await cliente.query(
+    const resultado = await escribirNombreGrupo(
+      cliente,
       `
         INSERT INTO grupos (nombre, creado_por)
         VALUES ($1, $2)
@@ -289,7 +312,8 @@ async function renombrarGrupo(uid, idGrupo, nombre) {
   return ejecutarOperacion(uid, async (cliente, usuario) => {
     await bloquearGrupoDisponible(cliente, usuario, idGrupo);
 
-    await cliente.query(
+    await escribirNombreGrupo(
+      cliente,
       'UPDATE grupos SET nombre = $1 WHERE id_grupo = $2',
       [nombre, idGrupo]
     );
@@ -458,6 +482,49 @@ async function retirarEstudiante(uid, idGrupo, uidEstudiante) {
   );
 }
 
+async function retirarTodosEstudiantes(uid, idGrupo) {
+  return ejecutarOperacion(uid, async (cliente, usuario) => {
+    await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+    const resultado = await cliente.query(
+      `
+        DELETE FROM grupo_estudiantes
+        WHERE id_grupo = $1
+        RETURNING uid_estudiante
+      `,
+      [idGrupo]
+    );
+
+    return { retirados: resultado.rowCount };
+  });
+}
+
+async function retirarEstudiantesSeleccionados(uid, idGrupo, uids) {
+  const solicitados = [...new Set(uids)];
+
+  return ejecutarOperacion(uid, async (cliente, usuario) => {
+    await bloquearGrupoDisponible(cliente, usuario, idGrupo);
+
+    const resultado = await cliente.query(
+      `
+        DELETE FROM grupo_estudiantes
+        WHERE id_grupo = $1 AND uid_estudiante = ANY($2::text[])
+        RETURNING uid_estudiante
+      `,
+      [idGrupo, solicitados]
+    );
+
+    const borrados = new Set(
+      resultado.rows.map((fila) => fila.uid_estudiante)
+    );
+
+    return {
+      retirados: solicitados.filter((item) => borrados.has(item)),
+      noEstaban: solicitados.filter((item) => !borrados.has(item))
+    };
+  });
+}
+
 async function asignarMaestro(uid, idGrupo, uidMaestro) {
   return ejecutarOperacion(
     uid,
@@ -567,6 +634,8 @@ module.exports = {
   obtenerDetalleGrupo,
   asignarEstudiante,
   retirarEstudiante,
+  retirarTodosEstudiantes,
+  retirarEstudiantesSeleccionados,
   asignarMaestro,
   retirarMaestro
 };
