@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/contenido/cursos/33"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

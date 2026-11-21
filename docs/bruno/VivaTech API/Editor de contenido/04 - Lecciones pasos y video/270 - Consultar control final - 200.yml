@@ -7,7 +7,7 @@ http:
   url: "{{baseUrl}}/api/contenido/cursos/{{idCursoLPV01Maestro}}"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 settings:
   encodeUrl: true
   timeout: 0

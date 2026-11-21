@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/contenido?uid=autor-ficticio&rol=administrador&puedeEditar=true"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

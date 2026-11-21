@@ -8,10 +8,10 @@ http:
   url: "{{baseUrl}}/api/grupos/{{idGrupoMaestroPrueba}}/estudiantes"
   body:
     type: json
-    data: '{"uid":"{{uidNuevo}}"}'
+    data: '{"uid":"{{uidMaestro}}"}'
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

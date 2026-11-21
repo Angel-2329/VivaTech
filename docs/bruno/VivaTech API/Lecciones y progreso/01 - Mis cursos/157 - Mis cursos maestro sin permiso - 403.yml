@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/mis-cursos"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

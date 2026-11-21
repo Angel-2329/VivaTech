@@ -1,0 +1,25 @@
+# Esperado: codigo grupo_duplicado.
+info:
+  name: 341 - Rechazar JOSE - 409
+  type: http
+  seq: 341
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA F1] JOSE"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,21 @@
+info:
+  name: 352 - E2 maestro propio con noEstaban y repetido - 200
+  type: http
+  seq: 352
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes/retiros"
+  body:
+    type: json
+    data: '{"uids":["{{uidEstudiante}}","uid-no-existe-f1","{{uidEstudiante}}"]}'
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

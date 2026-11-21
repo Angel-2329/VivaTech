@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/admin/progreso"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

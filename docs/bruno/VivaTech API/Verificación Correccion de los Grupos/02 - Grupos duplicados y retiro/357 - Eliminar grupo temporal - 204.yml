@@ -1,0 +1,18 @@
+info:
+  name: 357 - Eliminar grupo temporal - 204
+  type: http
+  seq: 357
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

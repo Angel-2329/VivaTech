@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/estudiantes"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

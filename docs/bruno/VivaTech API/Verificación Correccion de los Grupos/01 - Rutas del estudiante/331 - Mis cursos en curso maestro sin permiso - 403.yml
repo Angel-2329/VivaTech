@@ -1,0 +1,18 @@
+info:
+  name: 331 - Mis cursos en curso maestro sin permiso - 403
+  type: http
+  seq: 331
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-cursos/en-curso"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

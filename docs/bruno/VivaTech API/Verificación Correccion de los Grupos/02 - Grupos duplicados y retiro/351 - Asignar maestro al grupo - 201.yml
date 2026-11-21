@@ -1,0 +1,21 @@
+info:
+  name: 351 - Asignar maestro al grupo - 201
+  type: http
+  seq: 351
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/maestros"
+  body:
+    type: json
+    data: '{"uid":"{{uidMaestro}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

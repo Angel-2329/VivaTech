@@ -5,7 +5,7 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/api/admin/usuarios/{{uidNuevo}}/rol"
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidMaestro}}/rol"
   body:
     type: json
     data: |-

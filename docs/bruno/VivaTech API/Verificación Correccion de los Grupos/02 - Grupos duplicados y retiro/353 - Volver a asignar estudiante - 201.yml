@@ -1,0 +1,21 @@
+info:
+  name: 353 - Volver a asignar estudiante - 201
+  type: http
+  seq: 353
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes"
+  body:
+    type: json
+    data: '{"uid":"{{uidEstudiante}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

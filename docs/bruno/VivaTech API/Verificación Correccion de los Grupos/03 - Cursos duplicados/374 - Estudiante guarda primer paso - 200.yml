@@ -1,0 +1,21 @@
+info:
+  name: 374 - Estudiante guarda primer paso - 200
+  type: http
+  seq: 374
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionF1Retirado}}/progreso"
+  body:
+    type: json
+    data: '{"idPaso":"{{idPasoF1Lectura}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

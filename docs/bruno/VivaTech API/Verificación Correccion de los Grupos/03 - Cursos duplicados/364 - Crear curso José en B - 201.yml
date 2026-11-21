@@ -1,0 +1,26 @@
+info:
+  name: 364 - Crear curso José en B - 201
+  type: http
+  seq: 364
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaF1B}}",
+        "titulo": "[PRUEBA F1] José",
+        "descripcion": "Curso ficticio de la verificación F.1."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
