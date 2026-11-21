@@ -92,6 +92,7 @@ function Contenido() {
     try {
       await ejecutar(() => moverCurso(curso.idCurso, idCategoria, usuario), `"${curso.titulo}" se movió a ${destino?.nombre}.`)
     } catch (errorAlMover) {
+      if (errorAlMover.codigo === 'curso_duplicado') throw errorAlMover
       abrirAviso('No pudimos mover el curso', errorAlMover.message)
     }
   }

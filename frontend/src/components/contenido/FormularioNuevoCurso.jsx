@@ -43,7 +43,12 @@ function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
       if (fechaCierre) datos.fechaCierre = fechaCierre
       await onCrear(datos)
     } catch (errorAlCrear) {
-      setErrorGeneral(errorAlCrear.message || 'No pudimos crear el curso. Inténtalo otra vez.')
+      if (errorAlCrear.codigo === 'curso_duplicado') {
+        setErrores({ titulo: 'Ya existe un curso con ese título en esta categoría. Cambia el título o elige otra categoría.' })
+        tituloRef.current?.focus()
+      } else {
+        setErrorGeneral(errorAlCrear.message || 'No pudimos crear el curso. Inténtalo otra vez.')
+      }
       setGuardando(false)
     }
   }
