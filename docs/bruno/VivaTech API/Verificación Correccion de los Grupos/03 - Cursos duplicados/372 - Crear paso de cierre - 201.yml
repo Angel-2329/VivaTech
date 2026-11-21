@@ -1,0 +1,28 @@
+info:
+  name: 372 - Crear paso de cierre - 201
+  type: http
+  seq: 372
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionF1Retirado}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Recuerda: esta práctica no usa datos reales.",
+        "recursos": [],
+        "actividad": {
+          "tipo": "lectura"
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

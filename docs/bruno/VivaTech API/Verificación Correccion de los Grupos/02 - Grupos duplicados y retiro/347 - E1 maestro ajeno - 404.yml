@@ -1,0 +1,18 @@
+info:
+  name: 347 - E1 maestro ajeno - 404
+  type: http
+  seq: 347
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

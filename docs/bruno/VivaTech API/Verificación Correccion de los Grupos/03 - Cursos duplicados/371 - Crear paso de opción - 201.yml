@@ -1,0 +1,42 @@
+info:
+  name: 371 - Crear paso de opción - 201
+  type: http
+  seq: 371
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionF1Retirado}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Elige qué datos usar para practicar.",
+        "recursos": [],
+        "actividad": {
+          "tipo": "opcion",
+          "pregunta": "¿Qué datos debes usar en esta práctica?",
+          "opciones": [
+            {
+              "id": "a",
+              "texto": "Datos ficticios"
+            },
+            {
+              "id": "b",
+              "texto": "Información bancaria real"
+            }
+          ],
+          "correcta": "a",
+          "pista": "La práctica no necesita tus datos reales.",
+          "mensajeAcierto": "¡Muy bien! Practica sin compartir datos reales."
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

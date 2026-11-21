@@ -1,0 +1,24 @@
+info:
+  name: 348 - E2 lista vacía - 400
+  type: http
+  seq: 348
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes/retiros"
+  body:
+    type: json
+    data: |-
+      {
+        "uids": []
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

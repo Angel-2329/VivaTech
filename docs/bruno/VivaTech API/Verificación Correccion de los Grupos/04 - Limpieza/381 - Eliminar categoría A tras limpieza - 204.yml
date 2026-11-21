@@ -1,0 +1,19 @@
+# SOLO después del SQL de limpieza del curso retirado.
+info:
+  name: 381 - Eliminar categoría A tras limpieza - 204
+  type: http
+  seq: 381
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaF1A}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
