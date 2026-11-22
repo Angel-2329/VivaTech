@@ -93,7 +93,7 @@ function TarjetaCatalogo({ curso }) {
         )}
       </div>
 
-      {curso.cerrado && (
+      {curso.cerrado && curso.estado === 'en_curso' && (
         <div className="vt-alert vt-alert-warning">
           <span className="vt-icon" aria-hidden="true">
             event_busy
