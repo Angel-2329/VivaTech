@@ -134,7 +134,7 @@ function BuscadorPersonas({
           </p>
         )}
         {resultados?.length > 0 && (
-          <p className="vt-visually-hidden">{resultados.length} personas disponibles en esta página</p>
+          <p className="vt-visually-hidden">{resultados.length === 1 ? '1 persona disponible' : `${resultados.length} personas disponibles`} en esta página</p>
         )}
       </div>
 
