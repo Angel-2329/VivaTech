@@ -32,6 +32,7 @@ function buscarMaestros(texto, opciones = {}) {
 }
 
 const MAXIMO_NOMBRES = 5
+const MAXIMO_SELECCION = 100
 const ERROR_RETIRO_MASIVO = 'No pudimos quitar a los estudiantes. Nadie fue retirado del grupo. Inténtalo otra vez.'
 
 function textoEstudiantes(cantidad) {
@@ -77,7 +78,7 @@ function DetalleGrupo() {
 
   function abrirRetiroMasivo(tipo) {
     if (operacionRef.current) return
-    if (tipo === 'seleccion' && seleccionados.length === 0) return
+    if (tipo === 'seleccion' && (seleccionados.length === 0 || seleccionados.length > MAXIMO_SELECCION)) return
     setErrorMasivo('')
     setRetiroMasivo({
       tipo,
@@ -102,7 +103,9 @@ function DetalleGrupo() {
           const { retirados, noEstaban } = await retirarEstudiantesSeleccionados(grupo.idGrupo, uids)
           setDatos((anterior) => anterior?.idGrupo === grupo.idGrupo ? {
             ...anterior,
-            estudiantes: anterior.estudiantes.filter((estudiante) => !retirados.includes(estudiante.uid)),
+            estudiantes: anterior.estudiantes.filter(
+              (estudiante) => !retirados.includes(estudiante.uid) && !noEstaban.includes(estudiante.uid)
+            ),
           } : anterior)
           texto = `Se quitó del grupo a ${textoEstudiantes(retirados.length)}. Sus cuentas y su avance se conservan.`
           if (noEstaban.length > 0) {
@@ -342,6 +345,7 @@ function TablaEstudiantes({
   tituloRef,
 }) {
   const sinSeleccion = totalSeleccionados === 0
+  const excedeSeleccion = totalSeleccionados > MAXIMO_SELECCION
 
   return (
     <section className="vt-stack" aria-labelledby="titulo-estudiantes">
@@ -360,7 +364,7 @@ function TablaEstudiantes({
               type="button"
               className="vt-btn vt-btn-danger-soft"
               onClick={onQuitarSeleccionados}
-              aria-disabled={sinSeleccion || procesando}
+              aria-disabled={sinSeleccion || excedeSeleccion || procesando}
             >
               <span className="vt-icon" aria-hidden="true">
                 group_remove
@@ -376,6 +380,14 @@ function TablaEstudiantes({
               Retirar a todos
             </button>
           </div>
+          {excedeSeleccion && (
+            <p className="vt-field-error" role="alert">
+              <span className="vt-icon" aria-hidden="true">
+                error
+              </span>
+              Puedes quitar hasta {MAXIMO_SELECCION} estudiantes a la vez. Desmarca algunos o usa «Retirar a todos».
+            </p>
+          )}
           <p className="vt-body-sm vt-text-muted">
             Marca las casillas de los estudiantes que quieres quitar del grupo. Sus cuentas y su avance se conservan.
           </p>
