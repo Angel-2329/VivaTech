@@ -22,7 +22,7 @@ const ERRORES_SIN_REINTENTO = {
   curso_retirado: {
     icono: 'archive',
     titulo: 'Este curso fue retirado',
-    texto: 'Sus lecciones ya no están disponibles. Tu avance sigue guardado en Mis cursos.',
+    texto: 'Sus lecciones ya no están disponibles. Si lo terminaste, lo encontrarás en Mis cursos, sección Terminados.',
   },
   leccion_no_encontrada: {
     icono: 'search_off',
@@ -117,7 +117,6 @@ function RecorridoLeccion({ leccion }) {
   }
 
   
-  // En un paso ya guardado no se vuelve a mandar el avance: solo se avanza
   async function repasarPaso() {
     if (!esUltimo) {
       irAlPaso(posicion + 1)

@@ -8,8 +8,7 @@ function esDireccionLocal(nombreHost) {
 }
 
 export function urlPublica() {
-  //const configurada = import.meta.env?.VITE_URL_PUBLICA?.trim()
-  const configurada = import.meta.env?.VITE_URL_PUBLICA?.trim() || globalThis.location?.origin
+  const configurada = import.meta.env?.VITE_URL_PUBLICA?.trim()
   if (!configurada) return null
 
   let url
