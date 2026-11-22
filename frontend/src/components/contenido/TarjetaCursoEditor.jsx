@@ -173,36 +173,57 @@ function MoverCurso({ curso, categorias, bloqueado, onMover }) {
   const id = useId()
   const otras = categorias.filter((categoria) => categoria.idCategoria !== curso.idCategoria)
   const [destino, setDestino] = useState(otras[0]?.idCategoria ?? '')
+  const [error, setError] = useState('')
   const elegido = otras.some((categoria) => categoria.idCategoria === destino) ? destino : otras[0]?.idCategoria
 
+  async function mover(evento) {
+    evento.preventDefault()
+    if (!elegido) return
+    setError('')
+    try {
+      await onMover(curso, elegido)
+    } catch {
+      setError('En esa categoría ya hay un curso con el mismo título. Elige otra categoría.')
+    }
+  }
+
   return (
-    <form
-      className="vt-cluster contenido__mover"
-      onSubmit={(evento) => {
-        evento.preventDefault()
-        if (elegido) onMover(curso, elegido)
-      }}
-    >
-      <label className="vt-body-sm" htmlFor={`${id}-destino`}>
-        Mover a
-      </label>
-      <select
-        id={`${id}-destino`}
-        className="vt-select"
-        value={elegido}
-        onChange={(evento) => setDestino(evento.target.value)}
-        disabled={bloqueado}
-      >
-        {otras.map((categoria) => (
-          <option key={categoria.idCategoria} value={categoria.idCategoria}>
-            {categoria.nombre}
-          </option>
-        ))}
-      </select>
-      <button type="submit" className="vt-btn vt-btn-secondary vt-btn-sm" disabled={bloqueado}>
-        Mover
-        <span className="vt-visually-hidden"> {curso.titulo}</span>
-      </button>
+    <form className="vt-stack vt-stack-sm" onSubmit={mover}>
+      <div className="vt-cluster contenido__mover">
+        <label className="vt-body-sm" htmlFor={`${id}-destino`}>
+          Mover a
+        </label>
+        <select
+          id={`${id}-destino`}
+          className="vt-select"
+          value={elegido}
+          onChange={(evento) => {
+            setDestino(evento.target.value)
+            if (error) setError('')
+          }}
+          disabled={bloqueado}
+          aria-invalid={error ? 'true' : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+        >
+          {otras.map((categoria) => (
+            <option key={categoria.idCategoria} value={categoria.idCategoria}>
+              {categoria.nombre}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="vt-btn vt-btn-secondary vt-btn-sm" disabled={bloqueado}>
+          Mover
+          <span className="vt-visually-hidden"> {curso.titulo}</span>
+        </button>
+      </div>
+      {error && (
+        <p id={`${id}-error`} className="vt-field-error" role="alert">
+          <span className="vt-icon" aria-hidden="true">
+            error
+          </span>
+          {error}
+        </p>
+      )}
     </form>
   )
 }

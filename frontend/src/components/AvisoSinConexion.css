@@ -1,0 +1,49 @@
+.vt-sin-conexion.is-visible {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: var(--vt-space-sm);
+  padding: var(--vt-space-sm) var(--vt-margin-mobile);
+  background-color: var(--vt-on-surface);
+  color: var(--vt-surface-lowest);
+  font-size: var(--vt-body-md);
+  box-shadow: var(--vt-shadow-overlay);
+}
+
+.vt-sin-conexion p {
+  margin: 0;
+}
+
+.vt-sin-conexion__icono {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+
+body:has(.vt-sin-conexion.is-visible) {
+  padding-bottom: 6rem;
+}
+
+html:has(.vt-sin-conexion.is-visible) {
+  scroll-padding-bottom: 6rem;
+}
+
+html:has(.vt-sin-conexion.is-visible) .vt-lesson-nav {
+  bottom: 4.5rem;
+}
+
+@media (min-width: 64rem) {
+  .vt-sin-conexion.is-visible {
+    padding-inline: var(--vt-margin);
+  }
+}
+
+@media (forced-colors: active) {
+  .vt-sin-conexion.is-visible {
+    border-top: 2px solid CanvasText;
+  }
+}

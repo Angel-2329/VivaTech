@@ -39,7 +39,11 @@ function FormularioNombreGrupo({
       await onGuardar(nombreLimpio)
       if (limpiarAlGuardar) setNombre('')
     } catch (errorAlGuardar) {
-      setError(errorAlGuardar.message || 'No pudimos guardar el nombre. Inténtalo nuevamente.')
+      setError(
+        errorAlGuardar.codigo === 'grupo_duplicado'
+          ? 'Ya existe un grupo con ese nombre. Usa otro, por ejemplo agrega el turno o el año.'
+          : errorAlGuardar.message || 'No pudimos guardar el nombre. Inténtalo nuevamente.',
+      )
       campoRef.current?.focus()
     } finally {
       setGuardando(false)
