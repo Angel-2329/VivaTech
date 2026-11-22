@@ -4,7 +4,8 @@ function BarraAvance({ completadas, total, unidad = 'lecciones', pequena = false
   }
 
   const porcentaje = Math.round((completadas / total) * 100)
-  const texto = `${completadas} de ${total} ${unidad}`
+  const unidadTexto = total === 1 && unidad === 'lecciones' ? 'lección' : unidad
+  const texto = `${completadas} de ${total} ${unidadTexto}`
 
   return (
     <div className={pequena ? 'vt-progress vt-progress-sm' : 'vt-progress'}>

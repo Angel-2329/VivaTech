@@ -19,6 +19,16 @@ function VerificarCertificado() {
   const noDisponible = error && error.codigo === 'verificacion_no_disponible'
 
   useEffect(() => {
+    const anterior = document.title
+    document.title = datos
+      ? 'Certificado verificado | Viva Tech'
+      : noValido
+        ? 'Certificado no válido | Viva Tech'
+        : 'Verificar certificado | Viva Tech'
+    return () => { document.title = anterior }
+  }, [datos, noValido])
+
+  useEffect(() => {
     if (!cargando) tituloRef.current?.focus()
   }, [cargando])
 

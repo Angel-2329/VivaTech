@@ -71,7 +71,6 @@ function Contenido() {
     return ejecutar(() => renombrarCategoria(categoria.idCategoria, nombre, usuario), `La categoría ahora se llama "${nombre}".`)
   }
 
-  // El servidor recibe la lista completa de categorías en el nuevo orden
   async function manejarMoverCategoria(categoria, nuevaPosicion) {
     const ids = categorias.map((actual) => actual.idCategoria).filter((id) => id !== categoria.idCategoria)
     ids.splice(nuevaPosicion, 0, categoria.idCategoria)
@@ -99,7 +98,6 @@ function Contenido() {
 
  
 
-  // fecha = "AAAA-MM-DD" o null para quitarla. Los errores los muestra el formulario.
   function manejarCambiarFecha(curso, fecha) {
     return ejecutar(
       () => actualizarCurso(curso.idCurso, { fechaCierre: fecha }, usuario),
@@ -258,7 +256,7 @@ function dialogoDeCurso(curso, tipo, usuario) {
       titulo: `¿Publicar "${curso.titulo}"?`,
       contenido: (
         <>
-          <p>Los alumnos lo verán en Mis cursos.</p>
+          <p>Los alumnos lo verán en Cursos disponibles.</p>
           <p>Ya publicado, solo podrás corregir textos: no se podrán agregar, quitar ni reordenar lecciones o pasos.</p>
         </>
       ),
@@ -302,7 +300,6 @@ function dialogoDeCurso(curso, tipo, usuario) {
     textoConfirmar: curso.tieneAvance ? 'Sí, retirar el curso' : 'Sí, eliminar',
     peligro: true,
     accion: () => eliminarCurso(curso.idCurso, usuario),
-    // 204 llega como undefined (se borró); 200 trae resultado: 'retirado'
     textoExito: (respuesta) =>
       respuesta?.resultado === 'retirado' ? `"${curso.titulo}" quedó como retirado.` : `Se eliminó "${curso.titulo}".`,
   }
