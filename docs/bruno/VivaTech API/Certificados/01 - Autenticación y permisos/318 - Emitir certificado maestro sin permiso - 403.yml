@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/cursos/4/certificado"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

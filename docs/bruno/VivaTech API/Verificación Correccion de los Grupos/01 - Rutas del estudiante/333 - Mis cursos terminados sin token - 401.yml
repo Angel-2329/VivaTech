@@ -1,0 +1,17 @@
+info:
+  name: 333 - Mis cursos terminados sin token - 401
+  type: http
+  seq: 333
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-cursos/terminados"
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

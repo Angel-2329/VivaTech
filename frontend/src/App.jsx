@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router'
+import { useEffect } from 'react'
+import { Routes, Route, Navigate, matchPath, useLocation } from 'react-router'
 import RutaProtegida from './components/RutaProtegida.jsx'
 import AvisoSinConexion from './components/AvisoSinConexion.jsx'
 import Acceso from './pages/Acceso.jsx'
@@ -19,7 +20,43 @@ import ProgresoGeneral from './pages/admin/ProgresoGeneral.jsx'
 import Contenido from './pages/contenido/Contenido.jsx'
 import EditorCurso from './pages/contenido/EditorCurso.jsx'
 
+const TITULOS_POR_RUTA = [
+  ['/acceso', 'Acceso'],
+  ['/aviso-de-privacidad', 'Aviso de privacidad'],
+  ['/bienvenida', 'Bienvenida'],
+  ['/estudiante', 'Inicio'],
+  ['/estudiante/cursos-disponibles', 'Cursos disponibles'],
+  ['/estudiante/mis-cursos/en-curso', 'Mis cursos: en curso'],
+  ['/estudiante/mis-cursos/terminados', 'Mis cursos: terminados'],
+  ['/estudiante/lecciones/:idLeccion', 'Lección'],
+  ['/estudiante/certificados', 'Mis certificados'],
+  ['/estudiante/certificados/:idCertificado', 'Certificado'],
+  ['/maestro', 'Mis grupos'],
+  ['/maestro/grupos/:idGrupo', 'Detalle del grupo'],
+  ['/maestro/contenido', 'Contenido'],
+  ['/maestro/contenido/cursos/:idCurso', 'Editar curso'],
+  ['/admin', 'Inicio de administración'],
+  ['/admin/usuarios', 'Cuentas y roles'],
+  ['/admin/grupos', 'Grupos'],
+  ['/admin/grupos/:idGrupo', 'Detalle del grupo'],
+  ['/admin/progreso', 'Progreso general'],
+  ['/admin/contenido', 'Contenido'],
+  ['/admin/contenido/cursos/:idCurso', 'Editar curso'],
+]
+
+function tituloDeRuta(ruta) {
+  const encontrado = TITULOS_POR_RUTA.find(([patron]) => matchPath(patron, ruta))
+  return encontrado ? `${encontrado[1]} | Viva Tech` : 'Viva Tech'
+}
+
 function App() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    if (matchPath('/verificar/:codigo', pathname)) return
+    document.title = tituloDeRuta(pathname)
+  }, [pathname])
+
   return (
     <>
       <Routes>

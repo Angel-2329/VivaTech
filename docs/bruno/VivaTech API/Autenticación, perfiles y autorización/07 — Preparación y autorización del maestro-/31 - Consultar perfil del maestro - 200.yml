@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/perfil"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

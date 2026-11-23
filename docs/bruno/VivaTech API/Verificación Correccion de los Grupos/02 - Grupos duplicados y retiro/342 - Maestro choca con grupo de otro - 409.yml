@@ -1,0 +1,24 @@
+info:
+  name: 342 - Maestro choca con grupo de otro - 409
+  type: http
+  seq: 342
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA F1] JOSÉ"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

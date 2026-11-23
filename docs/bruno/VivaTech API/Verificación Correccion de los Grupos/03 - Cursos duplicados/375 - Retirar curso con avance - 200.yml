@@ -1,0 +1,18 @@
+info:
+  name: 375 - Retirar curso con avance - 200
+  type: http
+  seq: 375
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1Retirado}}"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

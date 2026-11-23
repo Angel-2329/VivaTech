@@ -1,0 +1,18 @@
+info:
+  name: 354 - E1 retirar a todos - 200
+  type: http
+  seq: 354
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

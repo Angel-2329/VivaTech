@@ -1,0 +1,21 @@
+info:
+  name: 365 - Rechazar traslado a categoría con ese título - 409
+  type: http
+  seq: 365
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1JoseB}}"
+  body:
+    type: json
+    data: '{"idCategoria":"{{idCategoriaF1A}}"}'
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

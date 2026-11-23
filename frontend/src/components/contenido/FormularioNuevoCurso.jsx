@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import CampoFechaCierre from './CampoFechaCierre.jsx'
 import CampoTexto from './CampoTexto.jsx'
 import { LIMITES, revisarFechaCierre, revisarTexto } from '../../utils/contenido.js'
@@ -11,10 +11,15 @@ function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [guardando, setGuardando] = useState(false)
+  const categoriaRef = useRef(null)
   const tituloRef = useRef(null)
   const descripcionRef = useRef(null)
   const fechaRef = useRef(null)
   const idCampo = useId()
+
+  useEffect(() => {
+    categoriaRef.current?.focus()
+  }, [])
 
   async function enviar(evento) {
     evento.preventDefault()
@@ -65,6 +70,7 @@ function FormularioNuevoCurso({ categorias, onCrear, onCancelar }) {
           Categoría
         </label>
         <select
+          ref={categoriaRef}
           id={`${idCampo}-categoria`}
           className="vt-select"
           value={idCategoria}

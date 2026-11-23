@@ -1,0 +1,21 @@
+info:
+  name: 349 - E2 con 101 uids - 400
+  type: http
+  seq: 349
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes/retiros"
+  body:
+    type: json
+    data: '{"uids":["uid-f1-001","uid-f1-002","uid-f1-003","uid-f1-004","uid-f1-005","uid-f1-006","uid-f1-007","uid-f1-008","uid-f1-009","uid-f1-010","uid-f1-011","uid-f1-012","uid-f1-013","uid-f1-014","uid-f1-015","uid-f1-016","uid-f1-017","uid-f1-018","uid-f1-019","uid-f1-020","uid-f1-021","uid-f1-022","uid-f1-023","uid-f1-024","uid-f1-025","uid-f1-026","uid-f1-027","uid-f1-028","uid-f1-029","uid-f1-030","uid-f1-031","uid-f1-032","uid-f1-033","uid-f1-034","uid-f1-035","uid-f1-036","uid-f1-037","uid-f1-038","uid-f1-039","uid-f1-040","uid-f1-041","uid-f1-042","uid-f1-043","uid-f1-044","uid-f1-045","uid-f1-046","uid-f1-047","uid-f1-048","uid-f1-049","uid-f1-050","uid-f1-051","uid-f1-052","uid-f1-053","uid-f1-054","uid-f1-055","uid-f1-056","uid-f1-057","uid-f1-058","uid-f1-059","uid-f1-060","uid-f1-061","uid-f1-062","uid-f1-063","uid-f1-064","uid-f1-065","uid-f1-066","uid-f1-067","uid-f1-068","uid-f1-069","uid-f1-070","uid-f1-071","uid-f1-072","uid-f1-073","uid-f1-074","uid-f1-075","uid-f1-076","uid-f1-077","uid-f1-078","uid-f1-079","uid-f1-080","uid-f1-081","uid-f1-082","uid-f1-083","uid-f1-084","uid-f1-085","uid-f1-086","uid-f1-087","uid-f1-088","uid-f1-089","uid-f1-090","uid-f1-091","uid-f1-092","uid-f1-093","uid-f1-094","uid-f1-095","uid-f1-096","uid-f1-097","uid-f1-098","uid-f1-099","uid-f1-100","uid-f1-101"]}'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

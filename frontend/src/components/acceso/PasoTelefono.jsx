@@ -195,12 +195,14 @@ function PasoTelefono({
             disabled={enviando}
             checked={aceptaAviso}
             onChange={manejarCambioAviso}
+            aria-required="true"
             aria-invalid={errores.aviso ? 'true' : undefined}
             aria-describedby={errores.aviso ? `${id}-error-aviso` : undefined}
           />
           <span>
             He leído y acepto el{' '}
             <Link to="/aviso-de-privacidad">Aviso de Privacidad</Link> de Viva Tech.
+            <span className="vt-field-required" aria-hidden="true"> Obligatorio</span>
           </span>
         </label>
 

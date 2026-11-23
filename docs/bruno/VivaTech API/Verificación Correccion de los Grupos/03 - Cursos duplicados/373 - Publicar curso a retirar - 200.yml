@@ -1,0 +1,24 @@
+info:
+  name: 373 - Publicar curso a retirar - 200
+  type: http
+  seq: 373
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1Retirado}}"
+  body:
+    type: json
+    data: |-
+      {
+        "estadoPublicacion": "publicado"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

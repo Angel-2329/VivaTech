@@ -1,18 +1,19 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import PasoLeccion from '../leccion/PasoLeccion.jsx'
 import '../../pages/estudiante/Leccion.css'
 
 
 function VistaPreviaPaso({ paso, numero }) {
+  const idTitulo = useId()
   const [vuelta, setVuelta] = useState(0)
   const [completado, setCompletado] = useState(false)
 
   return (
-    <section className="vt-stack vt-stack-sm editor__vista-previa" aria-labelledby="titulo-paso">
+    <section className="vt-stack vt-stack-sm editor__vista-previa" aria-labelledby={idTitulo}>
       <div className="vt-cluster vt-cluster-between">
-        <h4 id="titulo-paso" className="vt-label-lg">
+        <h3 id={idTitulo} className="vt-label-lg">
           Vista previa del paso {numero}: así lo ve el alumno
-        </h4>
+        </h3>
         <button
           type="button"
           className="vt-btn vt-btn-ghost vt-btn-sm"
@@ -31,6 +32,7 @@ function VistaPreviaPaso({ paso, numero }) {
       <PasoLeccion
         key={vuelta}
         paso={{ ...paso, idPaso: `vista-previa-${vuelta}` }}
+        idTitulo={idTitulo}
         guardando={false}
         onCompletar={() => setCompletado(true)}
       />

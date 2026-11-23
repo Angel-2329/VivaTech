@@ -1,0 +1,26 @@
+info:
+  name: 361 - Rechazar jose con espacios en A - 409
+  type: http
+  seq: 361
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaF1A}}",
+        "titulo": "  [prueba f1]   jose ",
+        "descripcion": "Curso ficticio de la verificación F.1."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,26 @@
+info:
+  name: 369 - Crear lección del curso a retirar - 201
+  type: http
+  seq: 369
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1Retirado}}/lecciones"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "[PRUEBA F1] Lección temporal",
+        "objetivo": "Practicar con datos ficticios.",
+        "duracionEstimadaMinutos": 3
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

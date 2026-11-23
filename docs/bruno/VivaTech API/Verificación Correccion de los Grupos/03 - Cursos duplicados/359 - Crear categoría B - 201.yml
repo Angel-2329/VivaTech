@@ -1,0 +1,25 @@
+# Copiar idCategoria a idCategoriaF1B.
+info:
+  name: 359 - Crear categoría B - 201
+  type: http
+  seq: 359
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/categorias"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA F1] Categoría B"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

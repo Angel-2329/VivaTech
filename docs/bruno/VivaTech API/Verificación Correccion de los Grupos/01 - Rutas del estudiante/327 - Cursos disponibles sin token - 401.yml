@@ -1,0 +1,17 @@
+info:
+  name: 327 - Cursos disponibles sin token - 401
+  type: http
+  seq: 327
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/cursos-disponibles"
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

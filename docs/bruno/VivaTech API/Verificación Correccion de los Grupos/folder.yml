@@ -1,0 +1,7 @@
+info:
+  name: Verificación Correccion de los Grupos
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit

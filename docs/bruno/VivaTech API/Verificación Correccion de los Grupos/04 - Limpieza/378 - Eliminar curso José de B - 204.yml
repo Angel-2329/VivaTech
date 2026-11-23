@@ -1,0 +1,18 @@
+info:
+  name: 378 - Eliminar curso José de B - 204
+  type: http
+  seq: 378
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1JoseB}}"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

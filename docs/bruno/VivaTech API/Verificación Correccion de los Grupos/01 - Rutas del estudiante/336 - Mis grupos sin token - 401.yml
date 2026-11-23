@@ -1,0 +1,17 @@
+info:
+  name: 336 - Mis grupos sin token - 401
+  type: http
+  seq: 336
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-grupos"
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

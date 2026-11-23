@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import CategoriaEditor from '../../components/contenido/CategoriaEditor.jsx'
 import FormularioNombre from '../../components/contenido/FormularioNombre.jsx'
 import FormularioNuevoCurso from '../../components/contenido/FormularioNuevoCurso.jsx'
@@ -38,10 +38,20 @@ function Contenido() {
   const [procesandoDialogo, setProcesandoDialogo] = useState(false)
   const [errorDialogo, setErrorDialogo] = useState('')
   const operacionRef = useRef(false)
+  const botonNuevoCursoRef = useRef(null)
+  const mensajeRef = useRef(null)
+  const focoPendienteRef = useRef(null)
 
   const bloqueado = cargando || Boolean(error) || modificando
 
-  
+  useEffect(() => {
+    const destino = focoPendienteRef.current?.current
+    if (!destino || destino.disabled) return
+    destino.focus()
+    focoPendienteRef.current = null
+  })
+
+
   async function ejecutar(accion, textoExito) {
     if (operacionRef.current) return
     operacionRef.current = true
@@ -59,7 +69,18 @@ function Contenido() {
   }
 
   async function manejarCrearCurso(datos) {
-    await ejecutar(() => crearCurso(datos, usuario), (curso) => `Se creó el curso "${curso.titulo}" como borrador.`)
+    if (!operacionRef.current) focoPendienteRef.current = mensajeRef
+    try {
+      await ejecutar(() => crearCurso(datos, usuario), (curso) => `Se creó el curso "${curso.titulo}" como borrador.`)
+    } catch (errorAlCrear) {
+      focoPendienteRef.current = null
+      throw errorAlCrear
+    }
+    setCreandoCurso(false)
+  }
+
+  function cancelarNuevoCurso() {
+    focoPendienteRef.current = botonNuevoCursoRef
     setCreandoCurso(false)
   }
 
@@ -71,7 +92,6 @@ function Contenido() {
     return ejecutar(() => renombrarCategoria(categoria.idCategoria, nombre, usuario), `La categoría ahora se llama "${nombre}".`)
   }
 
-  // El servidor recibe la lista completa de categorías en el nuevo orden
   async function manejarMoverCategoria(categoria, nuevaPosicion) {
     const ids = categorias.map((actual) => actual.idCategoria).filter((id) => id !== categoria.idCategoria)
     ids.splice(nuevaPosicion, 0, categoria.idCategoria)
@@ -99,7 +119,6 @@ function Contenido() {
 
  
 
-  // fecha = "AAAA-MM-DD" o null para quitarla. Los errores los muestra el formulario.
   function manejarCambiarFecha(curso, fecha) {
     return ejecutar(
       () => actualizarCurso(curso.idCurso, { fechaCierre: fecha }, usuario),
@@ -177,7 +196,7 @@ function Contenido() {
       {categorias && (
         <div className="vt-cluster">
           {!creandoCurso && categorias.length > 0 && (
-            <button type="button" className="vt-btn vt-btn-primary" onClick={() => setCreandoCurso(true)} disabled={bloqueado}>
+            <button ref={botonNuevoCursoRef} type="button" className="vt-btn vt-btn-primary" onClick={() => setCreandoCurso(true)} disabled={bloqueado}>
               <span className="vt-icon" aria-hidden="true">
                 add
               </span>
@@ -188,7 +207,7 @@ function Contenido() {
       )}
 
       {creandoCurso && categorias && (
-        <FormularioNuevoCurso categorias={categorias} onCrear={manejarCrearCurso} onCancelar={() => setCreandoCurso(false)} />
+        <FormularioNuevoCurso categorias={categorias} onCrear={manejarCrearCurso} onCancelar={cancelarNuevoCurso} />
       )}
 
       {esAdmin && categorias && (
@@ -206,7 +225,7 @@ function Contenido() {
         </section>
       )}
 
-      <MensajeExito texto={mensaje} />
+      <MensajeExito texto={mensaje} enfoqueRef={mensajeRef} />
 
       {cargando && <EstadoCarga texto="Cargando el contenido…" />}
       {error && <EstadoError error={error} onReintentar={reintentar} />}
@@ -258,7 +277,7 @@ function dialogoDeCurso(curso, tipo, usuario) {
       titulo: `¿Publicar "${curso.titulo}"?`,
       contenido: (
         <>
-          <p>Los alumnos lo verán en Mis cursos.</p>
+          <p>Los alumnos lo verán en Cursos disponibles.</p>
           <p>Ya publicado, solo podrás corregir textos: no se podrán agregar, quitar ni reordenar lecciones o pasos.</p>
         </>
       ),
@@ -302,7 +321,6 @@ function dialogoDeCurso(curso, tipo, usuario) {
     textoConfirmar: curso.tieneAvance ? 'Sí, retirar el curso' : 'Sí, eliminar',
     peligro: true,
     accion: () => eliminarCurso(curso.idCurso, usuario),
-    // 204 llega como undefined (se borró); 200 trae resultado: 'retirado'
     textoExito: (respuesta) =>
       respuesta?.resultado === 'retirado' ? `"${curso.titulo}" quedó como retirado.` : `Se eliminó "${curso.titulo}".`,
   }

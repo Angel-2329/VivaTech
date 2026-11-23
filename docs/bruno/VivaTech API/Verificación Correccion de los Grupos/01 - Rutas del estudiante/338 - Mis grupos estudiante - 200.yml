@@ -1,0 +1,19 @@
+# Revisar en la respuesta: Cache-Control: no-store.
+info:
+  name: 338 - Mis grupos estudiante - 200
+  type: http
+  seq: 338
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-grupos"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

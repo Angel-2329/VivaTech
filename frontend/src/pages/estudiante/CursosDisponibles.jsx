@@ -103,7 +103,12 @@ function TarjetaCatalogo({ curso }) {
       )}
 
       {curso.estado === 'en_curso' && (
-        <BarraAvance completadas={curso.leccionesCompletadas} total={curso.totalLecciones} pequena />
+        <BarraAvance
+          nombre={`Avance de ${curso.titulo}`}
+          completadas={curso.leccionesCompletadas}
+          total={curso.totalLecciones}
+          pequena
+        />
       )}
 
       <div className="cursos__acciones">

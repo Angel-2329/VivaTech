@@ -1,0 +1,21 @@
+info:
+  name: 346 - E2 maestro ajeno - 404
+  type: http
+  seq: 346
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}/estudiantes/retiros"
+  body:
+    type: json
+    data: '{"uids":["{{uidEstudiante}}"]}'
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}"
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

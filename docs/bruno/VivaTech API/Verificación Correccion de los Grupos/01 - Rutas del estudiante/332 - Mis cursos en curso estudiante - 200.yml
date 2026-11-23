@@ -1,0 +1,19 @@
+# Revisar en la respuesta: Cache-Control: no-store.
+info:
+  name: 332 - Mis cursos en curso estudiante - 200
+  type: http
+  seq: 332
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-cursos/en-curso"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

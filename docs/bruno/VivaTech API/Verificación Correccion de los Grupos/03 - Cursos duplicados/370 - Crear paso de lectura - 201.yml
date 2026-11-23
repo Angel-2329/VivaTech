@@ -1,0 +1,28 @@
+info:
+  name: 370 - Crear paso de lectura - 201
+  type: http
+  seq: 370
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionF1Retirado}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "En esta práctica utiliza solo datos ficticios.",
+        "recursos": [],
+        "actividad": {
+          "tipo": "lectura"
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

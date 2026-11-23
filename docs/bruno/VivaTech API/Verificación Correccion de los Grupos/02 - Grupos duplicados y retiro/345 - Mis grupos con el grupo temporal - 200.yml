@@ -1,0 +1,19 @@
+# Esperado: el grupo con maestros: [] y sin uid. Revisar en la respuesta: Cache-Control: no-store.
+info:
+  name: 345 - Mis grupos con el grupo temporal - 200
+  type: http
+  seq: 345
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/mis-grupos"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

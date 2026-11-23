@@ -1,0 +1,24 @@
+info:
+  name: 343 - Renombrar al mismo nombre normalizado - 200
+  type: http
+  seq: 343
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/grupos/{{idGrupoF1}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA F1] JOSÉ"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
