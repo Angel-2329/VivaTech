@@ -100,7 +100,11 @@ function CursoEnCurso({ curso }) {
         </div>
       )}
 
-      <BarraAvance completadas={curso.leccionesCompletadas} total={curso.totalLecciones} />
+      <BarraAvance
+        nombre={`Avance de ${curso.titulo}`}
+        completadas={curso.leccionesCompletadas}
+        total={curso.totalLecciones}
+      />
 
       {curso.siguienteLeccion && (
         <div className="mis-cursos__siguiente">

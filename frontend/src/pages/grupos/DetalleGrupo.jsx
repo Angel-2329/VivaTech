@@ -430,6 +430,7 @@ function TablaEstudiantes({
                     <td data-label="Avance" className="grupos__avance">
                       <BarraAvance
                         pequena
+                        nombre={`Avance de ${estudiante.nombreCompleto}`}
                         completadas={estudiante.leccionesCompletadas}
                         total={grupo.totalLeccionesPublicadas}
                       />
