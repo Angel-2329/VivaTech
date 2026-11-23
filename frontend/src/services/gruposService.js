@@ -68,3 +68,18 @@ export function buscarEstudiantes(
 
   return solicitarApi(`/estudiantes?${parametros}`, { signal })
 }
+
+export function obtenerMisGrupos() {
+  return solicitarApi('/mis-grupos')
+}
+
+export function retirarTodosLosEstudiantes(idGrupo) {
+  return solicitarApi(`/grupos/${encodeURIComponent(idGrupo)}/estudiantes`, { metodo: 'DELETE' })
+}
+
+export function retirarEstudiantesSeleccionados(idGrupo, uids) {
+  return solicitarApi(`/grupos/${encodeURIComponent(idGrupo)}/estudiantes/retiros`, {
+    metodo: 'POST',
+    datos: { uids },
+  })
+}

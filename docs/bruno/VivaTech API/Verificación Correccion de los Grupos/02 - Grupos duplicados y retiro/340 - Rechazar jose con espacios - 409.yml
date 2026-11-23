@@ -1,0 +1,25 @@
+# Esperado: codigo grupo_duplicado; sin ID ni dueño del otro grupo.
+info:
+  name: 340 - Rechazar jose con espacios - 409
+  type: http
+  seq: 340
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "  [prueba f1]   jose "
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

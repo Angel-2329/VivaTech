@@ -1,0 +1,25 @@
+# Copiar idGrupo a la variable idGrupoF1.
+info:
+  name: 339 - Crear grupo José - 201
+  type: http
+  seq: 339
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA F1] José"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

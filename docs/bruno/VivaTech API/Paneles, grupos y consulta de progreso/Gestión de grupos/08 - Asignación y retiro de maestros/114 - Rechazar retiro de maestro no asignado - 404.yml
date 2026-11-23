@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros/{{uidNuevo}}"
+  url: "{{baseUrl}}/api/grupos/{{idGrupoAdministradorPrueba}}/maestros/{{uidMaestro}}"
   auth:
     type: bearer
     token: "{{tokenAdministrador}}"

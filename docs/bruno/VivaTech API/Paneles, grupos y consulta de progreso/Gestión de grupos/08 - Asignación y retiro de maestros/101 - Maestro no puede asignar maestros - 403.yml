@@ -11,7 +11,7 @@ http:
     data: '{"uid":"uid-prueba-b04"}'
   auth:
     type: bearer
-    token: "{{tokenNuevo}}"
+    token: "{{tokenMaestro}}"
 
 settings:
   encodeUrl: true

@@ -1,0 +1,18 @@
+info:
+  name: 382 - Eliminar categoría B - 204
+  type: http
+  seq: 382
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/categorias/{{idCategoriaF1B}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

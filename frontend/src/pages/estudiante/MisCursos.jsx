@@ -1,141 +1,189 @@
+import { Link } from 'react-router'
+import BotonCertificado from '../../components/certificado/BotonCertificado.jsx'
+import ListaLecciones from '../../components/cursos/ListaLecciones.jsx'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
-import { obtenerMisCursos } from '../../services/cursosService.js'
-import { TEXTO_ESTADO_LECCION, contarCompletadas } from '../../utils/cursos.js'
-import { plural } from '../../utils/formato.js'
+import { obtenerCursosEnCurso, obtenerCursosTerminados } from '../../services/cursosService.js'
+import { RUTA_CURSOS_DISPONIBLES, RUTA_EN_CURSO, RUTA_TERMINADOS, rutaLeccion } from '../../utils/cursos.js'
+import { textoFecha, textoInstante } from '../../utils/fechas.js'
 import './Estudiante.css'
 
-
-const ICONOS = ['account_balance', 'receipt_long']
-
-const CLASE_INSIGNIA = {
-  completada: 'vt-badge vt-badge-success',
-  en_progreso: 'vt-badge vt-badge-primary',
-  pendiente: 'vt-badge vt-badge-neutral',
+const SECCIONES = {
+  'en-curso': {
+    texto: 'En curso',
+    ruta: RUTA_EN_CURSO,
+    descripcion: 'Los cursos que empezaste y todavía no terminas.',
+    cargar: obtenerCursosEnCurso,
+    textoCarga: 'Cargando tus cursos en curso…',
+  },
+  terminados: {
+    texto: 'Terminados',
+    ruta: RUTA_TERMINADOS,
+    descripcion: 'Los cursos que ya completaste. Puedes repasarlos cuando quieras.',
+    cargar: obtenerCursosTerminados,
+    textoCarga: 'Cargando tus cursos terminados…',
+  },
 }
 
-
-function MisCursos() {
-  const { datos: categorias, cargando, error, reintentar } = useDatos(obtenerMisCursos)
+function MisCursos({ seccion }) {
+  const actual = SECCIONES[seccion]
+  const { datos: cursos, cargando, error, reintentar } = useDatos(actual.cargar)
 
   return (
-    <PlantillaPanel
-      titulo="Mis cursos"
-      descripcion="Elige una categoría para ver sus cursos y lecciones."
-      regresarA="/estudiante"
-      textoRegresar="Regresar al inicio"
-    >
-      {cargando && <EstadoCarga texto="Cargando tus cursos…" />}
+    <PlantillaPanel titulo="Mis cursos" descripcion={actual.descripcion} regresarA="/estudiante" textoRegresar="Regresar al inicio">
+      <nav className="vt-tabs mis-cursos__secciones" aria-label="Secciones de Mis cursos">
+        {Object.entries(SECCIONES).map(([clave, opcion]) => (
+          <Link key={clave} className="vt-tab" to={opcion.ruta} aria-current={clave === seccion ? 'page' : undefined}>
+            {opcion.texto}
+          </Link>
+        ))}
+      </nav>
+
+      {cargando && <EstadoCarga texto={actual.textoCarga} />}
       {error && <EstadoError error={error} onReintentar={reintentar} />}
 
-      {categorias?.length === 0 && (
-        <EstadoVacio icono="menu_book" titulo="Todavía no hay cursos disponibles">
-          <p>Tu maestra o maestro te avisará cuando haya cursos nuevos.</p>
+      {cursos?.length === 0 && seccion === 'en-curso' && (
+        <EstadoVacio icono="menu_book" titulo="Aún no empiezas ningún curso">
+          <div>
+            <Link className="vt-btn vt-btn-primary" to={RUTA_CURSOS_DISPONIBLES}>
+              Ver cursos disponibles
+            </Link>
+          </div>
         </EstadoVacio>
       )}
 
-      {categorias?.length > 0 && (
-        <div>
-          {categorias.map((categoria, posicion) => (
-            <Categoria
-              key={categoria.idCategoria}
-              categoria={categoria}
-              icono={ICONOS[posicion % ICONOS.length]}
-              abiertaAlInicio={posicion === 0}
-            />
+      {cursos?.length === 0 && seccion === 'terminados' && (
+        <EstadoVacio icono="workspace_premium" titulo="Todavía no terminas ningún curso">
+          <p>Cuando completes todas sus lecciones, aparecerá aquí.</p>
+        </EstadoVacio>
+      )}
+
+      {cursos?.length > 0 && (
+        <ul className="vt-stack mis-cursos__lista">
+          {cursos.map((curso) => (
+            <li key={curso.idCurso}>
+              {seccion === 'en-curso' ? <CursoEnCurso curso={curso} /> : <CursoTerminado curso={curso} />}
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </PlantillaPanel>
   )
 }
 
-function Categoria({ categoria, icono, abiertaAlInicio }) {
+function CursoEnCurso({ curso }) {
   return (
-    <details className="vt-accordion" open={abiertaAlInicio}>
-      <summary className="vt-accordion__summary">
-        <span className="vt-category-icon" aria-hidden="true">
-          <span className="vt-icon">{icono}</span>
-        </span>
-        <span className="vt-accordion__title mis-cursos__categoria">
-          <span className="vt-headline-sm">{categoria.nombre}</span>
-          <span className="vt-body-sm vt-text-muted">
-            {plural(categoria.cursos.length, 'curso', 'cursos')}
-          </span>
-        </span>
-        <span className="vt-accordion__toggle" aria-hidden="true">
-          <span className="is-closed">Mostrar cursos</span>
-          <span className="is-open">Ocultar cursos</span>
-          <span className="vt-icon">expand_more</span>
-        </span>
-      </summary>
-
-      <div className="vt-accordion__content">
-        {categoria.cursos.map((curso) => (
-          <Curso key={curso.idCurso} curso={curso} />
-        ))}
-      </div>
-    </details>
-  )
-}
-
-function Curso({ curso }) {
-  const minutos = curso.lecciones.reduce((suma, leccion) => suma + leccion.duracionEstimadaMinutos, 0)
-
-  return (
-    <section className="vt-card vt-card-flat vt-stack" aria-labelledby={`curso-${curso.idCurso}`}>
+    <article className="vt-card vt-card-flat vt-stack" aria-labelledby={`curso-${curso.idCurso}`}>
       <div className="vt-stack vt-stack-sm">
+        <p className="vt-eyebrow">{curso.categoria.nombre}</p>
         <h2 id={`curso-${curso.idCurso}`} className="vt-headline-md">
           {curso.titulo}
         </h2>
-        <p>{curso.descripcion}</p>
-        <p className="vt-body-sm vt-text-muted">
-          {plural(curso.lecciones.length, 'lección', 'lecciones')} · {minutos} min en total
-        </p>
+        {curso.fechaCierre && !curso.cerrado && (
+          <p className="vt-cluster vt-body-sm">
+            <span className="vt-icon" aria-hidden="true">
+              event
+            </span>
+            Disponible hasta el {textoFecha(curso.fechaCierre)}
+          </p>
+        )}
       </div>
 
-      <BarraAvance completadas={contarCompletadas(curso.lecciones)} total={curso.lecciones.length} />
+      {curso.cerrado && (
+        <div className="vt-alert vt-alert-warning">
+          <span className="vt-icon" aria-hidden="true">
+            event_busy
+          </span>
+          <p className="vt-alert__content">Este curso cerró, pero puedes terminarlo.</p>
+        </div>
+      )}
 
-      <ol className="vt-lesson-list" aria-label={`Lecciones de ${curso.titulo}`}>
-        {curso.lecciones.map((leccion, posicion) => (
-          <li
-            key={leccion.idLeccion}
-            className={leccion.estado === 'en_progreso' ? 'vt-lesson is-current' : 'vt-lesson'}
-          >
-            <span
-              className={
-                leccion.estado === 'completada'
-                  ? 'mis-cursos__numero is-completada'
-                  : 'mis-cursos__numero'
-              }
-              aria-hidden="true"
-            >
-              {leccion.estado === 'completada' ? <span className="vt-icon">check</span> : posicion + 1}
+      <BarraAvance
+        nombre={`Avance de ${curso.titulo}`}
+        completadas={curso.leccionesCompletadas}
+        total={curso.totalLecciones}
+      />
+
+      {curso.siguienteLeccion && (
+        <div className="mis-cursos__siguiente">
+          <p>
+            <span className="vt-text-muted">Siguiente: </span>
+            <strong>{curso.siguienteLeccion.titulo}</strong>
+          </p>
+          <Link className="vt-btn vt-btn-primary" to={rutaLeccion(curso.siguienteLeccion.idLeccion)}>
+            Continuar
+            <span className="vt-visually-hidden">: {curso.titulo}</span>
+            <span className="vt-icon" aria-hidden="true">
+              arrow_forward
             </span>
+          </Link>
+        </div>
+      )}
 
-            <div className="vt-lesson__body">
-              <p className="vt-lesson__title">
-                <span className="vt-visually-hidden">Lección {posicion + 1}: </span>
-                {leccion.titulo}
-              </p>
-              <p className="vt-lesson__meta">
-                <span className={CLASE_INSIGNIA[leccion.estado]}>
-                  {TEXTO_ESTADO_LECCION[leccion.estado]}
-                </span>
-                <span>{leccion.duracionEstimadaMinutos} min</span>
-              </p>
-            </div>
+      <ListaLecciones curso={curso} />
+    </article>
+  )
+}
 
-            {/* Las lecciones se abren en el Sprint 4 */}
-            <button type="button" className="vt-btn vt-btn-secondary vt-btn-sm" disabled>
-              Disponible pronto
-            </button>
-          </li>
-        ))}
-      </ol>
-    </section>
+function CursoTerminado({ curso }) {
+  const primeraLeccion = curso.lecciones[0]
+
+  return (
+    <article className="vt-card vt-card-flat vt-stack" aria-labelledby={`curso-${curso.idCurso}`}>
+      <div className="vt-stack vt-stack-sm">
+        <p className="vt-eyebrow">{curso.categoria.nombre}</p>
+        <h2 id={`curso-${curso.idCurso}`} className="vt-headline-md">
+          {curso.titulo}
+        </h2>
+        <p className="vt-cluster">
+          {curso.retirado ? (
+            <span className="vt-badge vt-badge-neutral">
+              <span className="vt-icon" aria-hidden="true">
+                archive
+              </span>
+              Retirado
+            </span>
+          ) : (
+            <span className="vt-badge vt-badge-success">
+              <span className="vt-icon" aria-hidden="true">
+                check_circle
+              </span>
+              Terminado
+            </span>
+          )}
+          {curso.fechaFinalizacion && (
+            <span className="vt-body-sm">Terminado el {textoInstante(curso.fechaFinalizacion)}</span>
+          )}
+        </p>
+        {curso.certificado && <p className="vt-body-sm vt-text-muted">Folio {curso.certificado.folio}</p>}
+      </div>
+
+      {curso.retirado && (
+        <p className="vt-text-muted">
+          {curso.certificado
+            ? 'Este curso ya no está disponible. Tu certificado sigue siendo válido.'
+            : 'Este curso ya no está disponible. Todavía puedes obtener tu certificado.'}
+        </p>
+      )}
+
+      <div className="cursos__acciones">
+        <BotonCertificado idCurso={curso.idCurso} tituloCurso={curso.titulo} certificado={curso.certificado} />
+
+        {!curso.retirado && primeraLeccion && (
+          <Link className="vt-btn vt-btn-outline" to={rutaLeccion(primeraLeccion.idLeccion)}>
+            <span className="vt-icon" aria-hidden="true">
+              replay
+            </span>
+            Volver a practicar
+            <span className="vt-visually-hidden">: {curso.titulo}</span>
+          </Link>
+        )}
+      </div>
+
+      {!curso.retirado && curso.lecciones.length > 0 && <ListaLecciones curso={curso} />}
+    </article>
   )
 }
 

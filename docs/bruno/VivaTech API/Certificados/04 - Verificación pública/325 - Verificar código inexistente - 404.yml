@@ -1,0 +1,15 @@
+info:
+  name: 325 - Verificar código inexistente - 404
+  type: http
+  seq: 325
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/certificados/verificar/00000000-0000-4000-8000-000000000000"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

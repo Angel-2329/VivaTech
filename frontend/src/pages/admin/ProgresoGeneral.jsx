@@ -95,6 +95,7 @@ function ProgresoGeneral() {
                   <td data-label="Avance" className="admin__avance">
                     <BarraAvance
                       pequena
+                      nombre={`Avance de ${estudiante.nombreCompleto}`}
                       completadas={estudiante.leccionesCompletadas}
                       total={estudiante.totalLeccionesPublicadas}
                     />

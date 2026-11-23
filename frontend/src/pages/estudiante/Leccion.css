@@ -1,0 +1,71 @@
+.leccion__instruccion {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--vt-space-md);
+}
+
+.leccion__icono {
+  width: 3rem;
+  height: 3rem;
+}
+
+.leccion__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vt-space-xs);
+  margin: 0;
+  padding-inline-start: 1.5rem;
+}
+
+.leccion__ayuda {
+  flex: 1 1 12rem;
+  text-align: center;
+}
+
+.leccion__acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--vt-space-sm);
+}
+
+@media (min-width: 40rem) {
+  .leccion__acciones {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+}
+
+
+.leccion__titulo-paso {
+  margin: 0;
+  scroll-margin-top: calc(var(--vt-header-height) + var(--vt-space-md));
+}
+
+.leccion__titulo-paso:focus-visible {
+  outline: 3px solid var(--vt-action);
+  outline-offset: 4px;
+  border-radius: var(--vt-radius-sm);
+}
+
+
+.leccion__pasos li:not(.is-completed):not([aria-current="step"])::before {
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px var(--vt-outline);
+}
+
+
+@media (min-width: 40rem) and (max-height: 32rem) {
+  .vt-lesson-nav {
+    position: static;
+    box-shadow: none;
+  }
+}
+
+
+@media (min-width: 40rem) and (min-height: 32.01rem) {
+  html:has(.vt-lesson-nav) {
+    scroll-padding-bottom: 7rem;
+  }
+}

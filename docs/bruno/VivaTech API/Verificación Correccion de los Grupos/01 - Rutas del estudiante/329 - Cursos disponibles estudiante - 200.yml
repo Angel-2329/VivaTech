@@ -1,0 +1,19 @@
+# Revisar en la respuesta: Cache-Control: no-store.
+info:
+  name: 329 - Cursos disponibles estudiante - 200
+  type: http
+  seq: 329
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/cursos-disponibles"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

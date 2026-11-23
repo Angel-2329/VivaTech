@@ -1,0 +1,27 @@
+# Esperado: curso_duplicado.
+info:
+  name: 362 - Rechazar JOSE en A - 409
+  type: http
+  seq: 362
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaF1A}}",
+        "titulo": "[PRUEBA F1] JOSE",
+        "descripcion": "Curso ficticio de la verificación F.1."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

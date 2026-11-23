@@ -1,0 +1,18 @@
+info:
+  name: 320 - Emitir certificado nuevo - 201
+  type: http
+  seq: 320
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,7 @@
+info:
+  name: 01 - Rutas del estudiante
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit

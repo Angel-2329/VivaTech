@@ -1,0 +1,18 @@
+info:
+  name: 379 - Eliminar curso Otro - 204
+  type: http
+  seq: 379
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoF1Otro}}"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

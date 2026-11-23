@@ -10,3 +10,17 @@
     min-width: 12rem;
   }
 }
+
+.grupos__acciones-masivas .vt-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.grupos__casilla .vt-check {
+  padding: var(--vt-space-2xs);
+}
+
+.grupos__nombres {
+  margin: 0;
+  padding-inline-start: var(--vt-space-lg);
+}
