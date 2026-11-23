@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import FormularioLeccion from '../../components/contenido/FormularioLeccion.jsx'
 import LeccionEditor from '../../components/contenido/LeccionEditor.jsx'
@@ -29,7 +29,6 @@ function moverId(ids, id, nuevaPosicion) {
   return sinElemento
 }
 
-// /maestro/contenido/cursos/:idCurso y /admin/contenido/cursos/:idCurso
 function EditorCurso() {
   const { idCurso } = useParams()
   const { usuario } = useSesion()
@@ -46,10 +45,24 @@ function EditorCurso() {
   const [procesandoDialogo, setProcesandoDialogo] = useState(false)
   const [errorDialogo, setErrorDialogo] = useState('')
   const operacionRef = useRef(false)
+  const botonAgregarLeccionRef = useRef(null)
+  const mensajeRef = useRef(null)
+  const focoPendienteRef = useRef(null)
 
   const bloqueado = cargando || modificando
 
-  
+  useEffect(() => {
+    if (recargaFallo) {
+      focoPendienteRef.current = null
+      return
+    }
+    const destino = focoPendienteRef.current?.current
+    if (!destino || destino.disabled) return
+    destino.focus()
+    focoPendienteRef.current = null
+  })
+
+
   async function ejecutar(accion, textoExito) {
     if (recargaFallo) throw new Error('Vuelve a cargar el curso antes de hacer otro cambio.')
     if (operacionRef.current) return
@@ -72,6 +85,16 @@ function EditorCurso() {
     } finally {
       operacionRef.current = false
       setModificando(false)
+    }
+  }
+
+  async function guardarFormulario(accion, textoExito) {
+    if (!operacionRef.current) focoPendienteRef.current = mensajeRef
+    try {
+      await ejecutar(accion, textoExito)
+    } catch (errorAlGuardar) {
+      focoPendienteRef.current = null
+      throw errorAlGuardar
     }
   }
 
@@ -146,7 +169,6 @@ function EditorCurso() {
   const estado = ESTADO_CURSO[curso.estadoPublicacion]
   const soloLectura = !curso.puedeEditar
   const publicado = curso.estadoPublicacion === 'publicado'
-  // Igual que el backend: en publicados o con avance solo se corrigen textos
   const estructuraBloqueada = soloLectura || publicado || curso.tieneAvance
   const idsLecciones = curso.lecciones.map((leccion) => leccion.idLeccion)
 
@@ -169,7 +191,7 @@ function EditorCurso() {
 
       <AvisoEdicion curso={curso} soloLectura={soloLectura} estructuraBloqueada={estructuraBloqueada} />
 
-      <MensajeExito texto={mensaje} />
+      <MensajeExito texto={mensaje} enfoqueRef={mensajeRef} />
 
       {curso.lecciones.length === 0 ? (
         <EstadoVacio icono="menu_book" titulo="Este curso todavía no tiene lecciones">
@@ -187,7 +209,7 @@ function EditorCurso() {
               estructuraBloqueada={estructuraBloqueada}
               bloqueado={bloqueado}
               onGuardarLeccion={(actual, datos) =>
-                ejecutar(() => actualizarLeccion(actual.idLeccion, datos, usuario), `Se guardó la lección "${datos.titulo ?? actual.titulo}".`)
+                guardarFormulario(() => actualizarLeccion(actual.idLeccion, datos, usuario), `Se guardó la lección "${datos.titulo ?? actual.titulo}".`)
               }
               onMoverLeccion={(actual, nuevaPosicion) =>
                 ejecutarOrden(
@@ -207,9 +229,9 @@ function EditorCurso() {
                 })
               }}
               onCrearPaso={(actual, paso) =>
-                ejecutar(() => crearPaso(actual.idLeccion, paso, usuario), `Se agregó un paso a "${actual.titulo}".`)
+                guardarFormulario(() => crearPaso(actual.idLeccion, paso, usuario), `Se agregó un paso a "${actual.titulo}".`)
               }
-              onGuardarPaso={(paso, datos) => ejecutar(() => actualizarPaso(paso.idPaso, datos, usuario), 'Se guardó el paso.')}
+              onGuardarPaso={(paso, datos) => guardarFormulario(() => actualizarPaso(paso.idPaso, datos, usuario), 'Se guardó el paso.')}
               onMoverPaso={(actual, paso, nuevaPosicion) =>
                 ejecutarOrden(
                   () =>
@@ -245,6 +267,7 @@ function EditorCurso() {
         <div className="vt-stack vt-stack-sm">
           <div>
             <button
+              ref={botonAgregarLeccionRef}
               type="button"
               className="vt-btn vt-btn-primary"
               onClick={() => setAgregandoLeccion(true)}
@@ -270,10 +293,13 @@ function EditorCurso() {
           <FormularioLeccion
             textoBoton="Agregar lección"
             onGuardar={async (datos) => {
-              await ejecutar(() => crearLeccion(curso.idCurso, datos, usuario), `Se agregó la lección "${datos.titulo}".`)
+              await guardarFormulario(() => crearLeccion(curso.idCurso, datos, usuario), `Se agregó la lección "${datos.titulo}".`)
               setAgregandoLeccion(false)
             }}
-            onCancelar={() => setAgregandoLeccion(false)}
+            onCancelar={() => {
+              focoPendienteRef.current = botonAgregarLeccionRef
+              setAgregandoLeccion(false)
+            }}
           />
         </section>
       )}

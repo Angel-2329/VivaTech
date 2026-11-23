@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import CampoTexto from './CampoTexto.jsx'
 import { LIMITES_PASO, erroresDelServidor, leccionVacia, validarLeccion } from '../../utils/pasos.js'
 
@@ -12,6 +12,10 @@ function FormularioLeccion({ leccionInicial, soloTextos = false, textoBoton, onG
   const [errores, setErrores] = useState({})
   const [errorGeneral, setErrorGeneral] = useState('')
   const [guardando, setGuardando] = useState(false)
+
+  useEffect(() => {
+    document.getElementById(`${idBase}-titulo`)?.focus()
+  }, [idBase])
 
   function cambiar(campo, valor) {
     setDatos((anteriores) => ({ ...anteriores, [campo]: valor }))
@@ -52,7 +56,6 @@ function FormularioLeccion({ leccionInicial, soloTextos = false, textoBoton, onG
     try {
       await onGuardar(enviar)
     } catch (errorAlGuardar) {
-      // 400 contenido_invalido: cada error junto a su campo
       const delServidor = erroresDelServidor(errorAlGuardar)
       setErrores(delServidor)
       setErrorGeneral(errorAlGuardar.message || 'No pudimos guardar la lección. Inténtalo otra vez.')

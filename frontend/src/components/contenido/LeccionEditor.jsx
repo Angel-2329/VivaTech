@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import FormularioLeccion from './FormularioLeccion.jsx'
 import FormularioPaso from './FormularioPaso.jsx'
 import VistaPreviaPaso from './VistaPreviaPaso.jsx'
@@ -29,6 +29,25 @@ function LeccionEditor({
   const esAbierto = (tipo, idPaso) => abierto?.tipo === tipo && (idPaso === undefined || abierto.idPaso === idPaso)
   const cerrar = () => setAbierto(null)
 
+  const idBase = useId()
+  const idBotonLeccion = `${idBase}-editar-leccion`
+  const idBotonNuevoPaso = `${idBase}-nuevo-paso`
+  const idBotonPaso = (idPaso) => `${idBase}-editar-paso-${idPaso}`
+  const focoPendienteRef = useRef(null)
+
+  function cancelar(idBoton) {
+    focoPendienteRef.current = idBoton
+    cerrar()
+  }
+
+  useEffect(() => {
+    if (!focoPendienteRef.current) return
+    const boton = document.getElementById(focoPendienteRef.current)
+    if (boton?.disabled) return
+    boton?.focus()
+    focoPendienteRef.current = null
+  })
+
   return (
     <li className="vt-card vt-stack editor__leccion">
       <div className="vt-stack vt-stack-sm">
@@ -52,6 +71,7 @@ function LeccionEditor({
       {!soloLectura && !esAbierto('leccion') && (
         <div className="vt-cluster">
           <button
+            id={idBotonLeccion}
             type="button"
             className="vt-btn vt-btn-secondary vt-btn-sm"
             onClick={() => setAbierto({ tipo: 'leccion' })}
@@ -97,7 +117,7 @@ function LeccionEditor({
             await onGuardarLeccion(leccion, datos)
             cerrar()
           }}
-          onCancelar={cerrar}
+          onCancelar={() => cancelar(idBotonLeccion)}
         />
       )}
 
@@ -118,6 +138,7 @@ function LeccionEditor({
                 <div className="vt-cluster">
                   {!soloLectura && (
                     <button
+                      id={idBotonPaso(paso.idPaso)}
                       type="button"
                       className="vt-btn vt-btn-secondary vt-btn-sm"
                       onClick={() => setAbierto({ tipo: 'paso', idPaso: paso.idPaso })}
@@ -181,7 +202,7 @@ function LeccionEditor({
                     await onGuardarPaso(paso, datos)
                     cerrar()
                   }}
-                  onCancelar={cerrar}
+                  onCancelar={() => cancelar(idBotonPaso(paso.idPaso))}
                 />
               )}
             </li>
@@ -193,6 +214,7 @@ function LeccionEditor({
         <div className="vt-stack vt-stack-sm">
           <div>
             <button
+              id={idBotonNuevoPaso}
               type="button"
               className="vt-btn vt-btn-primary vt-btn-sm"
               onClick={() => setAbierto({ tipo: 'nuevo-paso' })}
@@ -218,7 +240,7 @@ function LeccionEditor({
             await onCrearPaso(leccion, datos)
             cerrar()
           }}
-          onCancelar={cerrar}
+          onCancelar={() => cancelar(idBotonNuevoPaso)}
         />
       )}
     </li>

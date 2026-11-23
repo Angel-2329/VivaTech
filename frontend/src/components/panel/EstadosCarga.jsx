@@ -48,11 +48,11 @@ export function EstadoVacio({ icono = 'inbox', titulo, children }) {
 }
 
 
-export function MensajeExito({ texto }) {
+export function MensajeExito({ texto, enfoqueRef }) {
   return (
     <div role="status">
       {texto && (
-        <div className="vt-alert vt-alert-success">
+        <div ref={enfoqueRef} tabIndex={enfoqueRef ? -1 : undefined} className="vt-alert vt-alert-success">
           <span className="vt-icon" aria-hidden="true">
             check_circle
           </span>
