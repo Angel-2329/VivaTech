@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import CampoTexto from './CampoTexto.jsx'
 import VistaPreviaPaso from './VistaPreviaPaso.jsx'
 import VideoYouTube from '../leccion/VideoYouTube.jsx'
@@ -22,7 +22,6 @@ import {
 } from '../../utils/pasos.js'
 import { esIdVideo, extraerIdVideo } from '../../utils/youtube.js'
 
-// Cambia un valor dentro del paso sin modificar el original. ruta: "actividad.opciones.0.texto"
 function conValor(objeto, ruta, valor) {
   const [clave, ...resto] = ruta.split('.')
   const copia = Array.isArray(objeto) ? [...objeto] : { ...objeto }
@@ -30,8 +29,6 @@ function conValor(objeto, ruta, valor) {
   return copia
 }
 
-// soloTextos: curso publicado o con avance. No se cambian el tipo, los recursos,
-// las opciones ni la respuesta correcta; solo se corrigen los textos.
 function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar, onCancelar }) {
   const idBase = useId()
   const [paso, setPaso] = useState(() => structuredClone(pasoInicial ?? pasoVacio()))
@@ -43,7 +40,10 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
   const { actividad } = paso
   const idDe = (ruta) => `${idBase}-${ruta.replaceAll('.', '-')}`
 
-  // Al agregar o quitar recursos, puntos u opciones las posiciones cambian: se limpian los errores
+  useEffect(() => {
+    document.getElementById(`${idBase}-${soloTextos ? 'instruccion' : 'tipo'}`)?.focus()
+  }, [idBase, soloTextos])
+
   function cambiar(ruta, valor) {
     setPaso((anterior) => conValor(anterior, ruta, valor))
     const cambiaEstructura = Array.isArray(valor) || ruta === 'actividad'
@@ -51,7 +51,6 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     else if (errores[ruta]) setErrores((anteriores) => ({ ...anteriores, [ruta]: '' }))
   }
 
-  // El video solo va en pasos de lectura: si se cambia a toque u opción, se quita
   function cambiarTipo(tipo) {
     setPaso((anterior) => ({
       ...anterior,
@@ -76,7 +75,6 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     }
 
     const limpio = limpiarPaso(paso)
-    // Lo bloqueado ya está desactivado; aquí solo puede pasar si se borró un subtítulo que existía
     if (soloTextos && pasoInicial && estructuraPaso(limpio) !== estructuraPaso(pasoInicial)) {
       setErrorGeneral('En este curso solo se corrigen textos: no dejes vacío el subtítulo, corrígelo.')
       document.getElementById(idDe('actividad.pantalla.subtitulo'))?.focus()
@@ -87,9 +85,7 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     try {
       await onGuardar(limpio)
     } catch (errorAlGuardar) {
-      // 400 contenido_invalido: cada error junto a su campo, y el mensaje general de respaldo
       const delServidor = erroresDelServidor(errorAlGuardar)
-      // video_invalido puede afectar al recurso completo, no solo al enlace.
       const posicionVideo = paso.recursos.findIndex((recurso) => recurso.tipo === 'video')
       if (errorAlGuardar.codigo === 'video_invalido' && posicionVideo !== -1) {
         delServidor[`recursos.${posicionVideo}.url`] =
