@@ -1,4 +1,4 @@
-function BarraAvance({ completadas, total, unidad = 'lecciones', pequena = false }) {
+function BarraAvance({ nombre, completadas, total, unidad = 'lecciones', pequena = false }) {
   if (!total) {
     return <p className="vt-body-sm vt-text-muted">Todavía no hay lecciones publicadas</p>
   }
@@ -16,6 +16,7 @@ function BarraAvance({ completadas, total, unidad = 'lecciones', pequena = false
       <div
         className="vt-progress__track"
         role="progressbar"
+        aria-label={nombre}
         aria-valuemin={0}
         aria-valuemax={total}
         aria-valuenow={completadas}

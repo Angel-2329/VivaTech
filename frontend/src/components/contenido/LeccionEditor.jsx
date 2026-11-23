@@ -54,7 +54,7 @@ function LeccionEditor({
         <p className="vt-body-sm vt-text-muted">
           Lección {posicion + 1} · {leccion.duracionEstimadaMinutos} min · {plural(total, 'paso', 'pasos')}
         </p>
-        <h3 className="vt-headline-sm">{leccion.titulo}</h3>
+        <h2 className="vt-headline-sm">{leccion.titulo}</h2>
         <p>{leccion.objetivo}</p>
         {(faltanPasos || sinPractica) && (
           <p className="vt-cluster vt-body-sm editor__pendiente">
