@@ -1,0 +1,25 @@
+# Esperado: 200 con nombre "PRUEBA P3 - Ñandú Peña".
+info:
+  name: 395 - Renombrar grupo con acentos y espacios - 200
+  type: http
+  seq: 395
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP3}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "PRUEBA P3 -   Ñandú  Peña"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

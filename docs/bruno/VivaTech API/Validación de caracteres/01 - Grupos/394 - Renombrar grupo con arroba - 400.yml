@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_grupo_invalido; el nombre no cambia.
+info:
+  name: 394 - Renombrar grupo con arroba - 400
+  type: http
+  seq: 394
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP3}}"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "PRUEBA P3 - Grupo@1"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

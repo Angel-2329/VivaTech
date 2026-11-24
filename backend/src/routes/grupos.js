@@ -16,6 +16,11 @@ const {
   asignarMaestro,
   retirarMaestro
 } = require('../services/grupos');
+const {
+  normalizarTexto,
+  contarCaracteres,
+  esNombreGrupoValido
+} = require('../services/validar-texto');
 
 const MAXIMO_SELECCION = 100;
 
@@ -53,14 +58,22 @@ function validarNombre(req, res, next) {
   }
 
   const nombre = typeof req.body.nombre === 'string'
-    ? req.body.nombre.trim()
+    ? normalizarTexto(req.body.nombre)
     : '';
-  const longitud = Array.from(nombre).length;
+  const longitud = contarCaracteres(nombre);
 
   if (longitud < 1 || longitud > 100) {
     return res.status(400).json({
       ok: false,
       mensaje: 'El nombre del grupo debe tener entre 1 y 100 caracteres',
+      codigo: 'nombre_grupo_invalido'
+    });
+  }
+
+  if (!esNombreGrupoValido(nombre)) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Usa solo letras, números, espacios y los signos - _ . , ( ) #.',
       codigo: 'nombre_grupo_invalido'
     });
   }

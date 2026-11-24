@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_completo_invalido (longitud antes que caracteres).
+info:
+  name: 400 - Actualizar nombre corto con emoji - 400
+  type: http
+  seq: 400
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "A😀"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
