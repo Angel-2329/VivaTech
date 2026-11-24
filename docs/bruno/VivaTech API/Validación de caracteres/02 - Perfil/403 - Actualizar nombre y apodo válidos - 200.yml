@@ -1,0 +1,27 @@
+# Antes: ejecutar «07 - Consultar perfil estudiante» y copiar nombreCompleto a la variable nombreEstudianteOriginal.
+# Esperado: 200 con nombreCompleto "María O'Connor-Ñúñez" y apodo "La Güera".
+info:
+  name: 403 - Actualizar nombre y apodo válidos - 200
+  type: http
+  seq: 403
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "  María   O’Connor-Ñúñez ",
+        "apodo": "  La   Güera "
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

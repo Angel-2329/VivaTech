@@ -2,6 +2,11 @@ const express = require('express');
 const pool = require('../config/database');
 const verificarTokenFirebase = require('../middlewares/verificar-token-firebase');
 const cargarUsuario = require('../middlewares/cargar-usuario');
+const {
+  normalizarNombrePersona,
+  contarCaracteres,
+  esNombrePersonaValido
+} = require('../services/validar-texto');
 
 const router = express.Router();
 
@@ -30,23 +35,72 @@ function convertirPerfil(usuario) {
   };
 }
 
-function limpiarApodo(apodo) {
-  return apodo?.trim() || null;
+const ERRORES = {
+  nombreLongitud: {
+    mensaje: 'El nombre completo debe tener entre 3 y 100 caracteres',
+    codigo: 'nombre_completo_invalido'
+  },
+  nombreCaracteres: {
+    mensaje: "El nombre solo puede tener letras, espacios, apóstrofo (') y guion (-).",
+    codigo: 'nombre_invalido'
+  },
+  apodoLongitud: {
+    mensaje: 'El apodo debe ser texto de hasta 30 caracteres o null',
+    codigo: 'apodo_invalido'
+  },
+  apodoCaracteres: {
+    mensaje: "El apodo solo puede tener letras, espacios, apóstrofo (') y guion (-).",
+    codigo: 'apodo_invalido'
+  }
+};
+
+function revisarNombre(nombre) {
+  if (typeof nombre !== 'string') {
+    return { error: ERRORES.nombreLongitud };
+  }
+
+  const valor = normalizarNombrePersona(nombre);
+  const longitud = contarCaracteres(valor);
+
+  if (longitud < 3 || longitud > 100) {
+    return { error: ERRORES.nombreLongitud };
+  }
+
+  if (!esNombrePersonaValido(valor)) {
+    return { error: ERRORES.nombreCaracteres };
+  }
+
+  return { valor };
 }
 
-function apodoValido(apodo) {
-  return apodo === undefined
-    || apodo === null
-    || (
-      typeof apodo === 'string'
-      && apodo.trim().length <= 30
-    );
+function revisarApodo(apodo) {
+  if (apodo === undefined || apodo === null) {
+    return { valor: null };
+  }
+
+  if (typeof apodo !== 'string') {
+    return { error: ERRORES.apodoLongitud };
+  }
+
+  const valor = normalizarNombrePersona(apodo);
+
+  if (valor === '') {
+    return { valor: null };
+  }
+
+  if (contarCaracteres(valor) > 30) {
+    return { error: ERRORES.apodoLongitud };
+  }
+
+  if (!esNombrePersonaValido(valor)) {
+    return { error: ERRORES.apodoCaracteres };
+  }
+
+  return { valor };
 }
 
-function nombreValido(nombre) {
-  return typeof nombre === 'string'
-    && nombre.trim().length >= 3
-    && nombre.trim().length <= 100;
+function responderInvalido(res, error) {
+  return res.status(400).json({ ok: false, ...error });
 }
 
 router.get(
@@ -61,21 +115,17 @@ router.get(
 router.post('/', verificarTokenFirebase, validarCuerpo, async (req, res) => {
   const { nombreCompleto, apodo } = req.body;
 
-  if (!nombreValido(nombreCompleto)) {
-    return res.status(400).json({
-      ok: false,
-      mensaje: 'El nombre completo debe tener entre 3 y 100 caracteres',
-      codigo: 'nombre_completo_invalido'
-    });
+  const nombre = revisarNombre(nombreCompleto);
+
+  if (nombre.error) {
+    return responderInvalido(res, nombre.error);
   }
 
-if (!apodoValido(apodo)) {
-  return res.status(400).json({
-    ok: false,
-    mensaje: 'El apodo debe ser texto de hasta 30 caracteres o null',
-    codigo: 'apodo_invalido'
-  });
-}
+  const apodoRevisado = revisarApodo(apodo);
+
+  if (apodoRevisado.error) {
+    return responderInvalido(res, apodoRevisado.error);
+  }
 
   try {
     const resultado = await pool.query(
@@ -86,8 +136,8 @@ if (!apodoValido(apodo)) {
       `,
       [
         req.auth.uid,
-        nombreCompleto.trim(),
-        limpiarApodo(apodo)
+        nombre.valor,
+        apodoRevisado.valor
       ]
     );
 
@@ -129,20 +179,16 @@ router.patch(
       });
     }
 
-    if (cambiarNombre && !nombreValido(nombreCompleto)) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'El nombre completo debe tener entre 3 y 100 caracteres',
-        codigo: 'nombre_completo_invalido'
-      });
+    const nombre = cambiarNombre ? revisarNombre(nombreCompleto) : { valor: null };
+
+    if (nombre.error) {
+      return responderInvalido(res, nombre.error);
     }
 
-    if (!apodoValido(apodo)) {
-      return res.status(400).json({
-        ok: false,
-        mensaje: 'El apodo debe ser texto de hasta 30 caracteres o null',
-        codigo: 'apodo_invalido'
-      });
+    const apodoRevisado = revisarApodo(apodo);
+
+    if (apodoRevisado.error) {
+      return responderInvalido(res, apodoRevisado.error);
     }
 
     try {
@@ -163,9 +209,9 @@ router.patch(
         `,
         [
           cambiarNombre,
-          cambiarNombre ? nombreCompleto.trim() : null,
+          nombre.valor,
           cambiarApodo,
-          cambiarApodo ? limpiarApodo(apodo) : null,
+          apodoRevisado.valor,
           req.auth.uid
         ]
       );

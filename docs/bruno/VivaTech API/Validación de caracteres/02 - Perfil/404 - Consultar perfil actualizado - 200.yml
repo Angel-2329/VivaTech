@@ -1,0 +1,19 @@
+# Esperado: nombreCompleto "María O'Connor-Ñúñez" y apodo "La Güera".
+info:
+  name: 404 - Consultar perfil actualizado - 200
+  type: http
+  seq: 404
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/perfil"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
