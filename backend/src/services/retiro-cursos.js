@@ -26,6 +26,8 @@ function exigir(condicion) {
   if (!condicion) throw inconsistente();
 }
 
+const sinDuracion = (lecciones) => lecciones.map(({ duracionEstimadaMinutos: _duracion, ...resto }) => resto);
+
 function comprobarHistorial(historial) {
   exigir(esUid(historial.uid));
   exigir(Array.isArray(historial.lecciones) && historial.lecciones.length >= 1 && historial.lecciones.length <= 10);
@@ -61,6 +63,7 @@ function desdeProgreso(uid, curso, lecciones, pasos, progresos, fechaMaxima) {
     const progreso = propios.get(leccion.idLeccion);
     if (!progreso) return {
       idLeccion: leccion.idLeccion, tituloCurso: curso.titulo, titulo: leccion.titulo, orden: leccion.orden,
+      duracionEstimadaMinutos: leccion.duracionEstimadaMinutos,
       origen: 'progreso', estado: 'pendiente', totalPasos: pasosLeccion.length,
       pasosCompletados: 0, idUltimoPasoCompletado: null,
       fechaInicio: null, fechaActualizacion: null, fechaFinalizacion: null
@@ -75,6 +78,7 @@ function desdeProgreso(uid, curso, lecciones, pasos, progresos, fechaMaxima) {
     } else exigir(progreso.fechaFinalizacion === null);
     return {
       idLeccion: leccion.idLeccion, tituloCurso: curso.titulo, titulo: leccion.titulo, orden: leccion.orden,
+      duracionEstimadaMinutos: leccion.duracionEstimadaMinutos,
       origen: 'progreso', estado: progreso.estado, totalPasos: pasosLeccion.length,
       pasosCompletados: indice + 1, idUltimoPasoCompletado: progreso.idUltimoPasoCompletado,
       fechaInicio: progreso.fechaInicio, fechaActualizacion: progreso.fechaActualizacion,
@@ -133,7 +137,7 @@ function planificarHistoriales(curso, lecciones, pasos, progresos, anteriores, c
     const nuevo = desdeProgreso(uid, curso, lecciones, pasos, filas, fechasMaximas.get(uid));
     const anterior = existentes.get(uid);
     if (anterior) {
-      exigir(isDeepStrictEqual(anterior.lecciones, nuevo.lecciones)
+      exigir(isDeepStrictEqual(sinDuracion(anterior.lecciones), sinDuracion(nuevo.lecciones))
         && anterior.cursoCompletado === nuevo.cursoCompletado
         && anterior.fechaFinalizacionCurso === nuevo.fechaFinalizacionCurso);
     } else pendientes.set(uid, nuevo);
@@ -194,7 +198,8 @@ async function eliminarEnConexion(cliente, editor, idCurso) {
   if (curso.idCurso !== idCurso) throw new TypeError('El curso no corresponde al identificador solicitado');
 
   const { rows: lecciones } = await cliente.query(`
-    SELECT id_leccion::text AS "idLeccion", titulo, orden
+    SELECT id_leccion::text AS "idLeccion", titulo, orden,
+      duracion_estimada_minutos AS "duracionEstimadaMinutos"
     FROM lecciones WHERE id_curso = $1::bigint
     ORDER BY orden, id_leccion FOR UPDATE
   `, [idCurso]);

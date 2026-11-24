@@ -1,0 +1,18 @@
+info:
+  name: 383 - Emitir con duración - 201
+  type: http
+  seq: 383
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/4/certificado"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
