@@ -11,7 +11,8 @@ const PUBLICO = {
   nombreCompleto: 'Persona ficticia', tituloCurso: 'Curso ficticio',
   lecciones: [{ titulo: 'Lección ficticia' }], folio: 'VT-2026-000007',
   fechaFinalizacionCurso: '2026-11-15T12:00:00.123789-06:00',
-  fechaEmision: '2026-11-15T13:00:00.987654-06:00'
+  fechaEmision: '2026-11-15T13:00:00.987654-06:00',
+  duracionMinutos: 37
 };
 let servidor;
 let origen;

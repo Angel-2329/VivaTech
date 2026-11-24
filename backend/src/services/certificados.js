@@ -6,6 +6,13 @@ const esId = (valor) => typeof valor === 'string' && /^[1-9][0-9]{0,18}$/.test(v
   && (valor.length < MAXIMO_ID.length || valor <= MAXIMO_ID);
 const esTexto = (valor) => typeof valor === 'string' && valor.trim().length > 0;
 const esInstante = (valor) => typeof valor === 'string' && Number.isFinite(Date.parse(valor));
+const esDuracion = (valor) => valor === null || (Number.isInteger(valor) && valor > 0);
+const esDuracionLeccion = (valor) => Number.isInteger(valor) && valor >= 1 && valor <= 15;
+
+function sumarDuracion(lecciones) {
+  if (!lecciones.every((leccion) => esDuracionLeccion(leccion.duracionEstimadaMinutos))) return null;
+  return lecciones.reduce((suma, leccion) => suma + leccion.duracionEstimadaMinutos, 0);
+}
 
 const COLUMNAS = `
   id_certificado::text AS "idCertificado", id_curso::text AS "idCurso",
@@ -14,7 +21,8 @@ const COLUMNAS = `
   titulo_curso_en_certificado AS "tituloCurso",
   lecciones_en_certificado AS lecciones,
   to_jsonb(fecha_finalizacion_curso) AS "fechaFinalizacionCurso",
-  to_jsonb(fecha_emision) AS "fechaEmision"
+  to_jsonb(fecha_emision) AS "fechaEmision",
+  duracion_minutos AS "duracionMinutos"
 `;
 
 function comprobarEstudiante(usuario) {
@@ -41,7 +49,8 @@ function recursoCertificado(fila) {
     || !esTexto(fila.nombreCompleto) || !esTexto(fila.tituloCurso)
     || !Array.isArray(fila.lecciones) || fila.lecciones.length === 0
     || fila.lecciones.some((leccion) => !leccion || !esTexto(leccion.titulo))
-    || !esInstante(fila.fechaFinalizacionCurso) || !esInstante(fila.fechaEmision)) {
+    || !esInstante(fila.fechaFinalizacionCurso) || !esInstante(fila.fechaEmision)
+    || !esDuracion(fila.duracionMinutos)) {
     throw new TypeError('El certificado almacenado es inconsistente');
   }
   return {
@@ -49,7 +58,8 @@ function recursoCertificado(fila) {
     folio: fila.folio, codigoVerificacion: fila.codigoVerificacion,
     nombreCompleto: fila.nombreCompleto, tituloCurso: fila.tituloCurso,
     lecciones: fila.lecciones.map(({ titulo }) => ({ titulo })),
-    fechaFinalizacionCurso: fila.fechaFinalizacionCurso, fechaEmision: fila.fechaEmision
+    fechaFinalizacionCurso: fila.fechaFinalizacionCurso, fechaEmision: fila.fechaEmision,
+    duracionMinutos: fila.duracionMinutos
   };
 }
 
@@ -88,7 +98,7 @@ async function conEstudiante(usuario, operacion) {
 async function evidenciaPublicada(cliente, uid, curso) {
   const { rows: lecciones } = await cliente.query(`
     SELECT l.id_leccion::text AS "idLeccion", l.titulo, l.orden,
-      p.estado, p.id_ultimo_paso_completado::text AS "ultimoCompletado",
+      l.duracion_estimada_minutos AS "duracionEstimadaMinutos", p.estado, p.id_ultimo_paso_completado::text AS "ultimoCompletado",
       to_jsonb(p.fecha_finalizacion) AS "fechaFinalizacion",
       (SELECT count(*)::integer FROM pasos pa WHERE pa.id_leccion = l.id_leccion) AS "totalPasos",
       (SELECT pa.id_paso::text FROM pasos pa WHERE pa.id_leccion = l.id_leccion
@@ -111,7 +121,10 @@ async function evidenciaPublicada(cliente, uid, curso) {
   `, [uid, curso.idCurso]);
   const fecha = maximos[0]?.fechaFinalizacionCurso;
   exigirHistorial(esInstante(fecha) && esTexto(curso.titulo));
-  return { tituloCurso: curso.titulo, lecciones: lecciones.map(({ titulo }) => ({ titulo })), fecha };
+  return {
+    tituloCurso: curso.titulo, lecciones: lecciones.map(({ titulo }) => ({ titulo })), fecha,
+    duracionMinutos: sumarDuracion(lecciones)
+  };
 }
 
 async function evidenciaRetirada(cliente, uid, idCurso) {
@@ -148,7 +161,8 @@ async function evidenciaRetirada(cliente, uid, idCurso) {
   return {
     tituloCurso,
     lecciones: [...historial.lecciones].sort((a, b) => a.orden - b.orden).map(({ titulo }) => ({ titulo })),
-    fecha: historial.fechaFinalizacionCurso
+    fecha: historial.fechaFinalizacionCurso,
+    duracionMinutos: sumarDuracion(historial.lecciones)
   };
 }
 
@@ -179,11 +193,12 @@ async function emitirCertificado(usuario, idCurso) {
     }
     const { rows: emitidos, rowCount } = await cliente.query(`
       INSERT INTO certificados (uid_estudiante, id_curso, nombre_en_certificado,
-        titulo_curso_en_certificado, lecciones_en_certificado, fecha_finalizacion_curso, fecha_emision)
-      VALUES ($1, $2::bigint, $3, $4, $5::jsonb, $6::timestamptz, clock_timestamp())
+        titulo_curso_en_certificado, lecciones_en_certificado, fecha_finalizacion_curso,
+        duracion_minutos, fecha_emision)
+      VALUES ($1, $2::bigint, $3, $4, $5::jsonb, $6::timestamptz, $7::integer, clock_timestamp())
       RETURNING ${COLUMNAS}
     `, [estudiante.uid, idCurso, estudiante.nombre_completo, evidencia.tituloCurso,
-      JSON.stringify(evidencia.lecciones), evidencia.fecha]);
+      JSON.stringify(evidencia.lecciones), evidencia.fecha, evidencia.duracionMinutos]);
     if (rowCount !== 1 || emitidos.length !== 1) throw new TypeError('La emisión no devolvió un certificado único');
     return { creado: true, certificado: recursoCertificado(emitidos[0]) };
   });
@@ -209,14 +224,16 @@ function recursoPublico(fila) {
   if (!fila || !esTexto(fila.folio) || !esTexto(fila.nombreCompleto) || !esTexto(fila.tituloCurso)
     || !Array.isArray(fila.lecciones) || fila.lecciones.length === 0
     || fila.lecciones.some((leccion) => !leccion || !esTexto(leccion.titulo))
-    || !esInstante(fila.fechaFinalizacionCurso) || !esInstante(fila.fechaEmision)) {
+    || !esInstante(fila.fechaFinalizacionCurso) || !esInstante(fila.fechaEmision)
+    || !esDuracion(fila.duracionMinutos)) {
     throw new TypeError('El certificado almacenado es inconsistente');
   }
   return {
     nombreCompleto: fila.nombreCompleto, tituloCurso: fila.tituloCurso,
     lecciones: fila.lecciones.map(({ titulo }) => ({ titulo })),
     folio: fila.folio,
-    fechaFinalizacionCurso: fila.fechaFinalizacionCurso, fechaEmision: fila.fechaEmision
+    fechaFinalizacionCurso: fila.fechaFinalizacionCurso, fechaEmision: fila.fechaEmision,
+    duracionMinutos: fila.duracionMinutos
   };
 }
 
@@ -227,7 +244,8 @@ async function verificarCertificado(codigo) {
       titulo_curso_en_certificado AS "tituloCurso",
       lecciones_en_certificado AS lecciones,
       to_jsonb(fecha_finalizacion_curso) AS "fechaFinalizacionCurso",
-      to_jsonb(fecha_emision) AS "fechaEmision"
+      to_jsonb(fecha_emision) AS "fechaEmision",
+      duracion_minutos AS "duracionMinutos"
     FROM certificados WHERE codigo_verificacion = $1::uuid
   `, [codigo.toLowerCase()]);
   if (!rows.length) throw noEncontrado();

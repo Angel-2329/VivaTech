@@ -13,8 +13,8 @@ const FINAL_A = '2026-11-14T10:02:00.123456-06:00';
 const FINAL_B = '2026-11-14T10:02:00.123789-06:00';
 const RETIRO = '2026-11-14T11:00:00.987654-06:00';
 const LECCIONES = [
-  { idLeccion: '21', idCurso: '10', titulo: 'Primera', orden: 1 },
-  { idLeccion: '22', idCurso: '10', titulo: 'Segunda', orden: 2 }
+  { idLeccion: '21', idCurso: '10', titulo: 'Primera', orden: 1, duracionEstimadaMinutos: 10 },
+  { idLeccion: '22', idCurso: '10', titulo: 'Segunda', orden: 2, duracionEstimadaMinutos: 12 }
 ];
 const PASOS = Array.from({ length: 6 }, (_, i) => ({
   idPaso: String(101 + i), idLeccion: i < 3 ? '21' : '22', orden: i % 3 + 1
@@ -274,6 +274,48 @@ test('Retiro servicio: certificado existente sigue inmutable tras corregir títu
   await retirar();
   assert.deepEqual(s.datos().certificados, [cert]);
   assert.deepEqual(s.datos().historiales[0].lecciones.map((l) => l.titulo), ['Primera', 'Segunda']);
+});
+
+test('Retiro servicio: la instantánea guarda la duración de cada lección, incluso pendiente', async (t) => {
+  const s = simular(t, { progresos: [avance()] });
+  await retirar();
+  const { lecciones } = s.datos().historiales[0];
+  assert.deepEqual(lecciones.map((l) => [l.estado, l.duracionEstimadaMinutos]), [['en_progreso', 10], ['pendiente', 12]]);
+  assert.match(s.llamadas.find(({ sql }) => /FROM lecciones WHERE/.test(sql)).sql, /duracion_estimada_minutos/);
+});
+
+test('Retiro servicio: instantánea desde certificado no inventa duración', async (t) => {
+  const s = simular(t, { certificados: [certificado()], lecciones: [], pasos: [] });
+  await retirar();
+  assert.ok(s.datos().historiales[0].lecciones.every((l) => !Object.hasOwn(l, 'duracionEstimadaMinutos')));
+});
+
+async function historialSinDuracion(t, progresos) {
+  const s = simular(t, { progresos });
+  await retirar();
+  t.mock.restoreAll();
+  const historial = s.datos().historiales[0];
+  historial.lecciones = historial.lecciones.map(({ duracionEstimadaMinutos: _duracion, ...resto }) => resto);
+  return historial;
+}
+
+test('Retiro servicio: historial anterior sin duración no provoca 409 y no se reescribe', async (t) => {
+  const progresos = [completado('alumno-a', '21', FINAL_A), completado('alumno-a', '22', FINAL_B)];
+  const historial = await historialSinDuracion(t, progresos);
+  const s = simular(t, { progresos, historiales: [historial] });
+  await retirar();
+  assert.deepEqual(s.datos().historiales, [historial]);
+  assert.equal(s.llamadas.some(({ sql }) => /^INSERT INTO historial/.test(sql)), false);
+  cerrar(s);
+});
+
+test('Retiro servicio: historial anterior con otra diferencia sigue siendo inconsistente', async (t) => {
+  const progresos = [completado('alumno-a', '21', FINAL_A), completado('alumno-a', '22', FINAL_B)];
+  const historial = await historialSinDuracion(t, progresos);
+  historial.lecciones[0].titulo = 'Título distinto';
+  const s = simular(t, { progresos, historiales: [historial] });
+  await assert.rejects(retirar(), codigo(409, 'historial_inconsistente'));
+  cerrar(s, 'ROLLBACK');
 });
 
 const HISTORIAL_ANTERIOR = { uid: 'alumno-historico', lecciones: [
