@@ -11,7 +11,7 @@ const FECHA = '2026-11-15T12:00:00.123789-06:00';
 const CERTIFICADO = { idCertificado: '7', idCurso: '10', folio: 'VT-2026-000007',
   codigoVerificacion: '7b604b92-7f81-4d56-b117-d2bc14dd1ab2', nombreCompleto: 'Persona ficticia',
   tituloCurso: 'Curso ficticio', lecciones: [{ titulo: 'Lección ficticia' }],
-  fechaFinalizacionCurso: FECHA, fechaEmision: '2026-11-15T13:00:00.987654-06:00' };
+  fechaFinalizacionCurso: FECHA, fechaEmision: '2026-11-15T13:00:00.987654-06:00', duracionMinutos: 8 };
 let servidor;
 let origen;
 
@@ -68,13 +68,13 @@ function simular(t, opciones = {}) {
       }
       if (/FROM lecciones l/.test(q)) {
         assert.deepEqual(parametros, [UID, '10']);
-        return { rows: opciones.vacio ? [] : [{ idLeccion: '21', titulo: 'Lección ficticia', orden: 1,
+        return { rows: opciones.vacio ? [] : [{ idLeccion: '21', titulo: 'Lección ficticia', orden: 1, duracionEstimadaMinutos: 8,
           estado: opciones.incompleto ? 'en_progreso' : 'completada', ultimoCompletado: '103',
           ultimoPaso: '103', totalPasos: 3, fechaFinalizacion: FECHA }] };
       }
       if (/max\(p.fecha_finalizacion\)/.test(q)) return { rows: [{ fechaFinalizacionCurso: FECHA }] };
       if (/^INSERT INTO certificados/.test(q)) {
-        assert.deepEqual(parametros, [UID, '10', 'Persona ficticia', 'Curso ficticio', JSON.stringify(CERTIFICADO.lecciones), FECHA]);
+        assert.deepEqual(parametros, [UID, '10', 'Persona ficticia', 'Curso ficticio', JSON.stringify(CERTIFICADO.lecciones), FECHA, 8]);
         certificado = structuredClone(CERTIFICADO);
         return { rows: [certificado], rowCount: 1 };
       }

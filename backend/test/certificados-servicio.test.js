@@ -12,14 +12,16 @@ const CERTIFICADO = {
   codigoVerificacion: '7b604b92-7f81-4d56-b117-d2bc14dd1ab2',
   nombreCompleto: 'Persona ficticia', tituloCurso: 'Curso ficticio',
   lecciones: [{ titulo: 'Primera' }, { titulo: 'Segunda' }],
-  fechaFinalizacionCurso: FECHA, fechaEmision: '2026-11-15T13:00:00.987654-06:00'
+  fechaFinalizacionCurso: FECHA, fechaEmision: '2026-11-15T13:00:00.987654-06:00', duracionMinutos: 22
 };
 const LECCIONES = [1, 2].map((orden) => ({ idLeccion: String(20 + orden), titulo: orden === 1 ? 'Primera' : 'Segunda',
-  orden, estado: 'completada', ultimoCompletado: String(100 + orden), ultimoPaso: String(100 + orden),
+  orden, duracionEstimadaMinutos: orden === 1 ? 10 : 12, estado: 'completada',
+  ultimoCompletado: String(100 + orden), ultimoPaso: String(100 + orden),
   totalPasos: 3, fechaFinalizacion: FECHA }));
 const HISTORIAL = { cursoCompletado: true, fechaFinalizacionCurso: FECHA,
   lecciones: LECCIONES.map((l) => ({ idLeccion: l.idLeccion, titulo: l.titulo, tituloCurso: 'Título al retirar',
-    orden: l.orden, estado: 'completada', origen: 'progreso', totalPasos: 3, pasosCompletados: 3,
+    orden: l.orden, duracionEstimadaMinutos: l.duracionEstimadaMinutos,
+    estado: 'completada', origen: 'progreso', totalPasos: 3, pasosCompletados: 3,
     idUltimoPasoCompletado: l.ultimoPaso, fechaFinalizacion: FECHA })) };
 
 after(async () => { await pool.end(); });
@@ -68,9 +70,11 @@ function simular(t, opciones = {}) {
       if (/^INSERT INTO certificados/.test(q)) {
         assert.match(q, /clock_timestamp\(\)/);
         assert.match(q, /\$6::timestamptz/);
+        assert.match(q, /\$7::integer/);
         assert.doesNotMatch(q.split('VALUES')[0], /codigo_verificacion|\bfolio\b/);
         certificado = { ...CERTIFICADO, idCurso: parametros[1], nombreCompleto: parametros[2],
-          tituloCurso: parametros[3], lecciones: JSON.parse(parametros[4]), fechaFinalizacionCurso: parametros[5] };
+          tituloCurso: parametros[3], lecciones: JSON.parse(parametros[4]), fechaFinalizacionCurso: parametros[5],
+          duracionMinutos: parametros[6] };
         return { rows: [structuredClone(certificado)], rowCount: 1 };
       }
       assert.fail(`Consulta inesperada: ${q}`);
@@ -249,3 +253,70 @@ test('Certificados servicio: fallo de conexión se propaga sin consultas', async
   await assert.rejects(emitirCertificado(ALUMNO, '10'), /Conexión privada/);
   assert.equal(s.llamadas.length, 0);
 });
+
+const parametroDuracion = (s) => s.llamadas.find(({ sql }) => /^INSERT/.test(sql)).parametros[6];
+
+test('Certificados duración: curso publicado guarda la suma de sus lecciones', async (t) => {
+  const s = simular(t);
+  const { certificado } = await emitirCertificado(ALUMNO, '10');
+  assert.equal(certificado.duracionMinutos, 22);
+  assert.equal(parametroDuracion(s), 22);
+  assert.deepEqual(certificado.lecciones, [{ titulo: 'Primera' }, { titulo: 'Segunda' }]);
+});
+
+for (const valor of [undefined, null, 0, -1, 16, 1.5, '10']) {
+  test(`Certificados duración: publicado con lección ${JSON.stringify(valor)} emite null sin suma parcial`, async (t) => {
+    const s = simular(t, { lecciones: [LECCIONES[0], { ...LECCIONES[1], duracionEstimadaMinutos: valor }] });
+    const { certificado } = await emitirCertificado(ALUMNO, '10');
+    assert.equal(certificado.duracionMinutos, null);
+    assert.equal(parametroDuracion(s), null);
+  });
+
+  test(`Certificados duración: historial con lección ${JSON.stringify(valor)} emite null sin suma parcial`, async (t) => {
+    const lecciones = [HISTORIAL.lecciones[0], { ...HISTORIAL.lecciones[1], duracionEstimadaMinutos: valor }];
+    const s = simular(t, { estado: 'retirado', historial: { ...HISTORIAL, lecciones } });
+    const { creado, certificado } = await emitirCertificado(ALUMNO, '10');
+    assert.equal(creado, true);
+    assert.equal(certificado.duracionMinutos, null);
+    assert.equal(parametroDuracion(s), null);
+  });
+}
+
+test('Certificados duración: retirado con instantánea completa guarda la suma', async (t) => {
+  const s = simular(t, { estado: 'retirado' });
+  const { certificado } = await emitirCertificado(ALUMNO, '10');
+  assert.equal(certificado.duracionMinutos, 22);
+  assert.equal(parametroDuracion(s), 22);
+});
+
+test('Certificados duración: historial anterior sin el campo emite null', async (t) => {
+  const lecciones = HISTORIAL.lecciones.map(({ duracionEstimadaMinutos: _duracion, ...resto }) => resto);
+  const s = simular(t, { estado: 'retirado', historial: { ...HISTORIAL, lecciones } });
+  const { creado, certificado } = await emitirCertificado(ALUMNO, '10');
+  assert.equal(creado, true);
+  assert.equal(certificado.duracionMinutos, null);
+  assert.equal(parametroDuracion(s), null);
+});
+
+for (const guardado of [37, null]) {
+  test(`Certificados duración: repetición devuelve ${guardado} guardado sin recalcular`, async (t) => {
+    const s = simular(t, { existente: { ...CERTIFICADO, duracionMinutos: guardado } });
+    const { creado, certificado } = await emitirCertificado(ALUMNO, '10');
+    assert.equal(creado, false);
+    assert.equal(certificado.duracionMinutos, guardado);
+    assert.equal(s.llamadas.some(({ sql }) => /^(INSERT|UPDATE)|FROM lecciones/.test(sql)), false);
+  });
+}
+
+test('Certificados duración: listado incluye valor y null', async (t) => {
+  simular(t, { lista: [CERTIFICADO, { ...CERTIFICADO, idCertificado: '6', duracionMinutos: null }] });
+  const lista = await listarMisCertificados(ALUMNO);
+  assert.deepEqual(lista.map((c) => c.duracionMinutos), [22, null]);
+});
+
+for (const valor of [undefined, 0, -1, 1.5, '22']) {
+  test(`Certificados duración: valor almacenado ${JSON.stringify(valor)} es inconsistente`, async (t) => {
+    simular(t, { lista: [{ ...CERTIFICADO, duracionMinutos: valor }] });
+    await assert.rejects(listarMisCertificados(ALUMNO), TypeError);
+  });
+}
