@@ -85,3 +85,11 @@ export function anioEmision(fechaIso) {
   const fecha = new Date(fechaIso)
   return Number.isNaN(fecha.getTime()) ? '' : formatoAnio.format(fecha)
 }
+
+export function textoDuracion(minutos) {
+  if (!Number.isInteger(minutos) || minutos <= 0) return null
+  if (minutos < 60) return minutos === 1 ? '1 minuto' : `${minutos} minutos`
+  const horas = Math.floor(minutos / 60)
+  const resto = minutos % 60
+  return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`
+}
