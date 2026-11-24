@@ -1,0 +1,25 @@
+# Esperado: 400 apodo_invalido, mensaje de caracteres.
+info:
+  name: 401 - Actualizar apodo con signos - 400
+  type: http
+  seq: 401
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "apodo": "Pepe!"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

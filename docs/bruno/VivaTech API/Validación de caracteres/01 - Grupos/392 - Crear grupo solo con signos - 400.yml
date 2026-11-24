@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_grupo_invalido (se necesita al menos una letra o un dígito).
+info:
+  name: 392 - Crear grupo solo con signos - 400
+  type: http
+  seq: 392
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "#()"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

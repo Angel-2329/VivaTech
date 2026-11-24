@@ -1,0 +1,26 @@
+# Esperado: 200 con el nombre original. Si el apodo original no era null, cambiar null por el apodo original antes de ejecutar.
+info:
+  name: 405 - Restaurar nombre y apodo del estudiante - 200
+  type: http
+  seq: 405
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "{{nombreEstudianteOriginal}}",
+        "apodo": null
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

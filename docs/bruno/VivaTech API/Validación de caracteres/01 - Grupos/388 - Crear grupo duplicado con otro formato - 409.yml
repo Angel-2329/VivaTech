@@ -1,0 +1,25 @@
+# Esperado: 409 grupo_duplicado (mismo nombre normalizado que la 387).
+info:
+  name: 388 - Crear grupo duplicado con otro formato - 409
+  type: http
+  seq: 388
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "prueba p3 - grupo 1-a  (turno #2), MAÑANA_B."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

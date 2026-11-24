@@ -1,0 +1,25 @@
+# Esperado: nombre guardado "PRUEBA P3 - Grupo 1-A (turno #2), mañana_b.". Copiar idGrupo a la variable idGrupoP3.
+info:
+  name: 387 - Crear grupo con signos permitidos y espacios repetidos - 201
+  type: http
+  seq: 387
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "  PRUEBA P3 -   Grupo 1-A (turno #2), mañana_b.  "
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

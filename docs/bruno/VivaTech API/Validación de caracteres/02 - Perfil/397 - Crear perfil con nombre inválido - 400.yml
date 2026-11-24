@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_invalido; se valida antes de intentar crear (no llega al 409 perfil_existente).
+info:
+  name: 397 - Crear perfil con nombre inválido - 400
+  type: http
+  seq: 397
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "Ana 😀 López"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
