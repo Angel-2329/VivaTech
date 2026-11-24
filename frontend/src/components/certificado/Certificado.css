@@ -152,6 +152,12 @@
   color: var(--vt-on-tertiary-fixed-variant);
 }
 
+.certificado__duracion {
+  margin: 0;
+  font-size: var(--vt-body-md);
+  color: var(--vt-on-surface-variant);
+}
+
 /* Lecciones en dos columnas cuando hay espacio */
 .certificado__lecciones {
   display: flex;
@@ -353,17 +359,17 @@
   }
 
   .certificado__marco {
-    gap: var(--vt-space-sm);
-    padding: 1.5rem 2rem;
+    gap: var(--vt-space-xs);
+    padding: 1.25rem 1.75rem;
     outline-offset: -0.5rem;
   }
 
   .certificado__titulo {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .certificado__nombre {
-    font-size: 1.9rem;
+    font-size: 1.7rem;
   }
 
   .certificado__curso {
@@ -372,6 +378,12 @@
 
   .certificado__pie {
     padding-top: var(--vt-space-sm);
+  }
+
+  .certificado__lecciones ul {
+    gap: 0.15rem var(--vt-space-md);
+    font-size: 0.8rem;
+    line-height: 1.3;
   }
 
   .certificado__sello,
