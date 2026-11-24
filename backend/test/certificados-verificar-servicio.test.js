@@ -11,7 +11,8 @@ const PUBLICO = {
   lecciones: [{ titulo: 'Primera' }, { titulo: 'Segunda' }, { titulo: 'Tercera' }],
   folio: 'VT-2026-000007',
   fechaFinalizacionCurso: '2026-11-15T12:00:00.123789-06:00',
-  fechaEmision: '2026-11-15T13:00:00.987654-06:00'
+  fechaEmision: '2026-11-15T13:00:00.987654-06:00',
+  duracionMinutos: 37
 };
 
 after(async () => { await pool.end(); });
@@ -29,13 +30,20 @@ function simular(t, opciones = {}) {
 
 const noEncontrado = (e) => e instanceof ErrorReglaCurso && e.estado === 404 && e.codigo === 'certificado_no_encontrado';
 
-test('Verificar servicio: devuelve solo los seis campos públicos en orden de lecciones', async (t) => {
+test('Verificar servicio: devuelve solo los siete campos públicos en orden de lecciones', async (t) => {
   const s = simular(t);
   const resultado = await verificarCertificado(CODIGO);
   assert.deepEqual(resultado, PUBLICO);
   assert.deepEqual(Object.keys(resultado).sort(),
-    ['fechaEmision', 'fechaFinalizacionCurso', 'folio', 'lecciones', 'nombreCompleto', 'tituloCurso']);
+    ['duracionMinutos', 'fechaEmision', 'fechaFinalizacionCurso', 'folio', 'lecciones', 'nombreCompleto', 'tituloCurso']);
   assert.equal(s.llamadas.length, 1);
+});
+
+test('Verificar servicio: certificado anterior devuelve duracionMinutos null', async (t) => {
+  simular(t, { filas: [{ ...PUBLICO, duracionMinutos: null }] });
+  const resultado = await verificarCertificado(CODIGO);
+  assert.equal(resultado.duracionMinutos, null);
+  assert.ok(Object.hasOwn(resultado, 'duracionMinutos'));
 });
 
 test('Verificar servicio: SQL usa parámetro uuid y no selecciona identificadores privados', async (t) => {
@@ -84,7 +92,8 @@ test('Verificar servicio: filas duplicadas son inconsistencia', async (t) => {
 
 for (const cambio of [{ lecciones: [] }, { lecciones: null }, { lecciones: [{ titulo: '' }] }, { lecciones: [null] },
   { tituloCurso: ' ' }, { nombreCompleto: '' }, { folio: '' }, { fechaEmision: 'no-fecha' },
-  { fechaFinalizacionCurso: null }]) {
+  { fechaFinalizacionCurso: null }, { duracionMinutos: 0 }, { duracionMinutos: -1 }, { duracionMinutos: 1.5 },
+  { duracionMinutos: '37' }, { duracionMinutos: undefined }]) {
   test(`Verificar servicio: fila inconsistente ${JSON.stringify(cambio)} lanza TypeError`, async (t) => {
     simular(t, { filas: [{ ...PUBLICO, ...cambio }] });
     await assert.rejects(verificarCertificado(CODIGO), TypeError);
