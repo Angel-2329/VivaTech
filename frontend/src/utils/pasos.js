@@ -144,6 +144,19 @@ export function limpiarPaso(paso) {
 }
 
 
+
+export function pasoParaVistaPrevia(paso) {
+  const limpio = limpiarPaso(paso)
+  const recursos = limpio.recursos
+    .map((recurso) => {
+      if (recurso.tipo !== 'video' || recurso.url === undefined) return recurso
+      const idVideo = extraerIdVideo(recurso.url)
+      return idVideo ? { tipo: 'video', plataforma: 'youtube', idVideo, titulo: recurso.titulo } : null
+    })
+    .filter(Boolean)
+  return { ...limpio, recursos }
+}
+
 export function validarLeccion({ titulo, objetivo, duracionEstimadaMinutos }) {
   const errores = {}
   const problemaTitulo = revisarTexto(titulo, LIMITES_PASO.titulo, 'el título de la lección')

@@ -15,6 +15,7 @@ import {
   estructuraPaso,
   limpiarPaso,
   nuevoIdOpcion,
+  pasoParaVistaPrevia,
   pasoVacio,
   puedeLlevarVideo,
   recursoVacio,
@@ -60,6 +61,30 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     setErrores({})
   }
 
+  function enfocarPrimerError(nuevos, accion) {
+    const rutas = Object.keys(nuevos)
+    const cuantos = rutas.length === 1 ? 'el campo marcado' : `los ${rutas.length} campos marcados`
+    setErrorGeneral(`${accion}, revisa ${cuantos}.`)
+    document.getElementById(idDe(rutas[0]))?.focus()
+  }
+
+  function alternarVistaPrevia() {
+    if (verVistaPrevia) {
+      setVerVistaPrevia(false)
+      return
+    }
+
+    const nuevos = validarPaso(paso)
+    setErrores(nuevos)
+    if (Object.keys(nuevos).length > 0) {
+      enfocarPrimerError(nuevos, 'Para ver la vista previa')
+      return
+    }
+
+    setErrorGeneral('')
+    setVerVistaPrevia(true)
+  }
+
   async function enviar(evento) {
     evento.preventDefault()
     if (guardando) return
@@ -67,10 +92,8 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
     const nuevos = validarPaso(paso)
     setErrores(nuevos)
     setErrorGeneral('')
-    const primero = Object.keys(nuevos)[0]
-    if (primero) {
-      setErrorGeneral(`Revisa ${Object.keys(nuevos).length === 1 ? 'el campo marcado' : `los ${Object.keys(nuevos).length} campos marcados`}.`)
-      document.getElementById(idDe(primero))?.focus()
+    if (Object.keys(nuevos).length > 0) {
+      enfocarPrimerError(nuevos, 'Para guardar')
       return
     }
 
@@ -195,7 +218,7 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
         <button
           type="button"
           className="vt-btn vt-btn-outline vt-btn-sm"
-          onClick={() => setVerVistaPrevia((actual) => !actual)}
+          onClick={alternarVistaPrevia}
           aria-expanded={verVistaPrevia}
         >
           <span className="vt-icon" aria-hidden="true">
@@ -208,7 +231,7 @@ function FormularioPaso({ pasoInicial, numero, soloTextos, textoBoton, onGuardar
         </button>
       </div>
 
-      {verVistaPrevia && <VistaPreviaPaso paso={limpiarPaso(paso)} numero={numero} />}
+      {verVistaPrevia && <VistaPreviaPaso paso={pasoParaVistaPrevia(paso)} numero={numero} />}
     </form>
   )
 }
