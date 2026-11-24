@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_grupo_invalido.
+info:
+  name: 391 - Crear grupo con etiqueta HTML - 400
+  type: http
+  seq: 391
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "<script>alert(1)</script>"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

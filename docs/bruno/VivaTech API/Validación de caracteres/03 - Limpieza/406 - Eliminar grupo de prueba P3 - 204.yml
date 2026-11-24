@@ -1,0 +1,19 @@
+# Esperado: 204. Después, GET /api/grupos no debe mostrar «PRUEBA P3 - Ñandú Peña».
+info:
+  name: 406 - Eliminar grupo de prueba P3 - 204
+  type: http
+  seq: 406
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP3}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_grupo_invalido (los corchetes no están permitidos).
+info:
+  name: 390 - Crear grupo con corchetes - 400
+  type: http
+  seq: 390
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "[PRUEBA P3] Grupo"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_invalido; el perfil no cambia.
+info:
+  name: 398 - Actualizar nombre con emoji - 400
+  type: http
+  seq: 398
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "Ana 😀 López"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

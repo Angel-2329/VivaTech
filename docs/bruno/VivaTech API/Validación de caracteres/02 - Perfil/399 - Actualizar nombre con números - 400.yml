@@ -1,0 +1,25 @@
+# Esperado: 400 nombre_invalido.
+info:
+  name: 399 - Actualizar nombre con números - 400
+  type: http
+  seq: 399
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/perfil"
+  body:
+    type: json
+    data: |-
+      {
+        "nombreCompleto": "Juan123 López"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
