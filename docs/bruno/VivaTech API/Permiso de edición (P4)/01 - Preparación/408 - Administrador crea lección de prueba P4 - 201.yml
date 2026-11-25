@@ -1,0 +1,27 @@
+# Esperado: 201. Copiar idLeccion a la variable idLeccionP4.
+info:
+  name: 408 - Administrador crea lección de prueba P4 - 201
+  type: http
+  seq: 408
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}/lecciones"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "PRUEBA P4 Lección",
+        "objetivo": "Practicar la edición compartida.",
+        "duracionEstimadaMinutos": 5
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

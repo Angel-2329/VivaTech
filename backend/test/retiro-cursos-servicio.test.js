@@ -42,7 +42,8 @@ function simular(t, opciones = {}) {
     progresos: opciones.progresos || [],
     historiales: opciones.historiales || [],
     certificados: opciones.certificados || [],
-    marcas: opciones.marcas || []
+    marcas: opciones.marcas || [],
+    editores: opciones.editores || []
   });
   const inicial = structuredClone(datos);
   let guardado;
@@ -126,6 +127,17 @@ function simular(t, opciones = {}) {
         assert.deepEqual(parametros, [id]);
         const n = datos.lecciones.length; datos.lecciones = [];
         return resultadoEscritura(n, q);
+      }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(q)) {
+        assert.match(q, /FOR SHARE$/);
+        assert.equal(parametros[0], id);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
+      if (/^DELETE FROM curso_editores/.test(q)) {
+        assert.deepEqual(parametros, [id]);
+        const rowCount = datos.editores.length;
+        datos.editores = [];
+        return { rows: [], rowCount };
       }
       if (/^DELETE FROM cursos/.test(q)) {
         assert.deepEqual(parametros, [id]);
@@ -564,3 +576,52 @@ test('Retiro servicio: conteo incorrecto al borrar el curso revierte hijos y SET
   cerrar(s, 'ROLLBACK');
 });
 
+
+for (const estado_publicacion of ['borrador', 'publicado', 'retirado']) {
+  test(`Retiro servicio P4: editor no elimina ni retira en ${estado_publicacion} (403 permiso_solo_edicion)`, async (t) => {
+    const s = simular(t, { curso: { creado_por: 'otro-autor', estado_publicacion }, esEditor: true,
+      editores: [MAESTRO.uid] });
+    await assert.rejects(retirar(), codigo(403, 'permiso_solo_edicion'));
+    assert.equal(s.llamadas.some(({ sql }) => /^(INSERT|UPDATE|DELETE)/.test(sql)), false);
+    assert.deepEqual(s.datos(), s.inicial);
+    const permiso = s.llamadas.find(({ sql }) => /^SELECT 1 AS permiso FROM curso_editores/.test(sql));
+    assert.deepEqual(permiso.parametros, ['10', MAESTRO.uid]);
+    cerrar(s, 'ROLLBACK');
+  });
+}
+
+test('Retiro servicio P4: con el perfil vigente como estudiante el permiso no aplica', async (t) => {
+  const s = simular(t, { curso: { creado_por: 'otro-autor' }, esEditor: true,
+    perfil: { ...MAESTRO, rol: 'estudiante' } });
+  await assert.rejects(retirar(), codigo(403, 'rol_no_autorizado'));
+  cerrar(s, 'ROLLBACK');
+});
+
+test('Retiro servicio P4: la eliminación física borra los permisos antes del curso', async (t) => {
+  const s = simular(t, { editores: ['uid-editor-a', 'uid-editor-b'] });
+  assert.equal(await retirar(), null);
+  assert.deepEqual(s.datos().editores, []);
+  const permisos = s.llamadas.findIndex(({ sql }) => /^DELETE FROM curso_editores/.test(sql));
+  const curso = s.llamadas.findIndex(({ sql }) => /^DELETE FROM cursos/.test(sql));
+  assert.ok(permisos >= 0 && permisos < curso);
+  assert.deepEqual(s.llamadas[permisos].parametros, ['10']);
+  cerrar(s);
+});
+
+test('Retiro servicio P4: el retiro con historial conserva los permisos', async (t) => {
+  const s = simular(t, { progresos: [avance()], editores: ['uid-editor-a'] });
+  assert.deepEqual(await retirar(), { idCurso: '10', estadoPublicacion: 'retirado', resultado: 'retirado' });
+  assert.deepEqual(s.datos().editores, ['uid-editor-a']);
+  assert.equal(s.llamadas.some(({ sql }) => /curso_editores/.test(sql) && /^DELETE/.test(sql)), false);
+  cerrar(s);
+});
+
+test('Retiro servicio P4: autor y administrador no consultan curso_editores', async (t) => {
+  const propio = simular(t);
+  await retirar();
+  assert.equal(propio.llamadas.some(({ sql }) => /^SELECT 1 AS permiso/.test(sql)), false);
+  t.mock.restoreAll();
+  const admin = simular(t, { usuario: ADMIN, curso: { creado_por: MAESTRO.uid } });
+  await eliminarCurso(ADMIN, '10');
+  assert.equal(admin.llamadas.some(({ sql }) => /^SELECT 1 AS permiso/.test(sql)), false);
+});

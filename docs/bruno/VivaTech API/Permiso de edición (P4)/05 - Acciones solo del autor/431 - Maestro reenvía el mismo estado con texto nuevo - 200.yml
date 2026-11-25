@@ -1,0 +1,26 @@
+# Esperado: 200. El estado no cambia, así que se permite (decidido en la sesión de P4).
+info:
+  name: 431 - Maestro reenvía el mismo estado con texto nuevo - 200
+  type: http
+  seq: 431
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "estadoPublicacion": "borrador",
+        "titulo": "PRUEBA P4 Curso con mismo estado"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

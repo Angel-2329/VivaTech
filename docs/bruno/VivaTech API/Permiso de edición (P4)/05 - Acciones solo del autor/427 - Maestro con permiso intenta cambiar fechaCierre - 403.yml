@@ -1,0 +1,25 @@
+# Esperado: 403 permiso_solo_edicion. La fecha no cambia.
+info:
+  name: 427 - Maestro con permiso intenta cambiar fechaCierre - 403
+  type: http
+  seq: 427
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "fechaCierre": "2099-12-31"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

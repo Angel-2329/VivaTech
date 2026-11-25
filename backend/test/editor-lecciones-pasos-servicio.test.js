@@ -38,6 +38,10 @@ function simular(t, opciones = {}) {
         const perfil = Object.hasOwn(opciones, 'perfil') ? opciones.perfil : usuario;
         return { rows: perfil ? [perfil] : [] };
       }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(q)) {
+        assert.match(q, /FOR SHARE$/);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
       if (/jsonb_array_elements/.test(q)) return { rows: opciones.historica ? [{ idCurso: '10' }] : [] };
       if (/FROM cursos WHERE id_curso.*FOR UPDATE/s.test(q)) return { rows: opciones.sinCurso ? [] : [{
         idCurso: '10', creado_por: opciones.autor || usuario.uid, estado_publicacion: opciones.estado || 'borrador'
@@ -553,3 +557,64 @@ test('Editor IDs: BIGINT máximo válido llega a la consulta como cadena', async
 });
 
 
+
+const consultasPermiso = (s) => s.llamadas.filter(({ sql }) => /^SELECT 1 AS permiso FROM curso_editores/.test(sql));
+
+for (const [metodo, , id, datos] of OPERACIONES) {
+  test(`Editor P4: ${metodo} con permiso de edición sobre curso ajeno`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: true });
+    await servicio[metodo](MAESTRO, id, datos);
+    const [permiso] = consultasPermiso(s);
+    assert.deepEqual(permiso.parametros, ['10', MAESTRO.uid]);
+    assert.match(permiso.sql, /FOR SHARE$/);
+    cerrar(s);
+  });
+
+  test(`Editor P4: ${metodo} sin permiso sobre curso ajeno sigue en curso_ajeno`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: false });
+    await assert.rejects(servicio[metodo](MAESTRO, id, datos), codigo(403, 'curso_ajeno'));
+    assert.equal(s.llamadas.some(({ sql }) => /^(INSERT|UPDATE|DELETE)/.test(sql)), false);
+    cerrar(s, 'ROLLBACK');
+  });
+
+  test(`Editor P4: ${metodo} con permiso sobre curso retirado responde curso_retirado`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: true, estado: 'retirado' });
+    await assert.rejects(servicio[metodo](MAESTRO, id, datos), codigo(409, 'curso_retirado'));
+    cerrar(s, 'ROLLBACK');
+  });
+
+  test(`Editor P4: ${metodo} con permiso pero perfil vigente estudiante no aplica`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: true, perfil: { ...MAESTRO, rol: 'estudiante' } });
+    await assert.rejects(servicio[metodo](MAESTRO, id, datos), codigo(403, 'rol_no_autorizado'));
+    assert.equal(consultasPermiso(s).length, 0);
+    cerrar(s, 'ROLLBACK');
+  });
+
+  test(`Editor P4: ${metodo} de autor y de administrador no consultan permisos`, async (t) => {
+    const propio = simular(t);
+    await servicio[metodo](MAESTRO, id, datos);
+    assert.equal(consultasPermiso(propio).length, 0);
+    t.mock.restoreAll();
+    const admin = simular(t, { usuario: ADMIN, autor: 'otro-autor' });
+    await servicio[metodo](ADMIN, id, datos);
+    assert.equal(consultasPermiso(admin).length, 0);
+  });
+}
+
+for (const [estado, avance, esperado] of [['publicado', false, 'curso_publicado'], ['borrador', true, 'curso_con_avance']]) {
+  for (const [metodo, , id, datos] of OPERACIONES.filter(([nombre]) => !['editarLeccion', 'editarPaso'].includes(nombre))) {
+    test(`Editor P4: ${metodo} del editor respeta ${esperado} igual que el autor`, async (t) => {
+      const s = simular(t, { autor: 'otro-autor', esEditor: true, estado, avance });
+      await assert.rejects(servicio[metodo](MAESTRO, id, datos), codigo(409, esperado));
+      assert.equal(s.llamadas.some(({ sql }) => /^(INSERT|UPDATE|DELETE)/.test(sql)), false);
+      cerrar(s, 'ROLLBACK');
+    });
+  }
+}
+
+test('Editor P4: la lección creada por el editor guarda su uid como creado_por', async (t) => {
+  const s = simular(t, { autor: 'otro-autor', esEditor: true });
+  await servicio.crearLeccion(MAESTRO, '10', META);
+  const insercion = s.llamadas.find(({ sql }) => /^INSERT INTO lecciones/.test(sql));
+  assert.equal(insercion.parametros[5], MAESTRO.uid);
+});

@@ -1,0 +1,25 @@
+# Esperado: 200 con el título nuevo.
+info:
+  name: 422 - Maestro edita la lección - 200
+  type: http
+  seq: 422
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "PRUEBA P4 Lección editada"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

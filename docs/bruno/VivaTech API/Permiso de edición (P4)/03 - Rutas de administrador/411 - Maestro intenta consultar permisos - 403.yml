@@ -1,0 +1,19 @@
+# Esperado: 403 rol_no_autorizado (solo el administrador da y quita permisos).
+info:
+  name: 411 - Maestro intenta consultar permisos - 403
+  type: http
+  seq: 411
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

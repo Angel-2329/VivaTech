@@ -87,6 +87,11 @@ function simular(t, opciones = {}) {
         assert.deepEqual(parametros, [opciones.id || '10']);
         return { rows: opciones.sinCurso ? [] : [{ ...curso }] };
       }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(texto)) {
+        assert.match(texto, /FOR SHARE$/);
+        assert.equal(parametros[0], curso.idCurso);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
       if (/^SELECT nombre FROM categorias/.test(texto)) {
         return { rows: opciones.sinCategoria ? [] : [{ nombre: 'Categoría de prueba' }] };
       }
@@ -122,10 +127,13 @@ function simular(t, opciones = {}) {
         return { rows: [], rowCount: lecciones.length };
       }
       if (/WHERE c\.id_curso = \$1::bigint/.test(texto)) {
-        assert.deepEqual(parametros, [curso.idCurso]);
+        assert.equal(parametros.length, 2);
+        assert.equal(parametros[0], curso.idCurso);
+        assert.equal(typeof parametros[1], 'string');
         const detalleLecciones = nuevo ? [] : lecciones;
         return { rows: [{ ...curso, estadoPublicacion: curso.estado_publicacion,
           fechaCierre: curso.fecha_cierre, creadoPor: 'Autor de Ejemplo', tieneAvance: opciones.tieneAvance === true,
+          esEditor: opciones.esEditor === true,
           totalLecciones: detalleLecciones.length, lecciones: detalleLecciones }] };
       }
       assert.fail(`Consulta no prevista: ${texto}`);
@@ -165,7 +173,8 @@ for (const rol of ['maestro', 'administrador']) {
     assert.deepEqual(await respuesta.json(), {
       idCurso: '11', titulo: 'Curso nuevo', descripcion: 'Ejemplos ficticios.', orden: 3,
       estadoPublicacion: 'borrador', fechaCierre: null, tieneAvance: false,
-      creadoPor: 'Autor de Ejemplo', puedeEditar: true, idCategoria: '1', lecciones: []
+      creadoPor: 'Autor de Ejemplo', puedeEditar: true,
+      permisoCurso: rol === 'administrador' ? 'administrador' : 'autor', idCategoria: '1', lecciones: []
     });
     assert.equal(s.llamadas.at(-1).sql, 'COMMIT');
     assert.equal(s.cliente.release.mock.callCount(), 1);
@@ -414,7 +423,8 @@ for (const rol of ['maestro', 'administrador']) {
       assert.deepEqual(await respuesta.json(), {
         idCurso: '10', idCategoria: '1', titulo: 'Curso original', descripcion: 'Descripción original.',
         orden: 2, estadoPublicacion, fechaCierre: null, creadoPor: 'Autor de Ejemplo',
-        tieneAvance: false, puedeEditar: true, lecciones: LECCIONES
+        tieneAvance: false, puedeEditar: true,
+        permisoCurso: rol === 'administrador' ? 'administrador' : 'autor', lecciones: LECCIONES
       });
       assert.deepEqual(s.estadosLecciones(), [estadoPublicacion]);
       assert.equal(s.llamadas.at(-1).sql, 'COMMIT');
@@ -530,3 +540,42 @@ for (const fallar of [/FROM lecciones WHERE id_curso/, /FROM pasos p JOIN/, /^UP
     assert.equal(s.cliente.release.mock.callCount(), 1);
   });
 }
+
+test('PATCH cursos P4: maestro con permiso corrige el texto de un curso ajeno → 200 con permisoCurso editor', async (t) => {
+  const s = simular(t, { curso: { creado_por: 'otro-autor' }, esEditor: true });
+  const respuesta = await solicitar({ metodo: 'PATCH', ruta: '/10', cuerpo: { titulo: 'Texto del editor' } });
+  assert.equal(respuesta.status, 200);
+  assert.equal(respuesta.headers.get('cache-control'), 'no-store');
+  const cuerpo = await respuesta.json();
+  assert.equal(cuerpo.titulo, 'Texto del editor');
+  assert.equal(cuerpo.permisoCurso, 'editor');
+  assert.equal(cuerpo.puedeEditar, true);
+  assert.equal(s.llamadas.at(-1).sql, 'COMMIT');
+});
+
+for (const [nombre, cuerpo] of [
+  ['publicar', { estadoPublicacion: 'publicado' }],
+  ['trasladar', { idCategoria: '2' }],
+  ['cambiar fechaCierre', { fechaCierre: '2099-12-31' }]
+]) {
+  test(`PATCH cursos P4: editor no puede ${nombre} → 403 permiso_solo_edicion`, async (t) => {
+    const s = simular(t, { curso: { creado_por: 'otro-autor' }, esEditor: true });
+    const respuesta = await solicitar({ metodo: 'PATCH', ruta: '/10', cuerpo });
+    assert.equal(respuesta.status, 403);
+    assert.equal(respuesta.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await respuesta.json(), {
+      ok: false,
+      mensaje: 'Tienes permiso para editar este curso, pero no para esta acción.',
+      codigo: 'permiso_solo_edicion'
+    });
+    assert.equal(s.llamadas.some(({ sql }) => /^UPDATE/.test(sql)), false);
+    assert.equal(s.llamadas.at(-1).sql, 'ROLLBACK');
+  });
+}
+
+test('PATCH cursos P4: al quitar el permiso el mismo maestro vuelve a recibir curso_ajeno', async (t) => {
+  simular(t, { curso: { creado_por: 'otro-autor' }, esEditor: false });
+  const respuesta = await solicitar({ metodo: 'PATCH', ruta: '/10', cuerpo: { titulo: 'Intento' } });
+  assert.equal(respuesta.status, 403);
+  assert.equal((await respuesta.json()).codigo, 'curso_ajeno');
+});

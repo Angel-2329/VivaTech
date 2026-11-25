@@ -1,6 +1,7 @@
 const { isDeepStrictEqual } = require('node:util');
 const pool = require('../config/database');
-const { ErrorReglaCurso, validarEdicionCurso } = require('./reglas-cursos');
+const { ErrorReglaCurso, validarAccionAutor } = require('./reglas-cursos');
+const { tienePermisoEditor } = require('./permisos-curso');
 
 const MAXIMO_ID = '9223372036854775807';
 const esId = (id) => typeof id === 'string' && /^[1-9][0-9]{0,18}$/.test(id)
@@ -187,15 +188,10 @@ async function eliminarEnConexion(cliente, editor, idCurso) {
   if (cursos.length > 1) throw new TypeError('El identificador devolvió más de un curso');
   const curso = cursos[0];
   const retirado = { idCurso, estadoPublicacion: 'retirado', resultado: 'retirado' };
-  if (curso?.estado_publicacion === 'retirado') {
-    if (editor.rol === 'maestro' && editor.uid !== curso.creado_por) {
-      throw new ErrorReglaCurso(403, 'Solo puedes modificar los cursos que tú creaste', 'curso_ajeno');
-    }
-    if (curso.idCurso !== idCurso) throw new TypeError('El curso no corresponde al identificador solicitado');
-    return retirado;
-  }
-  validarEdicionCurso(editor, curso);
+  const esEditor = await tienePermisoEditor(cliente, editor, curso);
+  validarAccionAutor(editor, curso, { esEditor });
   if (curso.idCurso !== idCurso) throw new TypeError('El curso no corresponde al identificador solicitado');
+  if (curso.estado_publicacion === 'retirado') return retirado;
 
   const { rows: lecciones } = await cliente.query(`
     SELECT id_leccion::text AS "idLeccion", titulo, orden,
@@ -235,6 +231,7 @@ async function eliminarEnConexion(cliente, editor, idCurso) {
 
   if (!progresos.length && !anteriores.length && !certificados.length) {
     await borrarOperativos(cliente, idCurso, lecciones, pasos, progresos);
+    await cliente.query('DELETE FROM curso_editores WHERE id_curso = $1::bigint', [idCurso]);
     comprobarEscritura(await cliente.query('DELETE FROM cursos WHERE id_curso = $1::bigint', [idCurso]), 1);
     return null;
   }

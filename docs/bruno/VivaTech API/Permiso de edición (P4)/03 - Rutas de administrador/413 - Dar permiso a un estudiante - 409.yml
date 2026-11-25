@@ -1,0 +1,25 @@
+# Esperado: 409 usuario_no_maestro.
+info:
+  name: 413 - Dar permiso a un estudiante - 409
+  type: http
+  seq: 413
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidEstudiante}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

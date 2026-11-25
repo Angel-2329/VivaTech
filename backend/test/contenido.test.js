@@ -33,7 +33,7 @@ function fila(cambios = {}) {
     idCategoria: '1', nombreCategoria: 'Categoría ficticia', ordenCategoria: 1,
     idCurso: '10', titulo: 'Curso ficticio', descripcion: 'Ejemplos sin datos reales.',
     orden: 1, estadoPublicacion: 'borrador', fechaCierre: null,
-    creado_por: UID, creadoPor: 'Maestro de Ejemplo', tieneAvance: false, totalLecciones: 1,
+    creado_por: UID, creadoPor: 'Maestro de Ejemplo', tieneAvance: false, esEditor: false, totalLecciones: 1,
     lecciones: [{
       idLeccion: '21', titulo: 'Lección ficticia', objetivo: 'Practicar.', duracionEstimadaMinutos: 3, orden: 1,
       pasos: [{ idPaso: '101', orden: 1, instruccion: 'Lee el ejemplo.', recursos: [], actividad: { tipo: 'lectura' } }]
@@ -58,7 +58,7 @@ function simular(t, opciones = {}) {
       return { rowCount: rows.length, rows };
     }
     const detalle = /WHERE c\.id_curso = \$1::bigint/.test(sql);
-    assert.deepEqual(parametros, detalle ? [opciones.id || '10'] : []);
+    assert.deepEqual(parametros, detalle ? [opciones.id || '10', UID] : [UID]);
     if (opciones.errorContenido) throw opciones.errorContenido;
     const rows = Object.hasOwn(opciones, 'filas') ? opciones.filas : [fila(opciones.cambios)];
     return { rowCount: rows.length, rows };
@@ -220,7 +220,7 @@ test('GET editor detalle: contrato con lecciones/pasos y borrador incompleto', a
   assert.deepEqual(await respuesta.json(), {
     idCurso: '10', titulo: 'Curso ficticio', descripcion: 'Ejemplos sin datos reales.',
     orden: 1, estadoPublicacion: 'borrador', fechaCierre: null,
-    tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true,
+    tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true, permisoCurso: 'autor',
     idCategoria: '1', lecciones: fila().lecciones
   });
 });
@@ -258,5 +258,32 @@ for (const ruta of RUTAS) {
     simular(t, { cambios: { tieneAvance: null } });
     t.mock.method(console, 'error', () => {});
     await comprobarError(await solicitar(ruta), 503, 'contenido_no_disponible');
+  });
+}
+
+for (const ruta of RUTAS) {
+  test(`GET editor ${ruta || 'listado'} P4: maestro con permiso en curso ajeno recibe permisoCurso editor`, async (t) => {
+    simular(t, { cambios: { creado_por: 'otro-autor', esEditor: true } });
+    const respuesta = await solicitar(ruta);
+    assert.equal(respuesta.status, 200);
+    assert.equal(respuesta.headers.get('cache-control'), 'no-store');
+    const cuerpo = await respuesta.json();
+    const curso = ruta ? cuerpo : cuerpo[0].cursos[0];
+    assert.equal(curso.permisoCurso, 'editor');
+    assert.equal(curso.puedeEditar, true);
+  });
+
+  test(`GET editor ${ruta || 'listado'} P4: maestro sin permiso en curso ajeno recibe permisoCurso null`, async (t) => {
+    simular(t, { cambios: { creado_por: 'otro-autor' } });
+    const cuerpo = await (await solicitar(ruta)).json();
+    const curso = ruta ? cuerpo : cuerpo[0].cursos[0];
+    assert.equal(curso.permisoCurso, null);
+    assert.equal(curso.puedeEditar, false);
+  });
+
+  test(`GET editor ${ruta || 'listado'} P4: administrador recibe permisoCurso administrador`, async (t) => {
+    simular(t, { rol: 'administrador', cambios: { creado_por: 'otro-autor', esEditor: true } });
+    const cuerpo = await (await solicitar(ruta)).json();
+    assert.equal((ruta ? cuerpo : cuerpo[0].cursos[0]).permisoCurso, 'administrador');
   });
 }

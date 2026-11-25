@@ -1,0 +1,25 @@
+# Esperado: 400 seleccion_invalida.
+info:
+  name: 414 - Dar permiso con uid vacío - 400
+  type: http
+  seq: 414
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": ""
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

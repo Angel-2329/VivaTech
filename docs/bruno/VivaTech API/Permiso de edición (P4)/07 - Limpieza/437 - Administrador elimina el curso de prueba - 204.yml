@@ -1,0 +1,19 @@
+# Esperado: 204 (sin avance ni historial: eliminación física de curso, lección y permiso).
+info:
+  name: 437 - Administrador elimina el curso de prueba - 204
+  type: http
+  seq: 437
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

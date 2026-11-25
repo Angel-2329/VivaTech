@@ -1,0 +1,19 @@
+# Esperado: 200. El curso «PRUEBA P4 Curso de permisos» aparece con permisoCurso "editor" y puedeEditar true.
+info:
+  name: 419 - Maestro consulta el listado del editor - 200
+  type: http
+  seq: 419
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/contenido"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

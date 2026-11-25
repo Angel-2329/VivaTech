@@ -1,0 +1,19 @@
+# Esperado: 204 sin cuerpo.
+info:
+  name: 432 - Quitar permiso al maestro - 204
+  type: http
+  seq: 432
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores/{{uidMaestro}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
