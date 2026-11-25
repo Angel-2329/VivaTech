@@ -9,6 +9,7 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
   const estado = ESTADO_CURSO[curso.estadoPublicacion]
   const esAdmin = usuario.rol === 'administrador'
   const retirado = curso.estadoPublicacion === 'retirado'
+  const esEditor = curso.permisoCurso === 'editor'
   const rutaEditor = `${esAdmin ? '/admin' : '/maestro'}/contenido/cursos/${curso.idCurso}`
 
   return (
@@ -30,6 +31,16 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
         <p className="vt-body-sm vt-text-muted">
           Creado por {curso.creadoPor}
         </p>
+        {esEditor && (
+          <p>
+            <span className="vt-badge vt-badge-primary">
+              <span className="vt-icon" aria-hidden="true">
+                edit_note
+              </span>
+              Tienes permiso de edición
+            </span>
+          </p>
+        )}
         {!retirado && <TextoFechaCierre fechaCierre={curso.fechaCierre} />}
       </div>
 
@@ -41,7 +52,9 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
 
       {!retirado && !curso.puedeEditar && (
         <div className="vt-stack vt-stack-sm">
-          <p className="vt-body-sm vt-text-muted">Solo quien lo creó o un administrador puede editarlo.</p>
+          <p className="vt-body-sm vt-text-muted">
+            Solo quien lo creó, un administrador o un maestro con permiso puede editarlo.
+          </p>
           <div>
             <Link className="vt-btn vt-btn-outline vt-btn-sm" to={rutaEditor}>
               Ver lecciones
@@ -51,13 +64,28 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
         </div>
       )}
 
-      {curso.puedeEditar && (
+      {curso.puedeEditar && esEditor && (
+        <div className="vt-stack vt-stack-sm">
+          <div>
+            <Link className="vt-btn vt-btn-secondary vt-btn-sm" to={rutaEditor}>
+              Editar lecciones
+              <span className="vt-visually-hidden"> de {curso.titulo}</span>
+            </Link>
+          </div>
+          <p className="vt-btn-hint">
+            Puedes editar las lecciones y los pasos. Publicar, eliminar y la fecha de cierre los maneja quien creó el
+            curso o un administrador.
+          </p>
+        </div>
+      )}
+
+      {curso.puedeEditar && !esEditor && (
         <AccionesCurso
           curso={curso}
           rutaEditor={rutaEditor}
           bloqueado={bloqueado}
           onPedirAccion={onPedirAccion}
-          puedeMover={esAdmin}
+          esAdmin={esAdmin}
           categorias={categorias}
           onMover={onMover}
           onCambiarFecha={onCambiarFecha}
@@ -81,7 +109,7 @@ function TextoFechaCierre({ fechaCierre }) {
   )
 }
 
-function AccionesCurso({ curso, rutaEditor, bloqueado, onPedirAccion, puedeMover, categorias, onMover, onCambiarFecha }) {
+function AccionesCurso({ curso, rutaEditor, bloqueado, onPedirAccion, esAdmin, categorias, onMover, onCambiarFecha }) {
   const id = useId()
   const [editandoFecha, setEditandoFecha] = useState(false)
   const publicado = curso.estadoPublicacion === 'publicado'
@@ -142,6 +170,16 @@ function AccionesCurso({ curso, rutaEditor, bloqueado, onPedirAccion, puedeMover
             <span className="vt-visually-hidden"> de {curso.titulo}</span>
           </button>
         )}
+
+        {esAdmin && (
+          <Link className="vt-btn vt-btn-ghost vt-btn-sm" to={`${rutaEditor}/permisos`}>
+            <span className="vt-icon" aria-hidden="true">
+              group_add
+            </span>
+            Permisos de edición
+            <span className="vt-visually-hidden"> de {curso.titulo}</span>
+          </Link>
+        )}
       </div>
 
       {editandoFecha && (
@@ -161,7 +199,7 @@ function AccionesCurso({ curso, rutaEditor, bloqueado, onPedirAccion, puedeMover
         </p>
       )}
 
-      {puedeMover && categorias.length > 1 && (
+      {esAdmin && categorias.length > 1 && (
         <MoverCurso curso={curso} categorias={categorias} bloqueado={bloqueado} onMover={onMover} />
       )}
     </div>
