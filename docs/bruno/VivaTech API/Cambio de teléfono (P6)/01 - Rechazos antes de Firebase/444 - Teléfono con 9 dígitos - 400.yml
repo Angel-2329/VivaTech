@@ -1,0 +1,23 @@
+# Esperado: 400 telefono_invalido.
+info:
+  name: 444 - Teléfono con 9 dígitos - 400
+  type: http
+  seq: 444
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "+52951123456" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -13,13 +13,17 @@ class ErrorOperacionUsuario extends Error {
 async function ejecutarCambioAdministrativo(
   uidSolicitante,
   uidDestino,
-  realizarCambio
+  realizarCambio,
+  errorPropio = {
+    mensaje: 'No puedes modificar tu propio rol o estado desde esta operación',
+    codigo: 'modificacion_propia_no_permitida'
+  }
 ) {
   if (uidSolicitante === uidDestino) {
     throw new ErrorOperacionUsuario(
       403,
-      'No puedes modificar tu propio rol o estado desde esta operación',
-      'modificacion_propia_no_permitida'
+      errorPropio.mensaje,
+      errorPropio.codigo
     );
   }
 

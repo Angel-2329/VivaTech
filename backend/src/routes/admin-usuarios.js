@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('../config/database');
+const firebaseAuth = require('../config/firebase');
 const verificarTokenFirebase =
   require('../middlewares/verificar-token-firebase');
 const cargarUsuario = require('../middlewares/cargar-usuario');
@@ -257,5 +258,142 @@ router.patch('/:uid/activo', validarDestinoYCuerpo, async (req, res) => {
     return responderErrorCambio(error, res);
   }
 });
+
+const FORMATO_TELEFONO = /^\+52\d{10}$/;
+
+function ultimos4(telefono) {
+  if (typeof telefono !== 'string') {
+    return null;
+  }
+
+  const digitos = telefono.slice(-4);
+
+  return /^\d{4}$/.test(digitos) ? digitos : null;
+}
+
+function errorIdentidadNoDisponible() {
+  return new ErrorOperacionUsuario(
+    503,
+    'No se pudo cambiar el teléfono. Intenta de nuevo más tarde.',
+    'identidad_no_disponible'
+  );
+}
+
+function errorCuentaNoEncontrada() {
+  return new ErrorOperacionUsuario(
+    404,
+    'No existe la cuenta solicitada',
+    'usuario_no_encontrado'
+  );
+}
+
+function sinCache(req, res, next) {
+  res.set('Cache-Control', 'no-store');
+  return next();
+}
+
+router.patch(
+  '/:uid/telefono',
+  sinCache,
+  validarDestinoYCuerpo,
+  async (req, res) => {
+    const telefono = req.body.telefono;
+
+    if (typeof telefono !== 'string' || !FORMATO_TELEFONO.test(telefono)) {
+      return res.status(400).json({
+        ok: false,
+        mensaje: 'El teléfono debe tener +52 seguido de 10 dígitos',
+        codigo: 'telefono_invalido'
+      });
+    }
+
+    let firebaseActualizado = false;
+
+    try {
+      const resultado = await ejecutarCambioAdministrativo(
+        req.auth.uid,
+        req.params.uid,
+        async (cliente, destinatario) => {
+          let cuentaFirebase;
+
+          try {
+            cuentaFirebase = await firebaseAuth.getUser(destinatario.uid);
+          } catch (error) {
+            if (error?.code === 'auth/user-not-found') {
+              throw errorCuentaNoEncontrada();
+            }
+
+            throw errorIdentidadNoDisponible();
+          }
+
+          if (cuentaFirebase.phoneNumber === telefono) {
+            throw new ErrorOperacionUsuario(
+              400,
+              'Ese número ya es el teléfono de la cuenta',
+              'telefono_sin_cambios'
+            );
+          }
+
+          await cliente.query(
+            `
+              INSERT INTO cambios_telefono (
+                uid_usuario,
+                uid_administrador,
+                ultimos4_anterior,
+                ultimos4_nuevo
+              )
+              VALUES ($1, $2, $3, $4)
+            `,
+            [
+              destinatario.uid,
+              req.auth.uid,
+              ultimos4(cuentaFirebase.phoneNumber),
+              ultimos4(telefono)
+            ]
+          );
+
+          try {
+            await firebaseAuth.updateUser(destinatario.uid, {
+              phoneNumber: telefono
+            });
+          } catch (error) {
+            if (error?.code === 'auth/phone-number-already-exists') {
+              throw new ErrorOperacionUsuario(
+                409,
+                'Ese número ya pertenece a otra cuenta.',
+                'telefono_en_uso'
+              );
+            }
+
+            if (error?.code === 'auth/user-not-found') {
+              throw errorCuentaNoEncontrada();
+            }
+
+            throw errorIdentidadNoDisponible();
+          }
+
+          firebaseActualizado = true;
+
+          return { uid: destinatario.uid, telefono };
+        },
+        {
+          mensaje: 'No puedes cambiar tu propio teléfono desde esta operación',
+          codigo: 'cambio_propio_no_permitido'
+        }
+      );
+
+      return res.json(resultado);
+    } catch (error) {
+      if (firebaseActualizado) {
+        console.error(
+          `El teléfono de la cuenta ${req.params.uid} cambió en Firebase, `
+          + 'pero no se guardó el registro del cambio'
+        );
+      }
+
+      return responderErrorCambio(error, res);
+    }
+  }
+);
 
 module.exports = router;
