@@ -1,0 +1,26 @@
+info:
+  name: 449 - Número de otra cuenta - 409
+  type: http
+  seq: 449
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: '{ "telefono": "{{telefonoEnUsoP6}}" }'
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+runtime:
+  variables:
+    - name: telefonoEnUsoP6
+      value: "+521212121212"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

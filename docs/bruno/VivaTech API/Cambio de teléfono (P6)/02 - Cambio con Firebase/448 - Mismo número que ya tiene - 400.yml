@@ -1,0 +1,23 @@
+# Esperado: 400 telefono_sin_cambios. No crea fila en cambios_telefono.
+info:
+  name: 448 - Mismo número que ya tiene - 400
+  type: http
+  seq: 448
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "{{telefonoOriginalP6}}" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
