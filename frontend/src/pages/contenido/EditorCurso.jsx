@@ -325,12 +325,18 @@ function AvisoEdicion({ curso, soloLectura, estructuraBloqueada }) {
   if (curso.estadoPublicacion === 'retirado') {
     texto = 'Este curso fue retirado y es de solo lectura.'
   } else if (soloLectura) {
-    texto = 'Solo quien creó este curso o un administrador puede editarlo. Aquí puedes ver sus lecciones y pasos.'
+    texto = 'Solo quien creó este curso, un administrador o un maestro con permiso puede editarlo. Aquí puedes ver sus lecciones y pasos.'
   } else if (curso.estadoPublicacion === 'publicado') {
     texto =
       'Este curso está publicado: puedes corregir textos, pero no agregar, quitar ni reordenar lecciones o pasos, ni cambiar el tipo de paso, las opciones o la respuesta correcta. Para eso hay que regresarlo a borrador desde Contenido, y solo se puede si nadie tiene avance.'
   } else if (estructuraBloqueada) {
     texto = 'Este curso ya tiene avance de alumnos: solo puedes corregir textos.'
+  }
+
+  if (!texto && curso.permisoCurso === 'editor') {
+    texto = 'Tienes permiso para editar las lecciones y los pasos de este curso. Publicarlo, eliminarlo o cambiar su fecha de cierre le corresponde a quien lo creó o a un administrador.'
+  } else if (curso.permisoCurso === 'editor') {
+    texto = `${texto} Publicarlo, eliminarlo o cambiar su fecha de cierre le corresponde a quien lo creó o a un administrador.`
   }
 
   if (!texto) {

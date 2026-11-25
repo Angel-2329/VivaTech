@@ -47,3 +47,21 @@ export function obtenerProgresoGeneral(
 
   return solicitarApi(`/admin/progreso?${parametros}`, { signal })
 }
+
+export function obtenerEditoresCurso(idCurso, { signal } = {}) {
+  return solicitarApi(`/admin/cursos/${encodeURIComponent(idCurso)}/editores`, { signal })
+}
+
+export function darPermisoEditor(idCurso, uid) {
+  return solicitarApi(`/admin/cursos/${encodeURIComponent(idCurso)}/editores`, {
+    metodo: 'POST',
+    datos: { uid },
+  })
+}
+
+export function quitarPermisoEditor(idCurso, uid) {
+  return solicitarApi(
+    `/admin/cursos/${encodeURIComponent(idCurso)}/editores/${encodeURIComponent(uid)}`,
+    { metodo: 'DELETE' },
+  )
+}

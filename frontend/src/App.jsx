@@ -17,6 +17,7 @@ import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
 import InicioAdmin from './pages/admin/InicioAdmin.jsx'
 import ProgresoGeneral from './pages/admin/ProgresoGeneral.jsx'
+import PermisosCurso from './pages/admin/PermisosCurso.jsx'
 import Contenido from './pages/contenido/Contenido.jsx'
 import EditorCurso from './pages/contenido/EditorCurso.jsx'
 
@@ -102,6 +103,7 @@ function App() {
           <Route path="/admin/progreso" element={<ProgresoGeneral />} />
           <Route path="/admin/contenido" element={<Contenido />} />
           <Route path="/admin/contenido/cursos/:idCurso" element={<EditorCurso />} />
+          <Route path="/admin/contenido/cursos/:idCurso/permisos" element={<PermisosCurso />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
