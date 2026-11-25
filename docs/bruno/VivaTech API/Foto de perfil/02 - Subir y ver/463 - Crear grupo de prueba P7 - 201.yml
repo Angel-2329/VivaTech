@@ -1,0 +1,25 @@
+# Esperado: 201. Copiar idGrupo a la variable idGrupoP7.
+info:
+  name: 463 - Crear grupo de prueba P7 - 201
+  type: http
+  seq: 463
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "PRUEBA P7 Foto"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

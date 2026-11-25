@@ -1,0 +1,19 @@
+# Esperado: 200; estudiante y maestro con tieneFoto true; el resto con tieneFoto false y fotoActualizada null.
+info:
+  name: 471 - Lista de usuarios del administrador - 200
+  type: http
+  seq: 471
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/admin/usuarios"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

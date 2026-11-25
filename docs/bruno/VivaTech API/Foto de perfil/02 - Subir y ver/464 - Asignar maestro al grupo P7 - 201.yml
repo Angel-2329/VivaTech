@@ -1,0 +1,25 @@
+# Esperado: 201.
+info:
+  name: 464 - Asignar maestro al grupo P7 - 201
+  type: http
+  seq: 464
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP7}}/maestros"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidMaestro}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

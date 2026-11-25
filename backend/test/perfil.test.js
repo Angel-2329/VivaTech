@@ -181,7 +181,9 @@ test('POST perfil crea un estudiante y normaliza sus datos', async (t) => {
     uid: 'uid-perfil-prueba',
     nombreCompleto: 'Persona de Prueba',
     apodo: null,
-    rol: 'estudiante'
+    rol: 'estudiante',
+    tieneFoto: false,
+    fotoActualizada: null
   });
 
   assert.equal(consulta.mock.callCount(), 1);
@@ -257,10 +259,12 @@ test('GET perfil devuelve el perfil autenticado en camelCase', async (t) => {
     uid: 'uid-perfil-prueba',
     nombreCompleto: 'Persona de Prueba',
     apodo: 'Persona',
-    rol: 'estudiante'
+    rol: 'estudiante',
+    tieneFoto: false,
+    fotoActualizada: null
   });
 
-  assert.equal(consulta.mock.callCount(), 1);
+  assert.equal(consulta.mock.callCount(), 2);
   assert.deepEqual(
     consulta.mock.calls[0].arguments[1],
     ['uid-perfil-prueba']
@@ -414,7 +418,9 @@ for (const caso of [
       uid: 'uid-perfil-prueba',
       nombreCompleto: caso.nombreFinal,
       apodo: caso.apodoFinal,
-      rol: 'estudiante'
+      rol: 'estudiante',
+      tieneFoto: false,
+      fotoActualizada: null
     });
 
     assert.equal(consulta.mock.callCount(), 2);

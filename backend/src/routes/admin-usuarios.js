@@ -11,6 +11,10 @@ const {
   ErrorOperacionUsuario,
   ejecutarCambioAdministrativo
 } = require('../services/cambio-administrativo-usuario');
+const {
+  COLUMNAS_FOTO,
+  borrarArchivo
+} = require('../services/fotos-perfil');
 
 const router = express.Router();
 
@@ -103,7 +107,8 @@ router.get('/', validarBusquedaUsuarios, async (req, res) => {
           nombre_completo AS "nombreCompleto",
           nombre_apodo AS apodo,
           rol,
-          activo
+          activo,
+          ${COLUMNAS_FOTO}
         FROM usuarios
         WHERE strpos(
           lower(nombre_completo),
@@ -183,7 +188,8 @@ router.patch('/:uid/rol', validarDestinoYCuerpo, async (req, res) => {
               nombre_completo AS "nombreCompleto",
               nombre_apodo AS apodo,
               rol,
-              activo
+              activo,
+              ${COLUMNAS_FOTO}
           `,
           [nuevoRol, destinatario.uid]
         );
@@ -229,14 +235,23 @@ router.patch('/:uid/activo', validarDestinoYCuerpo, async (req, res) => {
         const resultado = await cliente.query(
           `
             UPDATE usuarios
-            SET activo = $1
-            WHERE uid = $2
+            SET activo = $1,
+                foto_archivo = CASE WHEN $1::boolean THEN foto_archivo ELSE NULL END,
+                foto_actualizada = CASE WHEN $1::boolean THEN foto_actualizada ELSE NULL END
+            FROM (
+              SELECT uid AS uid_anterior, foto_archivo AS archivo_anterior
+              FROM usuarios
+              WHERE uid = $2
+            ) anterior
+            WHERE uid = anterior.uid_anterior
             RETURNING
               uid,
               nombre_completo AS "nombreCompleto",
               nombre_apodo AS apodo,
               rol,
-              activo
+              activo,
+              ${COLUMNAS_FOTO},
+              anterior.archivo_anterior AS "fotoAnterior"
           `,
           [nuevoActivo, destinatario.uid]
         );
@@ -253,7 +268,13 @@ router.patch('/:uid/activo', validarDestinoYCuerpo, async (req, res) => {
       }
     );
 
-    return res.json(usuario);
+    const { fotoAnterior, ...cuenta } = usuario;
+
+    if (!cuenta.activo && fotoAnterior) {
+      await borrarArchivo(fotoAnterior);
+    }
+
+    return res.json(cuenta);
   } catch (error) {
     return responderErrorCambio(error, res);
   }

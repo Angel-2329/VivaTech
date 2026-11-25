@@ -1,0 +1,27 @@
+# Esperado: 200 con fotoActualizada distinta a la 458. En FOTOS_DIR siguen 2 archivos: el .jpg anterior se borró y hay uno nuevo.
+info:
+  name: 472 - PUT reemplazar foto del estudiante - 200
+  type: http
+  seq: 472
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/perfil/foto"
+  body:
+    type: multipart-form
+    data:
+      - name: foto
+        type: file
+        value:
+          - ../archivos-p7/foto-estudiante-reemplazo.jpg
+        contentType: image/jpeg
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

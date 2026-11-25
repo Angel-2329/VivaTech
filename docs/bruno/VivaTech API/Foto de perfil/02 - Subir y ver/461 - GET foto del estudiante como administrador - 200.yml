@@ -1,0 +1,19 @@
+# Esperado: 200 image/jpeg.
+info:
+  name: 461 - GET foto del estudiante como administrador - 200
+  type: http
+  seq: 461
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/usuarios/{{uidEstudiante}}/foto"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
