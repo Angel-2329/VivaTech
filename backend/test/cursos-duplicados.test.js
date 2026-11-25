@@ -90,7 +90,7 @@ function crearCliente(t, opciones = {}) {
       if (/WHERE c\.id_curso = \$1::bigint/.test(texto)) {
         return { rows: [{
           ...curso, estadoPublicacion: curso.estado_publicacion, fechaCierre: curso.fecha_cierre,
-          creadoPor: 'Autor de Ejemplo', totalLecciones: 0, tieneAvance: false, lecciones: []
+          creadoPor: 'Autor de Ejemplo', totalLecciones: 0, tieneAvance: false, esEditor: false, lecciones: []
         }] };
       }
       assert.fail(`Consulta no prevista: ${texto}`);

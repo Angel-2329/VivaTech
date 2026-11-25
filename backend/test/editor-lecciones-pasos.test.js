@@ -69,6 +69,10 @@ function simular(t, opciones = {}) {
         const vigente = Object.hasOwn(opciones, 'perfilTx') ? opciones.perfilTx : perfil;
         return { rows: vigente ? [vigente] : [] };
       }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(q)) {
+        assert.match(q, /FOR SHARE$/);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
       if (/jsonb_array_elements/.test(q)) return { rows: opciones.historica ? [{ idCurso: '10' }] : [] };
       if (/FROM cursos WHERE id_curso.*FOR UPDATE/s.test(q)) return { rows: opciones.sinCurso ? [] : [{
         idCurso: '10', creado_por: opciones.autor || UID, estado_publicacion: opciones.estado || 'borrador'
@@ -400,3 +404,20 @@ for (const opciones of [
   });
 }
 
+
+for (const op of OPERACIONES) {
+  const nombre = `${op.metodo} ${op.ruta}`;
+  test(`Editor HTTP P4: ${nombre} maestro con permiso en curso ajeno → ${op.estado}`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: true });
+    const respuesta = await solicitar(op);
+    assert.equal(respuesta.status, op.estado);
+    assert.equal(respuesta.headers.get('cache-control'), 'no-store');
+    assert.equal(s.llamadas.at(-1).sql, 'COMMIT');
+  });
+
+  test(`Editor HTTP P4: ${nombre} permiso retirado → 403 curso_ajeno`, async (t) => {
+    const s = simular(t, { autor: 'otro-autor', esEditor: false });
+    await comprobarError(await solicitar(op), 403, 'curso_ajeno');
+    sinEscrituras(s);
+  });
+}

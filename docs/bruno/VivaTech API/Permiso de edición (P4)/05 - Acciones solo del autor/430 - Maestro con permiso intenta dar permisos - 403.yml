@@ -1,0 +1,25 @@
+# Esperado: 403 rol_no_autorizado (decidido en la sesión de P4).
+info:
+  name: 430 - Maestro con permiso intenta dar permisos - 403
+  type: http
+  seq: 430
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidMaestro}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,5 +1,8 @@
 const pool = require('../config/database');
-const { ErrorReglaCurso, validarEdicionCurso, validarFechaCierre, validarDespublicacionCurso } = require('./reglas-cursos');
+const {
+  ErrorReglaCurso, errorSoloEdicion, validarEdicionCurso, validarFechaCierre, validarDespublicacionCurso
+} = require('./reglas-cursos');
+const { tienePermisoEditor } = require('./permisos-curso');
 const { obtenerContenidoCurso } = require('./contenido');
 const { validarCurso } = require('./validar-contenido');
 
@@ -199,9 +202,16 @@ async function editarCurso(usuario, idCurso, datos, { reloj = () => new Date() }
       FROM cursos WHERE id_curso = $1::bigint FOR UPDATE
     `, [idCurso]);
     const curso = resultado.rows[0];
-    validarEdicionCurso(editor, curso);
+    const esEditor = await tienePermisoEditor(cliente, editor, curso);
+    validarEdicionCurso(editor, curso, { esEditor });
 
     const destino = entrada.idCategoria ?? curso.idCategoria;
+    const fechaActual = curso.fecha_cierre ?? null;
+    if (esEditor && (destino !== curso.idCategoria
+      || (Object.hasOwn(entrada, 'fechaCierre') && entrada.fechaCierre !== fechaActual)
+      || (Object.hasOwn(entrada, 'estadoPublicacion') && entrada.estadoPublicacion !== curso.estado_publicacion))) {
+      throw errorSoloEdicion();
+    }
     let orden = curso.orden;
     if (destino !== curso.idCategoria) {
       if (editor.rol !== 'administrador') {
@@ -211,7 +221,6 @@ async function editarCurso(usuario, idCurso, datos, { reloj = () => new Date() }
       orden = await siguienteOrden(cliente, destino);
     }
 
-    const fechaActual = curso.fecha_cierre ?? null;
     let fecha = fechaActual;
     if (Object.hasOwn(entrada, 'fechaCierre') && entrada.fechaCierre !== fechaActual) {
       fecha = validarFechaCierre(entrada.fechaCierre, { ahora: reloj() });

@@ -1,0 +1,25 @@
+# Esperado: 201 con uid, nombreCompleto, activo true, otorgadoPor y fechaOtorgamiento.
+info:
+  name: 416 - Dar permiso al maestro - 201
+  type: http
+  seq: 416
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidMaestro}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

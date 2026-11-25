@@ -1,0 +1,25 @@
+# Esperado: 409 es_autor (el curso lo creó el administrador).
+info:
+  name: 412 - Dar permiso al autor del curso - 409
+  type: http
+  seq: 412
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidAdministrador}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

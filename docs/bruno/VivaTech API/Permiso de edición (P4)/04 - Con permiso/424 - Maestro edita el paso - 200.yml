@@ -1,0 +1,25 @@
+# Esperado: 200 con la instrucción nueva.
+info:
+  name: 424 - Maestro edita el paso - 200
+  type: http
+  seq: 424
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/pasos/{{idPasoP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Lee este paso de prueba corregido."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
