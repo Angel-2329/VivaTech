@@ -6,15 +6,21 @@ import { useSesion } from '../context/SesionContext.jsx'
 import { guardarPerfil } from '../services/perfilService.js'
 import { nombreParaSaludo } from '../utils/nombreParaSaludo.js'
 import { rutaDeInicio } from '../utils/rutaDeInicio.js'
+import {
+  AYUDA_CARACTERES_NOMBRE,
+  LARGO_MAXIMO_APODO,
+  LARGO_MAXIMO_NOMBRE,
+  normalizarNombrePersona,
+  revisarApodo,
+  revisarNombreCompleto,
+} from '../utils/validacionTexto.js'
 import './PrimerAcceso.css'
 
-const LARGO_MINIMO_NOMBRE = 3
-const LARGO_MAXIMO_NOMBRE = 100
-const LARGO_MAXIMO_APODO = 30
 
-
-function limpiarTexto(texto) {
-  return texto.trim().replace(/\s+/g, ' ')
+const CAMPO_DEL_ERROR = {
+  nombre_completo_invalido: 'nombre',
+  nombre_invalido: 'nombre',
+  apodo_invalido: 'apodo',
 }
 
 function PrimerAcceso() {
@@ -22,17 +28,19 @@ function PrimerAcceso() {
   const [nombreCompleto, setNombreCompleto] = useState(usuario.nombreCompleto ?? '')
   const [apodo, setApodo] = useState(usuario.apodo ?? '')
   const [errorNombre, setErrorNombre] = useState('')
+  const [errorApodo, setErrorApodo] = useState('')
   const [errorGuardado, setErrorGuardado] = useState('')
   const [guardando, setGuardando] = useState(false)
   const navigate = useNavigate()
   const tituloRef = useRef(null)
   const nombreRef = useRef(null)
+  const apodoRef = useRef(null)
   const id = useId()
 
  
   const nombreDelSaludo = nombreParaSaludo({
-    nombreCompleto: limpiarTexto(nombreCompleto),
-    apodo: limpiarTexto(apodo) || null,
+    nombreCompleto: normalizarNombrePersona(nombreCompleto),
+    apodo: normalizarNombrePersona(apodo) || null,
   })
   const saludo = nombreDelSaludo ? `¡Hola, ${nombreDelSaludo}!` : '¡Hola!'
 
@@ -50,29 +58,34 @@ function PrimerAcceso() {
     if (errorNombre) setErrorNombre('')
   }
 
+  function manejarCambioApodo(evento) {
+    setApodo(evento.target.value)
+    if (errorApodo) setErrorApodo('')
+  }
+
   async function manejarEnvio(evento) {
     evento.preventDefault()
     if (guardando) return
 
-    const nombreLimpio = limpiarTexto(nombreCompleto)
-    const apodoLimpio = limpiarTexto(apodo) || null
+    const revisionNombre = revisarNombreCompleto(nombreCompleto)
+    const revisionApodo = revisarApodo(apodo)
 
-    if (
-      nombreLimpio.length < LARGO_MINIMO_NOMBRE
-      || nombreLimpio.length > LARGO_MAXIMO_NOMBRE
-    ) {
-      setErrorNombre('Escribe tu nombre completo, de 3 a 100 caracteres.')
+    setErrorNombre(revisionNombre.error ?? '')
+    setErrorApodo(revisionApodo.error ?? '')
+    setErrorGuardado('')
+
+    if (revisionNombre.error) {
       nombreRef.current?.focus()
       return
     }
-
-    if (apodoLimpio && apodoLimpio.length > LARGO_MAXIMO_APODO) {
-      setErrorGuardado('El apodo debe tener como máximo 30 caracteres.')
+    if (revisionApodo.error) {
+      apodoRef.current?.focus()
       return
     }
 
-    setErrorNombre('')
-    setErrorGuardado('')
+    const nombreLimpio = revisionNombre.valor
+    const apodoLimpio = revisionApodo.valor
+
     setGuardando(true)
 
     try {
@@ -88,7 +101,16 @@ function PrimerAcceso() {
           && resultado.codigo === 'perfil_existente'
         )
       ) {
-        setErrorGuardado(resultado.mensaje)
+        const campo = CAMPO_DEL_ERROR[resultado.codigo]
+        if (campo === 'nombre') {
+          setErrorNombre(resultado.mensaje)
+          nombreRef.current?.focus()
+        } else if (campo === 'apodo') {
+          setErrorApodo(resultado.mensaje)
+          apodoRef.current?.focus()
+        } else {
+          setErrorGuardado(resultado.mensaje)
+        }
         return
       }
 
@@ -168,7 +190,7 @@ function PrimerAcceso() {
                 <span className="vt-icon" aria-hidden="true">
                   info
                 </span>
-                Escribe tu nombre y apellidos. Ejemplo: Rosa María Pérez Díaz.
+                Escribe tu nombre y apellidos. {AYUDA_CARACTERES_NOMBRE} Ejemplo: Rosa María Pérez Díaz.
               </p>
               <input
                 ref={nombreRef}
@@ -207,6 +229,7 @@ function PrimerAcceso() {
                 primer nombre.
               </p>
               <input
+                ref={apodoRef}
                 id={`${id}-apodo`}
                 className="vt-input"
                 type="text"
@@ -214,9 +237,18 @@ function PrimerAcceso() {
                 maxLength={LARGO_MAXIMO_APODO}
                 readOnly={guardando}
                 value={apodo}
-                onChange={(evento) => setApodo(evento.target.value)}
-                aria-describedby={`${id}-ayuda-apodo`}
+                onChange={manejarCambioApodo}
+                aria-invalid={errorApodo ? 'true' : undefined}
+                aria-describedby={`${id}-ayuda-apodo${errorApodo ? ` ${id}-error-apodo` : ''}`}
               />
+              {errorApodo && (
+                <p id={`${id}-error-apodo`} className="vt-field-error" role="alert">
+                  <span className="vt-icon" aria-hidden="true">
+                    error
+                  </span>
+                  {errorApodo}
+                </p>
+              )}
             </div>
 
             {/* Se actualiza mientras la persona escribe */}

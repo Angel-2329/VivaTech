@@ -1,8 +1,9 @@
 import { useId, useRef, useState } from 'react'
+import { AYUDA_CARACTERES_GRUPO, LARGO_MAXIMO_GRUPO, revisarNombreGrupo } from '../../utils/validacionTexto.js'
 
-const LARGO_MINIMO = 1
-const LARGO_MAXIMO = 100
-
+const ERRORES_SERVIDOR = {
+  grupo_duplicado: 'Ya existe un grupo con ese nombre. Usa otro, por ejemplo agrega el turno o el año.',
+}
 
 function FormularioNombreGrupo({
   etiqueta,
@@ -23,14 +24,15 @@ function FormularioNombreGrupo({
     evento.preventDefault()
     if (guardando || deshabilitado) return
 
-    const nombreLimpio = nombre.trim()
-    const longitud = Array.from(nombreLimpio).length
+    const revision = revisarNombreGrupo(nombre)
 
-    if (longitud < LARGO_MINIMO || longitud > LARGO_MAXIMO) {
-      setError(`El nombre del grupo debe tener entre ${LARGO_MINIMO} y ${LARGO_MAXIMO} caracteres.`)
+    if (revision.error) {
+      setError(revision.error)
       campoRef.current?.focus()
       return
     }
+
+    const nombreLimpio = revision.valor
 
     setError('')
     setGuardando(true)
@@ -39,10 +41,10 @@ function FormularioNombreGrupo({
       await onGuardar(nombreLimpio)
       if (limpiarAlGuardar) setNombre('')
     } catch (errorAlGuardar) {
+     
       setError(
-        errorAlGuardar.codigo === 'grupo_duplicado'
-          ? 'Ya existe un grupo con ese nombre. Usa otro, por ejemplo agrega el turno o el año.'
-          : errorAlGuardar.message || 'No pudimos guardar el nombre. Inténtalo nuevamente.',
+        ERRORES_SERVIDOR[errorAlGuardar.codigo]
+          ?? (errorAlGuardar.message || 'No pudimos guardar el nombre. Inténtalo nuevamente.'),
       )
       campoRef.current?.focus()
     } finally {
@@ -57,7 +59,7 @@ function FormularioNombreGrupo({
           {etiqueta}
         </label>
         <p id={`${id}-ayuda`} className="vt-field-help">
-          Escribe entre {LARGO_MINIMO} y {LARGO_MAXIMO} caracteres. No se cuentan los espacios al inicio y al final.
+          Escribe hasta {LARGO_MAXIMO_GRUPO} caracteres. {AYUDA_CARACTERES_GRUPO} Ejemplo: 3A Matutino (2026).
         </p>
         <input
           ref={campoRef}
