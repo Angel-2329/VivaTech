@@ -1,0 +1,19 @@
+# Esperado: 404 foto_no_encontrada (mismo cuerpo que la 457). Requiere que el maestro no comparta grupo con el estudiante.
+info:
+  name: 462 - GET foto del estudiante como maestro sin grupo - 404
+  type: http
+  seq: 462
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/usuarios/{{uidEstudiante}}/foto"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

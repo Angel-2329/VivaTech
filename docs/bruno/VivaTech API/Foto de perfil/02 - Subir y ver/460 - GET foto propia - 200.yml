@@ -1,0 +1,19 @@
+# Esperado: 200 image/jpeg (se ve la imagen), Cache-Control private, no-store, nosniff.
+info:
+  name: 460 - GET foto propia - 200
+  type: http
+  seq: 460
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/usuarios/{{uidEstudiante}}/foto"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

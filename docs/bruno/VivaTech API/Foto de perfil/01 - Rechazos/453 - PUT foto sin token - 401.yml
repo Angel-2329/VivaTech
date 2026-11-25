@@ -1,0 +1,26 @@
+# Esperado: 401. No se crea archivo en FOTOS_DIR.
+info:
+  name: 453 - PUT foto sin token - 401
+  type: http
+  seq: 453
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/perfil/foto"
+  body:
+    type: multipart-form
+    data:
+      - name: foto
+        type: file
+        value:
+          - ../archivos-p7/foto-estudiante.jpg
+        contentType: image/jpeg
+  auth:
+    type: none
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

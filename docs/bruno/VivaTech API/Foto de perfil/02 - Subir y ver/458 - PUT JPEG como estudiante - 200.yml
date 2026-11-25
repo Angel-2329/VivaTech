@@ -1,0 +1,27 @@
+# Esperado: 200 { tieneFoto: true, fotoActualizada }, no-store. Anotar fotoActualizada. En FOTOS_DIR aparece 1 archivo con 32 caracteres hexadecimales y .jpg.
+info:
+  name: 458 - PUT JPEG como estudiante - 200
+  type: http
+  seq: 458
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/perfil/foto"
+  body:
+    type: multipart-form
+    data:
+      - name: foto
+        type: file
+        value:
+          - ../archivos-p7/foto-estudiante.jpg
+        contentType: image/jpeg
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

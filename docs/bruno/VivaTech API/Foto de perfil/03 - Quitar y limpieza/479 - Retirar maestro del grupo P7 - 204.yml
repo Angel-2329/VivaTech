@@ -1,0 +1,19 @@
+# Esperado: 204.
+info:
+  name: 479 - Retirar maestro del grupo P7 - 204
+  type: http
+  seq: 479
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP7}}/maestros/{{uidMaestro}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -3,6 +3,8 @@ const cors = require('cors');
 const pool = require('./config/database');
 const verificarTokenFirebase = require('./middlewares/verificar-token-firebase');
 const perfilRouter = require('./routes/perfil');
+const fotoPerfilRouter = require('./routes/foto-perfil');
+const usuariosFotoRouter = require('./routes/usuarios-foto');
 const estudiantesRouter = require('./routes/estudiantes');
 const adminUsuariosRouter = require('./routes/admin-usuarios');
 const gruposRouter = require('./routes/grupos');
@@ -31,7 +33,9 @@ app.use(['/api/lecciones', '/api/categorias', '/api/cursos', '/api/pasos'], (req
   next();
 });
 app.use(express.json());
+app.use('/api/perfil/foto', fotoPerfilRouter);
 app.use('/api/perfil', perfilRouter);
+app.use('/api/usuarios', usuariosFotoRouter);
 app.use('/api/estudiantes', estudiantesRouter);
 app.use('/api/admin/usuarios', adminUsuariosRouter);
 app.use('/api/admin/cursos', adminEditoresCursoRouter);

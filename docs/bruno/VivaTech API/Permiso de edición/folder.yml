@@ -1,7 +1,7 @@
 info:
-  name: Cambio de teléfono (P6)
+  name: Permiso de edición
   type: folder
-  seq: 9
+  seq: 8
 
 request:
   auth: inherit

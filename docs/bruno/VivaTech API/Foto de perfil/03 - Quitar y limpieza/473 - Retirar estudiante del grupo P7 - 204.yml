@@ -1,0 +1,19 @@
+# Esperado: 204.
+info:
+  name: 473 - Retirar estudiante del grupo P7 - 204
+  type: http
+  seq: 473
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/grupos/{{idGrupoP7}}/estudiantes/{{uidEstudiante}}"
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

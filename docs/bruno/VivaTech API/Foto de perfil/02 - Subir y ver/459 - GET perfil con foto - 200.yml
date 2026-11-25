@@ -1,0 +1,19 @@
+# Esperado: 200 con tieneFoto true y la misma fotoActualizada de la 458.
+info:
+  name: 459 - GET perfil con foto - 200
+  type: http
+  seq: 459
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/perfil"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
