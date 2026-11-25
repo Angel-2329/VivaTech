@@ -1,0 +1,23 @@
+# Esperado: 200. Crea la segunda fila. Después: borrar filas de cambios_telefono, la fila de usuarios y la cuenta de Firebase de prueba.
+info:
+  name: 452 - Restaurar el número original - 200
+  type: http
+  seq: 452
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "{{telefonoOriginalP6}}" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

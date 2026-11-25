@@ -1,0 +1,23 @@
+# Esperado: 403 cambio_propio_no_permitido. El teléfono del administrador no cambia.
+info:
+  name: 446 - Administrador cambia su propio teléfono - 403
+  type: http
+  seq: 446
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidAdministrador}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "{{telefonoNuevoP6}}" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

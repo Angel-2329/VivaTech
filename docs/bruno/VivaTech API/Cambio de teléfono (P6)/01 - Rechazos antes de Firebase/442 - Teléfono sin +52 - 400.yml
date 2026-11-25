@@ -1,0 +1,23 @@
+# Esperado: 400 telefono_invalido.
+info:
+  name: 442 - Teléfono sin +52 - 400
+  type: http
+  seq: 442
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "9511234567" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

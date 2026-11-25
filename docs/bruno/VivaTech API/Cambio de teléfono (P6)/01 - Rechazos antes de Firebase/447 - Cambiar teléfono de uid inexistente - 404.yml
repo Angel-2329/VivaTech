@@ -1,0 +1,23 @@
+# Esperado: 404 usuario_no_encontrado.
+info:
+  name: 447 - Cambiar teléfono de uid inexistente - 404
+  type: http
+  seq: 447
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/uid-inexistente-p6/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "{{telefonoNuevoP6}}" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
