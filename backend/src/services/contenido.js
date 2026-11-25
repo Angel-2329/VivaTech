@@ -1,7 +1,7 @@
 const pool = require('../config/database');
-const { ErrorReglaCurso, puedeEditarCurso } = require('./reglas-cursos');
+const { ErrorReglaCurso, obtenerPermisoCurso } = require('./reglas-cursos');
 
-const CAMPOS_CURSO = `
+const camposCurso = (parametroUid) => `
   c.id_curso::text AS "idCurso", c.titulo, c.descripcion, c.orden,
   c.estado_publicacion AS "estadoPublicacion",
   c.fecha_cierre::text AS "fechaCierre", c.creado_por,
@@ -17,12 +17,16 @@ const CAMPOS_CURSO = `
         SELECT 1 FROM historial_cursos_retirados h WHERE h.id_curso = c.id_curso
       )
     )
-  ) AS "tieneAvance"
+  ) AS "tieneAvance",
+  EXISTS (
+    SELECT 1 FROM curso_editores ce
+    WHERE ce.id_curso = c.id_curso AND ce.uid_maestro = ${parametroUid}
+  ) AS "esEditor"
 `;
 
 const CONSULTA_LISTADO = `
   SELECT ca.id_categoria::text AS "idCategoria", ca.nombre AS "nombreCategoria",
-    ca.orden AS "ordenCategoria", ${CAMPOS_CURSO}
+    ca.orden AS "ordenCategoria", ${camposCurso('$1')}
   FROM categorias ca
   LEFT JOIN cursos c ON c.id_categoria = ca.id_categoria
   LEFT JOIN usuarios autor ON autor.uid = c.creado_por
@@ -30,7 +34,7 @@ const CONSULTA_LISTADO = `
 `;
 
 const CONSULTA_DETALLE = `
-  SELECT c.id_categoria::text AS "idCategoria", ${CAMPOS_CURSO},
+  SELECT c.id_categoria::text AS "idCategoria", ${camposCurso('$2')},
     COALESCE((
       SELECT json_agg(json_build_object(
         'idLeccion', l.id_leccion::text,
@@ -81,10 +85,15 @@ function comprobarIdCurso(idCurso) {
 function datosCurso(usuario, fila) {
   if (!['borrador', 'publicado', 'retirado'].includes(fila.estadoPublicacion)
     || typeof fila.tieneAvance !== 'boolean'
+    || typeof fila.esEditor !== 'boolean'
     || typeof fila.creadoPor !== 'string'
     || !Number.isInteger(fila.totalLecciones) || fila.totalLecciones < 0) {
     throw new TypeError('La consulta del editor devolvió un curso inconsistente');
   }
+  const permisoCurso = obtenerPermisoCurso(usuario, {
+    estado_publicacion: fila.estadoPublicacion,
+    creado_por: fila.creado_por
+  }, { esEditor: fila.esEditor });
   return {
     idCurso: fila.idCurso,
     titulo: fila.titulo,
@@ -94,16 +103,14 @@ function datosCurso(usuario, fila) {
     fechaCierre: fila.fechaCierre ?? null,
     tieneAvance: fila.tieneAvance,
     creadoPor: fila.creadoPor,
-    puedeEditar: puedeEditarCurso(usuario, {
-      estado_publicacion: fila.estadoPublicacion,
-      creado_por: fila.creado_por
-    })
+    puedeEditar: permisoCurso !== null,
+    permisoCurso
   };
 }
 
 async function listarContenido(usuario) {
   comprobarEditor(usuario);
-  const resultado = await pool.query(CONSULTA_LISTADO, []);
+  const resultado = await pool.query(CONSULTA_LISTADO, [usuario.uid]);
   const categorias = new Map();
   for (const fila of resultado.rows) {
     if (!categorias.has(fila.idCategoria)) {
@@ -126,7 +133,7 @@ async function listarContenido(usuario) {
 async function obtenerContenidoCurso(usuario, idCurso, { conexion = pool } = {}) {
   comprobarEditor(usuario);
   comprobarIdCurso(idCurso);
-  const resultado = await conexion.query(CONSULTA_DETALLE, [idCurso]);
+  const resultado = await conexion.query(CONSULTA_DETALLE, [idCurso, usuario.uid]);
   if (resultado.rows.length === 0) {
     throw new ErrorReglaCurso(404, 'El curso no está disponible', 'curso_no_encontrado');
   }

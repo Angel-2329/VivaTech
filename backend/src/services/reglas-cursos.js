@@ -92,25 +92,47 @@ function obtenerEstadoCurso(curso, { ahora = new Date() } = {}) {
   return fecha < fechaCiudadMexico(ahora) ? 'cerrado' : 'disponible';
 }
 
-function puedeEditarCurso(usuario, curso) {
-  if (!esUsuarioActivo(usuario, ['maestro', 'administrador']) || !curso) return false;
-  if (!['borrador', 'publicado'].includes(curso.estado_publicacion)) return false;
-  return usuario.rol === 'administrador' || usuario.uid === curso.creado_por;
+function obtenerPermisoCurso(usuario, curso, { esEditor = false } = {}) {
+  if (!esUsuarioActivo(usuario, ['maestro', 'administrador']) || !curso) return null;
+  if (!['borrador', 'publicado'].includes(curso.estado_publicacion)) return null;
+  if (usuario.rol === 'administrador') return 'administrador';
+  if (usuario.uid === curso.creado_por) return 'autor';
+  return esEditor === true ? 'editor' : null;
 }
 
-function validarEdicionCurso(usuario, curso) {
+function puedeEditarCurso(usuario, curso, opciones = {}) {
+  return obtenerPermisoCurso(usuario, curso, opciones) !== null;
+}
+
+function errorCursoAjeno() {
+  return new ErrorReglaCurso(403, 'Solo puedes modificar los cursos que tú creaste', 'curso_ajeno');
+}
+
+function errorSoloEdicion() {
+  return new ErrorReglaCurso(403, 'Tienes permiso para editar este curso, pero no para esta acción.', 'permiso_solo_edicion');
+}
+
+function validarEdicionCurso(usuario, curso, { esEditor = false } = {}) {
   comprobarUsuario(usuario, ['maestro', 'administrador']);
   comprobarCurso(curso);
-  if (usuario.rol === 'maestro' && usuario.uid !== curso.creado_por) {
-    throw new ErrorReglaCurso(403, 'Solo puedes modificar los cursos que tú creaste', 'curso_ajeno');
+  if (usuario.rol === 'maestro' && usuario.uid !== curso.creado_por && esEditor !== true) {
+    throw errorCursoAjeno();
   }
   if (curso.estado_publicacion === 'retirado') {
     throw new ErrorReglaCurso(409, 'Un curso retirado es de solo lectura y no puede reactivarse', 'curso_retirado');
   }
 }
 
-function validarCambioEstructural(usuario, curso, { tieneAvance } = {}) {
-  validarEdicionCurso(usuario, curso);
+function validarAccionAutor(usuario, curso, { esEditor = false } = {}) {
+  comprobarUsuario(usuario, ['maestro', 'administrador']);
+  comprobarCurso(curso);
+  if (usuario.rol === 'maestro' && usuario.uid !== curso.creado_por) {
+    throw esEditor === true ? errorSoloEdicion() : errorCursoAjeno();
+  }
+}
+
+function validarCambioEstructural(usuario, curso, { tieneAvance, esEditor = false } = {}) {
+  validarEdicionCurso(usuario, curso, { esEditor });
   comprobarIndicador(tieneAvance, 'tieneAvance');
   if (curso.estado_publicacion === 'publicado') {
     throw new ErrorReglaCurso(409, 'Un curso publicado solo permite las correcciones autorizadas', 'curso_publicado');
@@ -163,8 +185,11 @@ module.exports = {
   fechaCiudadMexico,
   validarFechaCierre,
   obtenerEstadoCurso,
+  obtenerPermisoCurso,
   puedeEditarCurso,
+  errorSoloEdicion,
   validarEdicionCurso,
+  validarAccionAutor,
   validarCambioEstructural,
   validarDespublicacionCurso,
   puedeVerCursoEstudiante,

@@ -1,0 +1,26 @@
+# Esperado: 200 con el título y la descripción nuevos, estadoPublicacion "borrador" y permisoCurso "editor".
+info:
+  name: 421 - Maestro edita título y descripción - 200
+  type: http
+  seq: 421
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "PRUEBA P4 Curso editado por maestro",
+        "descripcion": "Descripción corregida por el maestro con permiso."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
