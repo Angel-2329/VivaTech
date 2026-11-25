@@ -1,0 +1,24 @@
+# Esperado: 200 { uid, telefono } con el mismo uidTelefonoP6 y Cache-Control no-store.
+# Crea 1 fila en cambios_telefono con los últimos 4 dígitos.
+info:
+  name: 450 - Cambiar al número nuevo - 200
+  type: http
+  seq: 450
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/admin/usuarios/{{uidTelefonoP6}}/telefono"
+  body:
+    type: json
+    data: |-
+      { "telefono": "{{telefonoNuevoP6}}" }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
