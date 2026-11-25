@@ -1,0 +1,27 @@
+# Esperado: 200. En FOTOS_DIR hay 2 archivos (uno .jpg y uno .webp).
+info:
+  name: 468 - PUT WebP como maestro - 200
+  type: http
+  seq: 468
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/api/perfil/foto"
+  body:
+    type: multipart-form
+    data:
+      - name: foto
+        type: file
+        value:
+          - ../archivos-p7/foto-maestro.webp
+        contentType: image/webp
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

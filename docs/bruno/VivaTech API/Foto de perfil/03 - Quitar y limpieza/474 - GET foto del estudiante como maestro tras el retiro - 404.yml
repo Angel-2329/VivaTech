@@ -1,0 +1,19 @@
+# Esperado: 404 foto_no_encontrada.
+info:
+  name: 474 - GET foto del estudiante como maestro tras el retiro - 404
+  type: http
+  seq: 474
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/usuarios/{{uidEstudiante}}/foto"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

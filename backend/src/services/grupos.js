@@ -42,6 +42,8 @@ const CONSULTA_ESTUDIANTES_GRUPO = `
     u.nombre_completo AS "nombreCompleto",
     u.nombre_apodo AS apodo,
     u.activo,
+    u.foto_archivo IS NOT NULL AS "tieneFoto",
+    to_jsonb(u.foto_actualizada) #>> '{}' AS "fotoActualizada",
     avance."leccionesCompletadas",
     avance."ultimaActividad"
   FROM grupo_estudiantes ge

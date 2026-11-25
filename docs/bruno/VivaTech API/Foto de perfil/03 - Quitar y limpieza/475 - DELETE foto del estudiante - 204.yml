@@ -1,0 +1,19 @@
+# Esperado: 204. En FOTOS_DIR queda solo el .webp del maestro.
+info:
+  name: 475 - DELETE foto del estudiante - 204
+  type: http
+  seq: 475
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/perfil/foto"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

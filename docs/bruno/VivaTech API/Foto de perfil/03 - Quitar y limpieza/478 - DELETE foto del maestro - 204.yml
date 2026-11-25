@@ -1,0 +1,19 @@
+# Esperado: 204. FOTOS_DIR queda vacía.
+info:
+  name: 478 - DELETE foto del maestro - 204
+  type: http
+  seq: 478
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/perfil/foto"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
