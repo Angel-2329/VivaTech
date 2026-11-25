@@ -42,7 +42,9 @@ async function ejecutarCambioAdministrativo(
           nombre_completo AS "nombreCompleto",
           nombre_apodo AS apodo,
           rol,
-          activo
+          activo,
+          foto_archivo IS NOT NULL AS "tieneFoto",
+          to_jsonb(foto_actualizada) #>> '{}' AS "fotoActualizada"
         FROM usuarios
         WHERE uid IN ($1, $2)
         ORDER BY uid

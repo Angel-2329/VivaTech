@@ -1,7 +1,7 @@
 info:
-  name: Permiso de edición (P4)
+  name: 03 - Quitar y limpieza
   type: folder
-  seq: 8
+  seq: 3
 
 request:
   auth: inherit

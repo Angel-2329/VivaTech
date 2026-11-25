@@ -1,0 +1,19 @@
+# Esperado: 204 otra vez.
+info:
+  name: 476 - DELETE foto del estudiante sin foto - 204
+  type: http
+  seq: 476
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/perfil/foto"
+  auth:
+    type: bearer
+    token: "{{tokenEstudiante}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -7,6 +7,7 @@ const {
   contarCaracteres,
   esNombrePersonaValido
 } = require('../services/validar-texto');
+const { COLUMNAS_FOTO } = require('../services/fotos-perfil');
 
 const router = express.Router();
 
@@ -31,7 +32,9 @@ function convertirPerfil(usuario) {
     uid: usuario.uid,
     nombreCompleto: usuario.nombre_completo,
     apodo: usuario.nombre_apodo,
-    rol: usuario.rol
+    rol: usuario.rol,
+    tieneFoto: usuario.tieneFoto === true,
+    fotoActualizada: usuario.fotoActualizada ?? null
   };
 }
 
@@ -107,8 +110,29 @@ router.get(
   '/',
   verificarTokenFirebase,
   cargarUsuario,
-  (req, res) => {
-    return res.json(convertirPerfil(req.usuario));
+  async (req, res) => {
+    try {
+      const resultado = await pool.query(
+        `
+          SELECT ${COLUMNAS_FOTO}
+          FROM usuarios
+          WHERE uid = $1
+        `,
+        [req.usuario.uid]
+      );
+
+      return res.json(convertirPerfil({
+        ...req.usuario,
+        ...resultado.rows[0]
+      }));
+    } catch (error) {
+      console.error('Error al consultar la foto del perfil:', error.message);
+
+      return res.status(503).json({
+        ok: false,
+        mensaje: 'No fue posible consultar el perfil'
+      });
+    }
   }
 );
 
@@ -132,7 +156,8 @@ router.post('/', verificarTokenFirebase, validarCuerpo, async (req, res) => {
       `
         INSERT INTO usuarios (uid, nombre_completo, nombre_apodo)
         VALUES ($1, $2, $3)
-        RETURNING uid, nombre_completo, nombre_apodo, rol
+        RETURNING uid, nombre_completo, nombre_apodo, rol,
+          ${COLUMNAS_FOTO}
       `,
       [
         req.auth.uid,
@@ -205,7 +230,8 @@ router.patch(
               END
           WHERE uid = $5
             AND activo = true
-          RETURNING uid, nombre_completo, nombre_apodo, rol
+          RETURNING uid, nombre_completo, nombre_apodo, rol,
+            ${COLUMNAS_FOTO}
         `,
         [
           cambiarNombre,
