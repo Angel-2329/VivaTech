@@ -286,3 +286,57 @@ test('Cursos reglas: no modifican el curso, el usuario ni el reloj recibido', ()
   validarFechaCierre(actual.fecha_cierre, { ahora: reloj });
   assert.deepEqual({ actual, usuario, reloj }, anteriores);
 });
+
+const { obtenerPermisoCurso, validarAccionAutor } = require('../src/services/reglas-cursos');
+
+test('Reglas P4: obtenerPermisoCurso distingue administrador, autor, editor y sin permiso', () => {
+  const ajeno = { ...curso('borrador'), creado_por: 'otro-autor' };
+  assert.equal(obtenerPermisoCurso(ADMIN, ajeno), 'administrador');
+  assert.equal(obtenerPermisoCurso(ADMIN, ajeno, { esEditor: true }), 'administrador');
+  assert.equal(obtenerPermisoCurso(MAESTRO, curso('publicado')), 'autor');
+  assert.equal(obtenerPermisoCurso(MAESTRO, curso('publicado'), { esEditor: true }), 'autor');
+  assert.equal(obtenerPermisoCurso(MAESTRO, ajeno, { esEditor: true }), 'editor');
+  assert.equal(obtenerPermisoCurso(MAESTRO, ajeno), null);
+  assert.equal(obtenerPermisoCurso(MAESTRO, ajeno, { esEditor: 'true' }), null);
+});
+
+test('Reglas P4: curso retirado o cuenta no vigente no tiene permiso', () => {
+  const ajenoRetirado = { ...curso('retirado'), creado_por: 'otro-autor' };
+  assert.equal(obtenerPermisoCurso(MAESTRO, ajenoRetirado, { esEditor: true }), null);
+  assert.equal(obtenerPermisoCurso(ADMIN, ajenoRetirado), null);
+  const ajeno = { ...curso('borrador'), creado_por: 'otro-autor' };
+  assert.equal(obtenerPermisoCurso({ ...MAESTRO, activo: false }, ajeno, { esEditor: true }), null);
+  assert.equal(obtenerPermisoCurso({ ...MAESTRO, rol: 'estudiante' }, ajeno, { esEditor: true }), null);
+  assert.equal(obtenerPermisoCurso(ALUMNO, ajeno, { esEditor: true }), null);
+  assert.equal(puedeEditarCurso(MAESTRO, ajeno, { esEditor: true }), true);
+  assert.equal(puedeEditarCurso(MAESTRO, ajeno), false);
+});
+
+test('Reglas P4: validarEdicionCurso acepta al editor y conserva curso_retirado', () => {
+  const ajeno = { ...curso('publicado'), creado_por: 'otro-autor' };
+  assert.doesNotThrow(() => validarEdicionCurso(MAESTRO, ajeno, { esEditor: true }));
+  comprobarError(() => validarEdicionCurso(MAESTRO, ajeno), 403, 'curso_ajeno');
+  comprobarError(() => validarEdicionCurso(MAESTRO, { ...ajeno, estado_publicacion: 'retirado' }, { esEditor: true }),
+    409, 'curso_retirado');
+});
+
+test('Reglas P4: validarCambioEstructural aplica al editor las mismas restricciones que al autor', () => {
+  const ajeno = { ...curso('borrador'), creado_por: 'otro-autor' };
+  assert.doesNotThrow(() => validarCambioEstructural(MAESTRO, ajeno, { tieneAvance: false, esEditor: true }));
+  comprobarError(() => validarCambioEstructural(MAESTRO, ajeno, { tieneAvance: true, esEditor: true }), 409, 'curso_con_avance');
+  comprobarError(() => validarCambioEstructural(MAESTRO, { ...ajeno, estado_publicacion: 'publicado' },
+    { tieneAvance: false, esEditor: true }), 409, 'curso_publicado');
+  comprobarError(() => validarCambioEstructural(MAESTRO, ajeno, { tieneAvance: false }), 403, 'curso_ajeno');
+});
+
+test('Reglas P4: validarAccionAutor rechaza al editor con permiso_solo_edicion en cualquier estado', () => {
+  for (const estado of ['borrador', 'publicado', 'retirado']) {
+    const ajeno = { ...curso(estado), creado_por: 'otro-autor' };
+    comprobarError(() => validarAccionAutor(MAESTRO, ajeno, { esEditor: true }), 403, 'permiso_solo_edicion');
+    comprobarError(() => validarAccionAutor(MAESTRO, ajeno), 403, 'curso_ajeno');
+    assert.doesNotThrow(() => validarAccionAutor(ADMIN, ajeno));
+    assert.doesNotThrow(() => validarAccionAutor(MAESTRO, curso(estado)));
+  }
+  comprobarError(() => validarAccionAutor(MAESTRO, null, { esEditor: true }), 404, 'curso_no_encontrado');
+  comprobarError(() => validarAccionAutor({ ...MAESTRO, activo: false }, curso()), 403, 'cuenta_desactivada');
+});

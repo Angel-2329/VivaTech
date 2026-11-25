@@ -1,0 +1,7 @@
+info:
+  name: Permiso de edición (P4)
+  type: folder
+  seq: 8
+
+request:
+  auth: inherit

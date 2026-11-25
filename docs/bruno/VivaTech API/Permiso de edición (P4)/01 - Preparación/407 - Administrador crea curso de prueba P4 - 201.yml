@@ -1,0 +1,28 @@
+# Antes: poner en la variable idCategoriaP4 el ID de una categoría existente.
+# Esperado: 201 con permisoCurso "administrador". Copiar idCurso a la variable idCursoP4.
+info:
+  name: 407 - Administrador crea curso de prueba P4 - 201
+  type: http
+  seq: 407
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/cursos"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "{{idCategoriaP4}}",
+        "titulo": "PRUEBA P4 Curso de permisos",
+        "descripcion": "Curso temporal para probar el permiso de edición."
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

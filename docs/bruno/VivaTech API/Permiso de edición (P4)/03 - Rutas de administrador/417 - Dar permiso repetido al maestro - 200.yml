@@ -1,0 +1,25 @@
+# Esperado: 200 con el mismo elemento (misma fechaOtorgamiento que la 416).
+info:
+  name: 417 - Dar permiso repetido al maestro - 200
+  type: http
+  seq: 417
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidMaestro}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,25 @@
+# Esperado: 201. Sirve para comprobar que la eliminación física borra también el permiso.
+info:
+  name: 436 - Volver a dar permiso antes de eliminar - 201
+  type: http
+  seq: 436
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/admin/cursos/{{idCursoP4}}/editores"
+  body:
+    type: json
+    data: |-
+      {
+        "uid": "{{uidMaestro}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenAdministrador}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

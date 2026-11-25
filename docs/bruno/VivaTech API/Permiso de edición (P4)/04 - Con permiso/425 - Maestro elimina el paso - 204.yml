@@ -1,0 +1,19 @@
+# Esperado: 204 sin cuerpo.
+info:
+  name: 425 - Maestro elimina el paso - 204
+  type: http
+  seq: 425
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/pasos/{{idPasoP4}}"
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

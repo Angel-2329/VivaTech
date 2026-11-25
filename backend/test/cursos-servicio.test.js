@@ -64,6 +64,11 @@ function simular(t, opciones = {}) {
         assert.deepEqual(parametros, [opciones.id || '10']);
         return { rows: opciones.sinCurso ? [] : [{ ...curso }] };
       }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(texto)) {
+        assert.match(texto, /FOR SHARE$/);
+        assert.equal(parametros[0], curso.idCurso);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
       if (/^SELECT nombre FROM categorias/.test(texto)) {
         return { rows: opciones.sinCategoria ? [] : [{ nombre: 'Categoría de prueba' }] };
       }
@@ -105,11 +110,13 @@ function simular(t, opciones = {}) {
         return { rows: [], rowCount: lecciones.length };
       }
       if (/WHERE c\.id_curso = \$1::bigint/.test(texto)) {
-        assert.deepEqual(parametros, [curso.idCurso]);
+        assert.equal(parametros.length, 2);
+        assert.equal(parametros[0], curso.idCurso);
+        assert.equal(typeof parametros[1], 'string');
         const detalleLecciones = creadoAhora ? [] : lecciones;
         return { rows: [{
           ...curso, estadoPublicacion: curso.estado_publicacion, fechaCierre: curso.fecha_cierre,
-          creadoPor: 'Autor de Ejemplo', totalLecciones: detalleLecciones.length,
+          creadoPor: 'Autor de Ejemplo', totalLecciones: detalleLecciones.length, esEditor: opciones.esEditor === true,
           tieneAvance: opciones.tieneAvance === true, lecciones: detalleLecciones
         }] };
       }
@@ -146,7 +153,8 @@ for (const usuario of [MAESTRO, ADMIN]) {
     assert.deepEqual(resultado, {
       idCurso: '11', titulo: 'Curso nuevo', descripcion: 'Contenido ficticio.', orden: 3,
       estadoPublicacion: 'borrador', fechaCierre: null, tieneAvance: false,
-      creadoPor: 'Autor de Ejemplo', puedeEditar: true, idCategoria: '1', lecciones: []
+      creadoPor: 'Autor de Ejemplo', puedeEditar: true,
+      permisoCurso: usuario.rol === 'administrador' ? 'administrador' : 'autor', idCategoria: '1', lecciones: []
     });
     const bloqueo = s.llamadas.findIndex(({ sql }) => /FROM categorias[\s\S]*FOR UPDATE/.test(sql));
     const maximo = s.llamadas.findIndex(({ sql }) => /max\(orden\)/.test(sql));
@@ -581,3 +589,95 @@ test('Cursos publicación: maestro no combina traslado con publicación ni guard
   assert.equal(s.llamadas.some(({ sql }) => /^UPDATE/.test(sql)), false);
   cerrar(s, 'ROLLBACK');
 });
+
+const AJENO = { creado_por: 'otro-autor' };
+const consultaPermiso = (s) => s.llamadas.filter(({ sql }) => /^SELECT 1 AS permiso FROM curso_editores/.test(sql));
+
+test('Cursos servicio P4: maestro con permiso edita título y descripción de un curso ajeno', async (t) => {
+  const s = simular(t, { curso: { ...AJENO, estado_publicacion: 'publicado' }, esEditor: true, tieneAvance: true });
+  const resultado = await editar({ titulo: ' Corregido por editor ', descripcion: 'Texto del editor.' });
+  assert.equal(resultado.titulo, 'Corregido por editor');
+  assert.equal(resultado.descripcion, 'Texto del editor.');
+  assert.equal(resultado.permisoCurso, 'editor');
+  assert.equal(resultado.puedeEditar, true);
+  const [permiso] = consultaPermiso(s);
+  assert.deepEqual(permiso.parametros, ['10', MAESTRO.uid]);
+  assert.match(permiso.sql, /FOR SHARE$/);
+  const actualizacion = s.llamadas.find(({ sql }) => /^UPDATE cursos SET/.test(sql));
+  assert.equal(actualizacion.parametros[0], '1');
+  assert.equal(actualizacion.parametros[6], 'publicado');
+  cerrar(s);
+});
+
+test('Cursos servicio P4: maestro sin permiso sigue recibiendo curso_ajeno sin escribir', async (t) => {
+  const s = simular(t, { curso: AJENO, esEditor: false });
+  await assert.rejects(editar({ titulo: 'Intento' }), codigo(403, 'curso_ajeno'));
+  assert.equal(consultaPermiso(s).length, 1);
+  assert.equal(s.llamadas.some(({ sql }) => /^UPDATE/.test(sql)), false);
+  cerrar(s, 'ROLLBACK');
+});
+
+for (const [nombre, curso, datos] of [
+  ['publicar', { estado_publicacion: 'borrador' }, { estadoPublicacion: 'publicado' }],
+  ['despublicar', { estado_publicacion: 'publicado' }, { estadoPublicacion: 'borrador' }],
+  ['trasladar', {}, { idCategoria: '2' }],
+  ['cambiar fechaCierre a una fecha', {}, { fechaCierre: '2026-12-31' }],
+  ['quitar fechaCierre', { fecha_cierre: '2026-12-31' }, { fechaCierre: null }],
+  ['enviar fechaCierre inválida', {}, { fechaCierre: 'mañana' }],
+  ['combinar texto con publicar', { estado_publicacion: 'borrador' }, { titulo: 'Nuevo', estadoPublicacion: 'publicado' }]
+]) {
+  test(`Cursos servicio P4: editor no puede ${nombre} (403 permiso_solo_edicion, sin escrituras)`, async (t) => {
+    const s = simular(t, { curso: { ...AJENO, ...curso }, esEditor: true });
+    await assert.rejects(editar(datos), codigo(403, 'permiso_solo_edicion'));
+    assert.equal(s.llamadas.some(({ sql }) => /^(UPDATE|INSERT)/.test(sql)), false);
+    assert.equal(s.llamadas.some(({ sql }) => /FROM categorias/.test(sql)), false);
+    cerrar(s, 'ROLLBACK');
+  });
+}
+
+test('Cursos servicio P4: el mensaje de permiso_solo_edicion es el del contrato', async (t) => {
+  simular(t, { curso: AJENO, esEditor: true });
+  await assert.rejects(editar({ estadoPublicacion: 'publicado' }), (error) => error instanceof ErrorReglaCurso
+    && error.message === 'Tienes permiso para editar este curso, pero no para esta acción.');
+});
+
+test('Cursos servicio P4: editor reenvía estado, categoría y fecha sin cambios junto con texto nuevo', async (t) => {
+  const s = simular(t, { curso: { ...AJENO, estado_publicacion: 'publicado', fecha_cierre: '2020-01-01' }, esEditor: true });
+  const resultado = await editar({
+    idCategoria: '1', estadoPublicacion: 'publicado', fechaCierre: '2020-01-01', titulo: 'Texto corregido'
+  });
+  assert.equal(resultado.titulo, 'Texto corregido');
+  assert.equal(resultado.fechaCierre, '2020-01-01');
+  assert.equal(s.llamadas.some(({ sql }) => /^UPDATE lecciones/.test(sql)), false);
+  cerrar(s);
+});
+
+test('Cursos servicio P4: editor sobre curso retirado recibe 409 curso_retirado como el autor', async (t) => {
+  const s = simular(t, { curso: { ...AJENO, estado_publicacion: 'retirado' }, esEditor: true });
+  await assert.rejects(editar({ titulo: 'Intento' }), codigo(409, 'curso_retirado'));
+  cerrar(s, 'ROLLBACK');
+});
+
+for (const [perfil, estado, esperado] of [
+  [{ ...MAESTRO, rol: 'estudiante' }, 403, 'rol_no_autorizado'],
+  [{ ...MAESTRO, activo: false }, 403, 'cuenta_desactivada']
+]) {
+  test(`Cursos servicio P4: permiso sin efecto con perfil vigente ${esperado}`, async (t) => {
+    const s = simular(t, { curso: AJENO, esEditor: true, perfil });
+    await assert.rejects(editar({ titulo: 'Intento' }), codigo(estado, esperado));
+    assert.equal(consultaPermiso(s).length, 0);
+    cerrar(s, 'ROLLBACK');
+  });
+}
+
+for (const [nombre, opciones, ejecutar] of [
+  ['autor', {}, () => editar({ titulo: 'Propio' })],
+  ['administrador', { usuario: ADMIN, curso: AJENO }, () => editarCurso(ADMIN, '10', { titulo: 'Admin' }, { reloj: () => AHORA })]
+]) {
+  test(`Cursos servicio P4: ${nombre} no consulta curso_editores`, async (t) => {
+    const s = simular(t, opciones);
+    await ejecutar();
+    assert.equal(consultaPermiso(s).length, 0);
+    cerrar(s);
+  });
+}

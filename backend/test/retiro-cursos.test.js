@@ -43,7 +43,8 @@ function simular(t, opciones = {}) {
       estado: opciones.completo ? 'completada' : 'en_progreso',
       idUltimoPasoCompletado: opciones.completo ? '103' : '101',
       fechaInicio: FECHA, fechaActualizacion: FECHA, fechaFinalizacion: opciones.completo ? FINAL : null }] : []),
-    historiales: opciones.historiales || [], certificados: opciones.certificados || []
+    historiales: opciones.historiales || [], certificados: opciones.certificados || [],
+    editores: opciones.editores || []
   });
   const inicial = structuredClone(datos);
   let guardado;
@@ -110,6 +111,17 @@ function simular(t, opciones = {}) {
           datos[tabla] = [];
           return { rows: [], rowCount };
         }
+      }
+      if (/^SELECT 1 AS permiso FROM curso_editores/.test(q)) {
+        assert.match(q, /FOR SHARE$/);
+        assert.equal(parametros[0], id);
+        return { rows: opciones.esEditor ? [{ permiso: 1 }] : [] };
+      }
+      if (/^DELETE FROM curso_editores/.test(q)) {
+        assert.deepEqual(parametros, [id]);
+        const rowCount = datos.editores.length;
+        datos.editores = [];
+        return { rows: [], rowCount };
       }
       if (/^DELETE FROM cursos/.test(q)) {
         assert.deepEqual(parametros, [id]);
@@ -399,6 +411,22 @@ for (const opciones of [
     const s = simular(t, opciones);
     t.mock.method(console, 'error', () => {});
     await comprobarError(await solicitar(), 503);
+    assert.deepEqual(s.datos(), s.inicial);
+  });
+}
+
+for (const estado_publicacion of ['borrador', 'publicado', 'retirado']) {
+  test(`DELETE cursos P4: editor recibe 403 permiso_solo_edicion en ${estado_publicacion}`, async (t) => {
+    const s = simular(t, { curso: { estado_publicacion, creado_por: 'otro-autor' }, esEditor: true });
+    const respuesta = await solicitar();
+    assert.equal(respuesta.status, 403);
+    assert.equal(respuesta.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await respuesta.json(), {
+      ok: false,
+      mensaje: 'Tienes permiso para editar este curso, pero no para esta acción.',
+      codigo: 'permiso_solo_edicion'
+    });
+    assert.equal(s.llamadas.some(({ sql }) => /^(INSERT|UPDATE|DELETE)/.test(sql)), false);
     assert.deepEqual(s.datos(), s.inicial);
   });
 }

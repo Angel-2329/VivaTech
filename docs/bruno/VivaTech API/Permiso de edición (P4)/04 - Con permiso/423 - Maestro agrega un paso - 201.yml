@@ -1,0 +1,29 @@
+# Esperado: 201. Copiar idPaso a la variable idPasoP4.
+info:
+  name: 423 - Maestro agrega un paso - 201
+  type: http
+  seq: 423
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/lecciones/{{idLeccionP4}}/pasos"
+  body:
+    type: json
+    data: |-
+      {
+        "instruccion": "Lee este paso de prueba.",
+        "recursos": [],
+        "actividad": {
+          "tipo": "lectura"
+        }
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

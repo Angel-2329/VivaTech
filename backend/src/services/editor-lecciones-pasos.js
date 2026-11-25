@@ -3,6 +3,7 @@ const pool = require('../config/database');
 const { ErrorReglaCurso, validarEdicionCurso, validarCambioEstructural } = require('./reglas-cursos');
 const { validarLeccion, validarPaso } = require('./validar-contenido');
 const { normalizarRecursosVideo } = require('./normalizar-video');
+const { tienePermisoEditor } = require('./permisos-curso');
 
 const MODELOS = {
   leccion: { tabla: 'lecciones', id: 'id_leccion', padre: 'id_curso', clave: 'idLeccion', lista: 'idsLecciones', maximo: 10, limite: 'limite_lecciones' },
@@ -164,7 +165,8 @@ async function ejecutar(usuario, tipo, id, operacion) {
       FROM cursos WHERE id_curso = $1::bigint FOR UPDATE
     `, [padre.idCurso]);
     const curso = cursos.rows[0];
-    validarEdicionCurso(editor, curso);
+    const esEditor = await tienePermisoEditor(cliente, editor, curso);
+    validarEdicionCurso(editor, curso, { esEditor });
     const avances = await cliente.query(`
       SELECT EXISTS (SELECT 1 FROM progresos p
         JOIN lecciones l ON l.id_leccion = p.id_leccion
@@ -172,7 +174,7 @@ async function ejecutar(usuario, tipo, id, operacion) {
     `, [curso.idCurso]);
     const tieneAvance = avances.rows[0]?.tieneAvance;
     if (typeof tieneAvance !== 'boolean') throw new TypeError('El avance debe proceder de PostgreSQL');
-    const contexto = { cliente, editor, curso, tieneAvance };
+    const contexto = { cliente, editor, curso, tieneAvance, esEditor };
     if (tipo !== 'curso') {
       const lecciones = await cliente.query(`
         SELECT id_leccion::text AS "idLeccion", titulo, objetivo,
@@ -214,7 +216,9 @@ async function ejecutar(usuario, tipo, id, operacion) {
 }
 
 function exigirEstructura(contexto) {
-  validarCambioEstructural(contexto.editor, contexto.curso, { tieneAvance: contexto.tieneAvance });
+  validarCambioEstructural(contexto.editor, contexto.curso, {
+    tieneAvance: contexto.tieneAvance, esEditor: contexto.esEditor
+  });
 }
 
 const recursoPaso = (fila) => ({ idPaso: fila.idPaso, orden: fila.orden, instruccion: fila.instruccion, recursos: fila.recursos, actividad: fila.actividad });

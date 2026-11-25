@@ -1,0 +1,25 @@
+# Esperado: 403 permiso_solo_edicion (se rechaza antes de revisar si la categoría existe).
+info:
+  name: 428 - Maestro con permiso intenta trasladar - 403
+  type: http
+  seq: 428
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/cursos/{{idCursoP4}}"
+  body:
+    type: json
+    data: |-
+      {
+        "idCategoria": "999999"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenMaestro}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -17,7 +17,7 @@ function fila(cambios = {}) {
     idCurso: '10', titulo: 'Curso ficticio', descripcion: 'Prácticas sin datos reales.',
     orden: 1, estadoPublicacion: 'borrador', fechaCierre: null,
     creado_por: MAESTRO.uid, creadoPor: 'Maestro de Ejemplo',
-    totalLecciones: 1, tieneAvance: false,
+    totalLecciones: 1, tieneAvance: false, esEditor: false,
     lecciones: [{
       idLeccion: '21', titulo: 'Lección ficticia', objetivo: 'Practicar con ejemplos.',
       duracionEstimadaMinutos: 3, orden: 1,
@@ -27,9 +27,12 @@ function fila(cambios = {}) {
   };
 }
 
-function simular(t, rows, parametros = []) {
+function simular(t, rows, parametros = [], uid) {
   const consulta = t.mock.method(pool, 'query', async (sql, recibidos) => {
-    assert.deepEqual(recibidos, parametros);
+    assert.equal(recibidos.length, parametros.length + 1);
+    assert.deepEqual(recibidos.slice(0, -1), parametros);
+    assert.equal(typeof recibidos.at(-1), 'string');
+    if (uid !== undefined) assert.equal(recibidos.at(-1), uid);
     return { rows };
   });
   t.mock.method(pool, 'connect', async () => assert.fail('Las consultas no abren transacción'));
@@ -58,7 +61,7 @@ test('Editor servicio: listado proyecta contrato sin lecciones, UID ni campos ad
     cursos: [{
       idCurso: '10', titulo: 'Curso ficticio', descripcion: 'Prácticas sin datos reales.',
       orden: 1, estadoPublicacion: 'borrador', fechaCierre: null,
-      tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true, totalLecciones: 1
+      tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true, permisoCurso: 'autor', totalLecciones: 1
     }]
   }]);
 });
@@ -83,6 +86,8 @@ for (const usuario of [MAESTRO, ADMIN]) {
         })]);
         const curso = (await listarContenido(usuario))[0].cursos[0];
         assert.equal(curso.puedeEditar, estado !== 'retirado' && (usuario.rol === 'administrador' || propio));
+        assert.equal(curso.permisoCurso, estado === 'retirado' ? null
+          : usuario.rol === 'administrador' ? 'administrador' : propio ? 'autor' : null);
         assert.equal(curso.estadoPublicacion, estado);
         assert.equal(curso.totalLecciones, estado === 'retirado' ? 0 : 1);
         assert.equal(curso.tieneAvance, estado === 'retirado');
@@ -104,7 +109,7 @@ test('Editor servicio: detalle devuelve lecciones y pasos del borrador sin exigi
   assert.deepEqual(await obtenerContenidoCurso(MAESTRO, '10'), {
     idCurso: '10', titulo: datos.titulo, descripcion: datos.descripcion,
     orden: 1, estadoPublicacion: 'borrador', fechaCierre: null,
-    tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true,
+    tieneAvance: false, creadoPor: 'Maestro de Ejemplo', puedeEditar: true, permisoCurso: 'autor',
     idCategoria: '1', lecciones: datos.lecciones
   });
 });
@@ -126,7 +131,9 @@ test('Editor servicio: lección incompleta sin pasos y objetivo null es consulta
 
 test('Editor servicio: maestro consulta curso ajeno sin curso_ajeno y sin permiso de escritura', async (t) => {
   simular(t, [fila({ creado_por: 'otro-maestro' })], ['10']);
-  assert.equal((await obtenerContenidoCurso(MAESTRO, '10')).puedeEditar, false);
+  const resultado = await obtenerContenidoCurso(MAESTRO, '10');
+  assert.equal(resultado.puedeEditar, false);
+  assert.equal(resultado.permisoCurso, null);
 });
 
 for (const usuario of [MAESTRO, ADMIN]) {
@@ -203,7 +210,7 @@ test('Editor servicio: curso inexistente conserva 404', async (t) => {
 });
 
 for (const cambios of [
-  { estadoPublicacion: 'desconocido' }, { tieneAvance: 'true' },
+  { estadoPublicacion: 'desconocido' }, { tieneAvance: 'true' }, { esEditor: 'true' }, { esEditor: null },
   { creadoPor: { uid: 'privado' } }, { totalLecciones: null }, { totalLecciones: -1 },
   { lecciones: null }
 ]) {
@@ -253,4 +260,49 @@ test('Editor servicio: fallo SQL no se convierte en catálogo vacío o curso ine
   t.mock.method(pool, 'query', async () => { throw error; });
   await assert.rejects(listarContenido(MAESTRO), (recibido) => recibido === error);
   await assert.rejects(obtenerContenidoCurso(MAESTRO, '10'), (recibido) => recibido === error);
+});
+
+for (const estado of ['borrador', 'publicado']) {
+  test(`Editor servicio P4: maestro con permiso en curso ajeno ${estado} recibe editor y puedeEditar`, async (t) => {
+    simular(t, [fila({ creado_por: 'otro-autor', estadoPublicacion: estado, esEditor: true })], ['10'], MAESTRO.uid);
+    const resultado = await obtenerContenidoCurso(MAESTRO, '10');
+    assert.equal(resultado.puedeEditar, true);
+    assert.equal(resultado.permisoCurso, 'editor');
+  });
+}
+
+test('Editor servicio P4: listado marca editor por curso y pasa el uid del solicitante como $1', async (t) => {
+  const consulta = simular(t, [
+    fila({ idCurso: '10', creado_por: 'otro-autor', esEditor: true }),
+    fila({ idCurso: '11', creado_por: 'otro-autor', esEditor: false }),
+    fila({ idCurso: '12', creado_por: MAESTRO.uid, esEditor: false })
+  ], [], MAESTRO.uid);
+  const cursos = (await listarContenido(MAESTRO))[0].cursos;
+  assert.deepEqual(cursos.map((c) => [c.idCurso, c.permisoCurso, c.puedeEditar]),
+    [['10', 'editor', true], ['11', null, false], ['12', 'autor', true]]);
+  const [sql] = consulta.mock.calls[0].arguments;
+  assert.match(sql, /FROM curso_editores ce\s+WHERE ce\.id_curso = c\.id_curso AND ce\.uid_maestro = \$1\s/);
+});
+
+test('Editor servicio P4: detalle usa $2 para el uid y $1 para el curso', async (t) => {
+  const consulta = simular(t, [fila()], ['10'], MAESTRO.uid);
+  await obtenerContenidoCurso(MAESTRO, '10');
+  const [sql] = consulta.mock.calls[0].arguments;
+  assert.match(sql, /ce\.uid_maestro = \$2\s/);
+  assert.match(sql, /c\.id_curso = \$1::bigint/);
+});
+
+test('Editor servicio P4: curso retirado con permiso no da editor ni puedeEditar', async (t) => {
+  simular(t, [fila({ creado_por: 'otro-autor', estadoPublicacion: 'retirado', tieneAvance: true, esEditor: true })], ['10']);
+  const resultado = await obtenerContenidoCurso(MAESTRO, '10');
+  assert.equal(resultado.permisoCurso, null);
+  assert.equal(resultado.puedeEditar, false);
+});
+
+test('Editor servicio P4: administrador y autor conservan su permiso aunque exista fila de editor', async (t) => {
+  simular(t, [fila({ creado_por: 'otro-autor', esEditor: true })], ['10']);
+  assert.equal((await obtenerContenidoCurso(ADMIN, '10')).permisoCurso, 'administrador');
+  t.mock.restoreAll();
+  simular(t, [fila({ creado_por: MAESTRO.uid, esEditor: true })], ['10']);
+  assert.equal((await obtenerContenidoCurso(MAESTRO, '10')).permisoCurso, 'autor');
 });

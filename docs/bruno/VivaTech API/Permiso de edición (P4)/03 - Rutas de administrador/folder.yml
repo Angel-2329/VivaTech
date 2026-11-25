@@ -1,0 +1,7 @@
+info:
+  name: 03 - Rutas de administrador
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit
