@@ -11,7 +11,7 @@ function crearError(mensaje, estado, codigo, errores) {
 
 export async function solicitarApi(
   ruta,
-  { metodo = 'GET', datos, signal } = {}
+  { metodo = 'GET', datos, signal, formato = 'json' } = {}
 ) {
   const urlBase = import.meta.env.VITE_API_URL?.trim()
 
@@ -41,7 +41,9 @@ export async function solicitarApi(
     Authorization: `Bearer ${token}`,
   }
 
-  if (datos !== undefined) {
+  const esFormulario = datos instanceof FormData
+
+  if (datos !== undefined && !esFormulario) {
     headers['Content-Type'] = 'application/json'
   }
 
@@ -53,7 +55,7 @@ export async function solicitarApi(
       {
         method: metodo,
         headers,
-        body: datos === undefined ? undefined : JSON.stringify(datos),
+        body: datos === undefined || esFormulario ? datos : JSON.stringify(datos),
         signal,
       }
     )
@@ -71,6 +73,10 @@ export async function solicitarApi(
 
   if (respuesta.ok && respuesta.status === 204) {
     return undefined
+  }
+
+  if (respuesta.ok && formato === 'blob') {
+    return respuesta.blob()
   }
 
   const cuerpo = await respuesta.json().catch(() => null)

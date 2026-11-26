@@ -3,7 +3,7 @@ import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import { EstadoCarga, EstadoError, EstadoVacio } from '../../components/panel/EstadosCarga.jsx'
 import { useDatos } from '../../hooks/useDatos.js'
 import { listarMisCertificados } from '../../services/certificadosService.js'
-import { fechaLarga } from '../../utils/certificados.js'
+import { fechaLarga, textoDuracion } from '../../utils/certificados.js'
 import { RUTA_MIS_CURSOS } from '../../utils/cursos.js'
 import '../../components/certificado/Certificado.css'
 
@@ -42,6 +42,11 @@ function MisCertificados() {
               <p className="vt-body-sm vt-text-muted">
                 Emitido el {fechaLarga(certificado.fechaEmision)} · Folio {certificado.folio}
               </p>
+              {textoDuracion(certificado.duracionMinutos) && (
+                <p className="vt-body-sm vt-text-muted">
+                  Duración aproximada: {textoDuracion(certificado.duracionMinutos)}
+                </p>
+              )}
               <div>
                 <Link className="vt-btn vt-btn-secondary vt-btn-sm" to={`/estudiante/certificados/${certificado.idCertificado}`}>
                   Ver certificado

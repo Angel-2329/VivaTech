@@ -9,6 +9,7 @@ function BuscadorPersonas({
   buscar,
   yaAsignados,
   textoAgregar = 'Agregar',
+  textoAsignado = 'Ya está en el grupo',
   onAgregar,
   bloqueado = false,
 }) {
@@ -155,7 +156,7 @@ function BuscadorPersonas({
                     <span className="vt-icon" aria-hidden="true">
                       check
                     </span>
-                    Ya está en el grupo
+                    {textoAsignado}
                   </span>
                 ) : (
                   <button

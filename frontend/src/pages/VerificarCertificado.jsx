@@ -5,7 +5,7 @@ import PiePagina from '../components/PiePagina.jsx'
 import { EstadoCarga, EstadoError } from '../components/panel/EstadosCarga.jsx'
 import { useDatos } from '../hooks/useDatos.js'
 import { verificarCertificado } from '../services/certificadosService.js'
-import { fechaLarga } from '../utils/certificados.js'
+import { fechaLarga, textoDuracion } from '../utils/certificados.js'
 import '../components/certificado/Certificado.css'
 
 
@@ -67,6 +67,12 @@ function VerificarCertificado() {
                   <dt>Curso</dt>
                   <dd>{datos.tituloCurso}</dd>
                 </div>
+                {textoDuracion(datos.duracionMinutos) && (
+                  <div>
+                    <dt>Duración aproximada</dt>
+                    <dd>{textoDuracion(datos.duracionMinutos)}</dd>
+                  </div>
+                )}
                 <div>
                   <dt>Terminó el curso</dt>
                   <dd>{fechaLarga(datos.fechaFinalizacionCurso)}</dd>

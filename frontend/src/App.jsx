@@ -4,6 +4,7 @@ import RutaProtegida from './components/RutaProtegida.jsx'
 import AvisoSinConexion from './components/AvisoSinConexion.jsx'
 import Acceso from './pages/Acceso.jsx'
 import PrimerAcceso from './pages/PrimerAcceso.jsx'
+import MiPerfil from './pages/MiPerfil.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import CursosDisponibles from './pages/estudiante/CursosDisponibles.jsx'
@@ -17,6 +18,7 @@ import DetalleGrupo from './pages/grupos/DetalleGrupo.jsx'
 import UsuariosRoles from './pages/admin/UsuariosRoles.jsx'
 import InicioAdmin from './pages/admin/InicioAdmin.jsx'
 import ProgresoGeneral from './pages/admin/ProgresoGeneral.jsx'
+import PermisosCurso from './pages/admin/PermisosCurso.jsx'
 import Contenido from './pages/contenido/Contenido.jsx'
 import EditorCurso from './pages/contenido/EditorCurso.jsx'
 
@@ -72,6 +74,10 @@ function App() {
           <Route path="/bienvenida" element={<PrimerAcceso />} />
         </Route>
 
+        <Route element={<RutaProtegida roles={['estudiante', 'maestro', 'administrador']} />}>
+          <Route path="/mi-perfil" element={<MiPerfil />} />
+        </Route>
+
         {/* Solo estudiantes */}
         <Route element={<RutaProtegida roles={['estudiante']} />}>
           <Route path="/estudiante" element={<InicioEstudiante />} />
@@ -102,6 +108,7 @@ function App() {
           <Route path="/admin/progreso" element={<ProgresoGeneral />} />
           <Route path="/admin/contenido" element={<Contenido />} />
           <Route path="/admin/contenido/cursos/:idCurso" element={<EditorCurso />} />
+          <Route path="/admin/contenido/cursos/:idCurso/permisos" element={<PermisosCurso />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

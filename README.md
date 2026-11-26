@@ -27,25 +27,66 @@ Funcionalidades implementadas y conectadas a la API real:
 - Consulta de progreso por grupo y progreso general desde PostgreSQL, sin duplicar finalizaciones por pertenencia a varios grupos.
 - Paneles administrativos y de grupos conectados mediante `adminService.js` y `gruposService.js`, incluyendo respuestas DELETE 204 sin contenido.
 
-### Experiencia del estudiante y alcance pendiente
+Incorporado en el sprint 4:
 
-El acceso, el perfil, el rol, el estado de cuenta y la protección de rutas del estudiante son reales. Sin embargo, `cursosService.js` permanece simulado durante el sprint 3: las categorías, cursos, lecciones y el avance educativo que presenta esa interfaz no constituyen actividad educativa guardada en PostgreSQL.
+- Contenido educativo real en PostgreSQL: categorías, cursos, lecciones y pasos, con carga del contenido inicial por script.
+- Recorrido del estudiante por lecciones y pasos (teoría, video de YouTube y actividades), con guardado del progreso.
+- Inicio del estudiante con la tarjeta «Mi grupo»; pestañas «Cursos disponibles» y «Mis cursos» (subpestañas En curso y Terminados) y «Mis certificados».
+- Editor de contenido para maestros y administrador: categorías, cursos, lecciones y pasos, con reordenado, vista previa, publicación, despublicación, fecha de cierre, retiro y eliminación de cursos, conservando el historial del estudiante.
+- Permiso de edición que el administrador da a otros maestros sobre un curso; el maestro con permiso solo edita, no publica ni elimina.
+- Certificados con folio, duración aproximada, QR y enlace para compartir en LinkedIn (sin API de LinkedIn), y verificación pública por código sin iniciar sesión.
+- Retiro de varios estudiantes de un grupo, o de todos, conservando sus cuentas y su avance.
+- Nombres de grupo únicos en el sistema y títulos de curso únicos por categoría.
+- Validación de caracteres en nombres de grupo, nombre completo y apodo.
+- Cambio del número de teléfono de una cuenta por el administrador, con registro de quién hizo el cambio.
+- Foto de perfil guardada en el servidor, visible solo para la persona, el administrador y sus maestros.
+- PWA mínima: manifiesto, íconos, instalación y aviso sin conexión, sin service worker ni datos privados guardados en el dispositivo.
 
-La implementación real de `GET /api/mis-cursos` está prevista para el sprint 4. La carga de categorías iniciales no crea ni publica automáticamente cursos o lecciones.
-
-Las consultas de progreso de maestros y administradores sí leen PostgreSQL. Esto no significa que ya esté implementado el recorrido educativo que genera y guarda automáticamente ese progreso. Sin lecciones publicadas consideradas o sin registros de progreso, las consultas devuelven ceros y última actividad nula según corresponda.
-
-La emisión de certificados y QR no forma parte de la implementación de este sprint. Las funcionalidades completas de PWA y el despliegue siguen pendientes de sus etapas correspondientes.
+Las pantallas de permiso de edición, cambio de teléfono y foto de perfil, y el cambio de teléfono por la propia persona, se incorporan solo si llegan a `integracion` antes de la congelación del 26 de noviembre de 2026; la API correspondiente ya está integrada.
 
 El prototipo cuenta con verificaciones locales y limitaciones explícitas; no está validado como listo para producción ni acredita conformidad completa con WCAG 2.2 AA. El merge a `integracion` no sustituye las pruebas conjuntas ni la aceptación formal del incremento.
+
+## Resumen funcional
+
+### Roles
+
+| Rol | Qué puede hacer |
+|---|---|
+| Estudiante | Registrar su perfil y su foto, consultar su grupo, tomar cursos publicados por lecciones y pasos, retomar su avance, repasar cursos terminados, obtener certificados y compartirlos |
+| Maestro | Crear y administrar sus grupos y estudiantes, consultar el avance de sus estudiantes, y crear y editar sus cursos o aquellos en los que el administrador le dio permiso de edición |
+| Administrador | Todo lo del maestro sobre cualquier grupo y curso, además de gestionar cuentas (rol, activación y teléfono), categorías, maestros de grupo y permisos de edición, y consultar el resumen y el progreso general |
+| Público sin cuenta | Verificar un certificado con su código o QR |
+
+### Historias de usuario (resumen)
+
+- Como persona adulta, quiero entrar solo con mi número de celular y un código, para no tener que recordar una contraseña.
+- Como estudiante, quiero aprender paso a paso con explicaciones, videos y prácticas, y continuar donde me quedé.
+- Como estudiante, quiero un certificado verificable de los cursos que termino, para demostrar lo aprendido.
+- Como maestro, quiero organizar a mis estudiantes en grupos y ver su avance.
+- Como maestro, quiero crear y publicar cursos sin programar, y que otro maestro autorizado me ayude a editarlos.
+- Como administrador, quiero gestionar cuentas, roles, categorías y permisos para mantener el orden y la seguridad de la plataforma.
+
+### Flujo principal
+
+1. La persona escribe su número de celular, resuelve el reCAPTCHA y confirma el código SMS (Firebase Authentication).
+2. Si es su primer acceso, registra su nombre completo y su apodo; la cuenta inicia con el rol estudiante.
+3. El administrador asigna roles y organiza grupos; los maestros crean y publican cursos.
+4. El estudiante elige un curso en «Cursos disponibles» y avanza lección por lección; su progreso se guarda en cada paso.
+5. Al completar todas las lecciones obtiene su certificado, con folio y código QR.
+6. Cualquier persona puede verificar el certificado en `/verificar` con el código o el QR, sin iniciar sesión.
+
+### Acceso sin contraseñas
+
+El acceso usa el número de teléfono y un código de un solo uso enviado por SMS, protegido con reCAPTCHA. La plataforma no guarda contraseñas: Firebase Authentication verifica la identidad y emite un token que el backend comprueba en cada solicitud. Rol, estado de la cuenta y permisos se deciden en el servidor con los datos de PostgreSQL, nunca con lo que envía el navegador. Equivale a un inicio de sesión con usuario y contraseña en cuanto a identificación y control de acceso, sin el riesgo de almacenar ni filtrar contraseñas.
 
 ## Tecnologías
 
 - Frontend: React, Vite y React Router.
 - Backend: Node.js y Express.
-- Base de datos: PostgreSQL.
-- Autenticación: Firebase Authentication.
-- Verificación de tokens: Firebase Admin SDK.
+- Base de datos: PostgreSQL, con migraciones de node-pg-migrate.
+- Autenticación: Firebase Authentication por teléfono.
+- Verificación de tokens y cambio de teléfono por administrador: Firebase Admin SDK.
+- Carga de la foto de perfil: multer, con archivos guardados en el disco del servidor.
 
 PostgreSQL almacena los perfiles de la aplicación. El número telefónico es administrado por Firebase Authentication y no se almacena en la tabla de usuarios.
 
@@ -128,9 +169,13 @@ VITE_FIREBASE_APP_ID=tu-app-id-web
 VITE_FIREBASE_AUTH_TESTING=true
 
 VITE_API_URL=http://localhost:3000/api
+
+VITE_URL_PUBLICA=
 ```
 
 Los valores de Firebase deben pertenecer a la aplicación web del proyecto utilizado por el backend.
+
+- `VITE_URL_PUBLICA` es el origen HTTPS público del frontend, sin `/` final (por ejemplo `https://tu-dominio`). Se usa para el QR y el enlace de LinkedIn del certificado. Si está vacía o apunta a `localhost` o a una IP privada, el certificado no muestra el QR ni el enlace.
 
 - Vite carga `.env.local`.
 - Las variables `VITE_*` pueden quedar expuestas en el código del navegador: no colocar claves privadas ni credenciales de Firebase Admin.
@@ -164,12 +209,16 @@ FIREBASE_PROJECT_ID=tu-id-de-proyecto
 FRONTEND_ORIGIN=http://localhost:5173
 PORT=3000
 NODE_ENV=development
+FOTOS_DIR=C:/ruta/absoluta/fuera-del-repo/fotos
+GOOGLE_APPLICATION_CREDENTIALS=C:/ruta/absoluta/fuera-del-repo/cuenta-de-servicio.json
 ```
 
 - El backend carga `.env` mediante dotenv; no carga automáticamente `.env.local` como Vite.
 - `DATABASE_URL` debe apuntar a la base autorizada.
 - `FIREBASE_PROJECT_ID` debe coincidir con el proyecto del frontend.
 - `FRONTEND_ORIGIN` debe coincidir exactamente con el origen de Vite, sin barra final.
+- `FOTOS_DIR` es la carpeta absoluta donde se guardan las fotos de perfil, fuera del repositorio y de cualquier carpeta pública. Es obligatoria y no tiene valor por defecto: si falta, las rutas de foto responden `503`.
+- `GOOGLE_APPLICATION_CREDENTIALS` apunta a la llave de una cuenta de servicio de Firebase, guardada fuera del repositorio. La necesita el cambio de teléfono por administrador; sin ella, esa ruta responde `503`. Cada persona genera su propia llave; no se comparten ni se suben al repositorio.
 - Reiniciar el backend después de modificar las variables.
 
 No subir archivos de entorno reales, contraseñas, tokens ni credenciales privadas al repositorio.
@@ -183,6 +232,22 @@ Para aplicar las migraciones, desde `backend`:
 ```powershell
 npm run migrate:up
 ```
+
+El repositorio tiene 9 migraciones en `backend/migrations`:
+
+| Migración | Cambio |
+|---|---|
+| `1792909072380_crear-esquema-inicial` | Esquema inicial |
+| `1793923200000_cursos-cierre-historial` | Fecha de cierre de cursos e historial de cursos retirados |
+| `1793923200001_registro-contenido-inicial` | Registro de la carga del contenido inicial |
+| `1793923200002_grupos-nombre-unico` | Índice único de nombres de grupo |
+| `1793923200003_cursos-titulo-unico` | Índice único de títulos de curso por categoría |
+| `1793923200004_certificados-duracion` | Duración en los certificados |
+| `1793923200005_curso-editores` | Permisos de edición de cursos |
+| `1793923200006_cambios-telefono` | Registro de cambios de teléfono |
+| `1793923200007_usuarios-foto` | Referencia de la foto de perfil |
+
+Las migraciones de índices únicos revisan primero los datos y se detienen sin modificarlos si encuentran duplicados. Sin las migraciones más recientes, el perfil, la administración de usuarios y el detalle de grupo responden `503`; aplicar las migraciones antes de iniciar una versión nueva del backend.
 
 ### Advertencia sobre la reversión
 
@@ -226,42 +291,53 @@ npm run dev
 
 Abrir la dirección que indique Vite. Si utiliza un puerto distinto de `5173`, ajustar `FRONTEND_ORIGIN` en el backend y reiniciarlo.
 
-## API de perfil
+## API
 
-Las rutas requieren:
+La API se monta en `/api`. Salvo las rutas públicas indicadas, todas requieren:
 
 ```text
 Authorization: Bearer TOKEN_DE_FIREBASE
 ```
 
-El frontend obtiene el token desde Firebase Authentication. No se almacena manualmente en `localStorage` ni debe imprimirse.
+El frontend obtiene el token desde Firebase Authentication; no se almacena manualmente en `localStorage` ni debe imprimirse. El backend obtiene el UID del token verificado y el rol y el estado de la cuenta desde PostgreSQL: el cliente no concede permisos enviando un rol en el cuerpo o en los filtros. Una cuenta desactivada recibe `403 cuenta_desactivada` y un rol no permitido, `403 rol_no_autorizado`.
 
-| Método | Ruta | Función |
+### Rutas por área
+
+| Área | Rutas | Acceso |
 |---|---|---|
-| GET | `/api/perfil` | Consultar el perfil autenticado |
-| POST | `/api/perfil` | Crear el perfil |
-| PATCH | `/api/perfil` | Actualizar nombre completo o apodo |
+| Diagnóstico | `GET /api/health` | Pública |
+| Perfil | `GET`, `POST` y `PATCH /api/perfil` | Persona autenticada (su propio perfil) |
+| Foto de perfil | `PUT` y `DELETE /api/perfil/foto` | Persona autenticada (su propia foto) |
+| Foto de otra persona | `GET /api/usuarios/:uid/foto` | La propia persona, el administrador o un maestro asignado a un grupo donde la persona es estudiante |
+| Búsqueda de estudiantes | `GET /api/estudiantes` | Maestro o administrador |
+| Administración de cuentas | `GET /api/admin/usuarios`; `PATCH /api/admin/usuarios/:uid/rol`, `/activo` y `/telefono` | Administrador |
+| Resumen y progreso | `GET /api/admin/resumen` y `GET /api/admin/progreso` | Administrador |
+| Permiso de edición de cursos | `GET` y `POST /api/admin/cursos/:idCurso/editores`; `DELETE /api/admin/cursos/:idCurso/editores/:uid` | Administrador |
+| Grupos | `GET` y `POST /api/grupos`; `GET`, `PATCH` y `DELETE /api/grupos/:idGrupo` | Maestro asignado o administrador (el maestro solo ve sus grupos) |
+| Estudiantes del grupo | `POST` y `DELETE /api/grupos/:idGrupo/estudiantes`; `POST /api/grupos/:idGrupo/estudiantes/retiros`; `DELETE /api/grupos/:idGrupo/estudiantes/:uid` | Maestro asignado o administrador |
+| Maestros del grupo | `POST /api/grupos/:idGrupo/maestros`; `DELETE /api/grupos/:idGrupo/maestros/:uid` | Administrador |
+| Mi grupo | `GET /api/mis-grupos` | Estudiante |
+| Cursos del estudiante | `GET /api/cursos-disponibles`; `GET /api/mis-cursos/en-curso` y `/terminados` | Estudiante |
+| Lecciones y progreso | `GET /api/lecciones/:idLeccion`; `PUT /api/lecciones/:idLeccion/progreso` | Estudiante |
+| Certificados | `POST /api/cursos/:idCurso/certificado`; `GET /api/mis-certificados` | Estudiante |
+| Verificación de certificados | `GET /api/certificados/verificar/:codigo` | Pública, sin token |
+| Consulta del editor | `GET /api/contenido`; `GET /api/contenido/cursos/:idCurso` | Maestro o administrador |
+| Categorías | `POST /api/categorias`; `PATCH` y `DELETE /api/categorias/:idCategoria`; `PUT /api/categorias/orden` | Administrador |
+| Cursos | `POST /api/cursos`; `PATCH` y `DELETE /api/cursos/:idCurso`; `POST /api/cursos/:idCurso/lecciones`; `PUT /api/cursos/:idCurso/orden-lecciones` | Maestro autor, maestro con permiso de edición o administrador |
+| Lecciones y pasos (editor) | `PATCH` y `DELETE /api/lecciones/:idLeccion`; `POST /api/lecciones/:idLeccion/pasos`; `PUT /api/lecciones/:idLeccion/orden-pasos`; `PATCH` y `DELETE /api/pasos/:idPaso` | Maestro autor, maestro con permiso de edición o administrador |
 
-Formato de perfil:
+`GET /api/mis-cursos` se conserva por compatibilidad, pero quedó obsoleta: el frontend usa `/api/cursos-disponibles`, `/api/mis-cursos/en-curso` y `/api/mis-cursos/terminados`.
 
-```json
-{
-  "uid": "uid-del-usuario",
-  "nombreCompleto": "Persona de Prueba",
-  "apodo": null,
-  "rol": "estudiante"
-}
-```
+### Reglas principales
 
-Reglas principales:
-
-- El UID procede del token verificado.
-- El nombre completo es obligatorio, entre 3 y 100 caracteres después de quitar espacios externos.
-- El apodo es opcional, de hasta 30 caracteres.
-- El apodo vacío se guarda como `NULL`.
-- El perfil nuevo recibe el rol estudiante.
-- Las rutas de perfil no permiten asignar roles ni cambiar el estado activo.
-- PATCH conserva los campos omitidos.
+- **Perfil:** nombre completo de 3 a 100 caracteres y apodo opcional de hasta 30; solo letras (incluidos acentos y ñ), espacios, apóstrofo y guion. Se guardan normalizados (espacios repetidos a uno y sin espacios externos). El apodo vacío se guarda como `NULL`. El perfil nuevo recibe el rol estudiante y estas rutas no permiten cambiar el rol ni el estado.
+- **Grupos:** nombre de 1 a 100 caracteres con letras, números, espacios y `- _ . , ( ) #`, y único en todo el sistema sin distinguir mayúsculas ni acentos (`409 grupo_duplicado`). Un grupo con estudiantes no se elimina (`409 grupo_con_participantes`). El retiro de estudiantes, uno, varios (hasta 100) o todos, conserva sus cuentas y su avance.
+- **Cursos:** título único dentro de la categoría sin contar los cursos retirados (`409 curso_duplicado`). El maestro con permiso de edición solo edita datos, lecciones y pasos; publicar, despublicar, trasladar, retirar o eliminar el curso responde `403 permiso_solo_edicion`. Retirar un curso conserva el historial del estudiante.
+- **Certificados:** el servidor revisa que el curso esté completo; el folio lo genera la base. La emisión repetida devuelve el certificado existente sin regenerarlo. `duracionMinutos` es la suma de la duración de las lecciones o `null` en certificados anteriores. La verificación pública devuelve solo nombre, curso, lecciones, folio, duración y fechas.
+- **Foto de perfil:** campo multipart `foto`, solo JPEG o WebP según el contenido real del archivo y hasta 307 200 bytes. Se guarda con nombre aleatorio en `FOTOS_DIR`, fuera de la carpeta pública; la base guarda solo la referencia. Desactivar una cuenta borra su foto.
+- **Cambio de teléfono por administrador:** número `+52` con 10 dígitos. El UID no cambia y se registra quién hizo el cambio, guardando solo los últimos 4 dígitos de cada número.
+- **Identificadores:** `idGrupo` y otros BIGINT se devuelven como cadena decimal; no convertirlos a `Number` en el cliente.
+- Las respuestas privadas usan `Cache-Control: no-store`. Los DELETE exitosos responden `204 No Content`, sin cuerpo.
 
 Los errores controlados utilizan:
 
@@ -273,224 +349,16 @@ Los errores controlados utilizan:
 }
 ```
 
-Casos relevantes:
-
-- `404 perfil_no_registrado`: identidad autenticada sin perfil.
-- `409 perfil_existente`: intento de creación duplicada.
-- `403 cuenta_desactivada`: perfil desactivado.
-- `401`: autenticación ausente o rechazada.
-- `503`: imposibilidad de completar una operación por un fallo del servicio.
+| HTTP | Significado general |
+|---|---|
+| 400 | Datos inválidos (por ejemplo `nombre_invalido`, `nombre_grupo_invalido`, `telefono_invalido`) |
+| 401 | Autenticación ausente o rechazada |
+| 403 | Rol no autorizado, cuenta desactivada o acción no permitida |
+| 404 | Recurso inexistente o ajeno, con la misma respuesta para no revelar su existencia |
+| 409 | Conflicto: duplicados, curso incompleto o estado que no permite la operación |
+| 503 | El servicio (base de datos, disco o Firebase) no pudo completar la operación |
 
 Una falla de conexión no se interpreta como primer acceso.
-
-## API de usuarios y administración
-
-Estas rutas requieren un token de Firebase mediante `Authorization: Bearer ...`. El backend obtiene el rol y el estado de la cuenta desde PostgreSQL; el cliente no concede permisos enviando un rol en el cuerpo o en los filtros.
-
-| Método | Ruta | Acceso y función |
-|---|---|---|
-| GET | `/api/estudiantes` | Maestro o administrador: buscar estudiantes activos por nombre completo para agregarlos a grupos; no devuelve su progreso |
-| GET | `/api/admin/usuarios` | Administrador: consultar cuentas activas y desactivadas, con búsqueda y filtro opcional de rol |
-| PATCH | `/api/admin/usuarios/:uid/rol` | Administrador: cambiar el rol de otra cuenta, sujeto a sus participaciones en grupos |
-| PATCH | `/api/admin/usuarios/:uid/activo` | Administrador: desactivar o reactivar otra cuenta |
-| GET | `/api/admin/resumen` | Administrador: consultar totales y desglose de cuentas |
-| GET | `/api/admin/progreso` | Administrador: consultar progreso de estudiantes, tengan grupo o no |
-
-### Búsqueda, filtro de rol y paginación
-
-`GET /api/estudiantes`, `GET /api/admin/usuarios` y `GET /api/admin/progreso` reciben parámetros de consulta en la URL, no en encabezados:
-
-| Parámetro | Comportamiento |
-|---|---|
-| `buscar` | Un solo texto de hasta 100 caracteres; se quitan espacios exteriores y se busca literalmente dentro del nombre completo, sin distinguir mayúsculas; vacío u omitido no restringe por nombre |
-| `limite` | Entero de 1 a 100; predeterminado 50 |
-| `desplazamiento` | Entero de 0 a 2147483647; predeterminado 0 |
-
-Solo `GET /api/admin/usuarios` incorpora además `rol`: `estudiante`, `maestro` o `administrador`, en minúsculas. Se quitan espacios exteriores; vacío u omitido no filtra por rol. Un valor inválido o varios valores de `rol` producen `400 rol_invalido`.
-
-Ejemplo:
-
-```text
-GET /api/admin/usuarios?buscar=Persona&rol=estudiante&limite=20&desplazamiento=0
-```
-
-Los filtros se aplican antes de paginar. Las respuestas son listas, ordenadas por nombre completo sin distinguir mayúsculas y por UID como desempate; no incluyen un total global de resultados. No asumir que una sola página contiene todas las cuentas.
-
-La interfaz de Cuentas y Progreso muestra 20 registros por página. Solicita hasta 21 para detectar una página siguiente, muestra solo los primeros 20 y avanza el desplazamiento de 20 en 20. Una búsqueda nueva reinicia la página. Los buscadores de participantes utilizan el mismo tamaño; al buscar maestros, determinan si hay otra página antes de ocultar candidatos desactivados.
-
-### Cambio de rol y estado
-
-Los cuerpos de las operaciones de cambio son:
-
-```json
-{ "rol": "maestro" }
-```
-
-```json
-{ "activo": false }
-```
-
-- El administrador no puede modificar su propio rol ni estado desde estas rutas: `403 modificacion_propia_no_permitida`.
-- Para cambiar efectivamente el rol de una persona, primero debe retirarse de sus participaciones como estudiante o maestro en grupos; de lo contrario se responde `409 usuario_en_grupos`.
-- Desactivar no elimina el perfil, las asignaciones ni el progreso. Una cuenta desactivada no puede utilizar la plataforma.
-- El backend vuelve a comprobar los permisos del administrador dentro de la transacción y bloquea las cuentas involucradas en orden por UID.
-- Las operaciones exitosas devuelven el usuario actualizado como JSON.
-
-### Resumen administrativo
-
-`GET /api/admin/resumen` devuelve un objeto con los campos numéricos:
-
-```json
-{
-  "totalEstudiantes": 0,
-  "estudiantesActivos": 0,
-  "estudiantesInactivos": 0,
-  "totalMaestros": 0,
-  "maestrosActivos": 0,
-  "maestrosInactivos": 0,
-  "totalGrupos": 0,
-  "totalLeccionesPublicadas": 0,
-  "leccionesCompletadas": 0
-}
-```
-
-Los valores anteriores son ilustrativos. Cada total de personas suma sus cuentas activas y desactivadas. Los conteos se calculan desde la base, sin columnas adicionales para almacenarlos.
-
-`leccionesCompletadas` cuenta los registros completados considerados de cuentas cuyo rol actual sea `estudiante`, activas o desactivadas y con grupo o sin grupo. Pertenecer a varios grupos no multiplica sus finalizaciones. Cambiar de rol no borra el historial, pero ese historial deja de formar parte de este total mientras la cuenta no tenga rol de estudiante.
-
-### Progreso general y última actividad
-
-Cada elemento de `GET /api/admin/progreso` tiene esta estructura ilustrativa:
-
-```json
-{
-  "uid": "uid-ilustrativo",
-  "nombreCompleto": "Estudiante de Prueba",
-  "activo": true,
-  "grupos": [],
-  "leccionesCompletadas": 0,
-  "totalLeccionesPublicadas": 0,
-  "ultimaActividad": null
-}
-```
-
-- Incluye cuentas con rol actual de estudiante, activas y desactivadas, incluso sin grupos ni progreso.
-- Solo considera lecciones publicadas que pertenezcan a cursos publicados. Una lección publicada en un curso borrador se excluye.
-- Las finalizaciones se cuentan por estudiante y lección, no por asignación a grupo.
-- `ultimaActividad` es la mayor `fecha_actualizacion` de su progreso considerado, incluyendo estado `en_progreso` y `completada`; no representa inicio de sesión, navegación ni cambios de perfil.
-- Las fechas se transmiten en ISO 8601. Si no hay progreso considerado, se devuelve `null` y la interfaz muestra “Sin actividad registrada”.
-- Si no hay lecciones consideradas, el total y las finalizaciones son cero. La interfaz informa “Todavía no hay lecciones publicadas”, sin dividir por cero.
-
-## API de grupos y participantes
-
-Estas rutas requieren autenticación y una cuenta activa con rol autorizado. `creado_por` registra la autoría del grupo; no sustituye la asignación en `grupo_maestros`. El maestro opera únicamente sobre grupos donde está asignado. El administrador puede operar sobre todos los grupos.
-
-| Método | Ruta | Acceso | Éxito |
-|---|---|---|---|
-| GET | `/api/grupos` | Maestro: sus grupos; administrador: todos | 200, lista de grupos |
-| POST | `/api/grupos` | Maestro o administrador | 201, grupo creado |
-| PATCH | `/api/grupos/:idGrupo` | Maestro asignado o administrador | 200, grupo actualizado |
-| DELETE | `/api/grupos/:idGrupo` | Maestro asignado o administrador | 204, sin cuerpo |
-| GET | `/api/grupos/:idGrupo` | Maestro asignado o administrador | 200, detalle del grupo |
-| POST | `/api/grupos/:idGrupo/estudiantes` | Maestro asignado o administrador | 201, estudiante asignado con su progreso |
-| DELETE | `/api/grupos/:idGrupo/estudiantes/:uid` | Maestro asignado o administrador | 204, sin cuerpo |
-| POST | `/api/grupos/:idGrupo/maestros` | Solo administrador | 201, `{ uid, nombreCompleto }` |
-| DELETE | `/api/grupos/:idGrupo/maestros/:uid` | Solo administrador | 204, sin cuerpo |
-
-### Identificadores, nombre y creación
-
-- `idGrupo` se devuelve como cadena decimal en JSON para conservar la precisión de BIGINT. Las rutas aceptan identificadores positivos sin ceros iniciales, hasta `9223372036854775807`; un valor inválido produce `400 id_grupo_invalido`.
-- No convertir el identificador a `Number` para compararlo, guardarlo o construir rutas en el cliente.
-- Crear y renombrar reciben `{ "nombre": "Grupo matutino" }`.
-- El nombre debe tener de 1 a 100 caracteres después de quitar espacios iniciales y finales. Se conservan los espacios interiores; no se exige unicidad del nombre.
-- El formulario y el backend cuentan los puntos de código del texto mediante `Array.from`. Un nombre inválido produce `400 nombre_grupo_invalido`.
-- Si crea un maestro, el grupo y su autoasignación se guardan dentro de la misma transacción. Crear como administrador no lo asigna automáticamente como maestro.
-- Un maestro que solicita un grupo ajeno recibe `404 grupo_no_encontrado`, igual que un grupo inexistente para un solicitante autorizado. Esto no sustituye los rechazos 401 por autenticación o 403 por rol o estado no permitido.
-
-Ejemplo ilustrativo de un elemento del listado, creación o renombrado:
-
-```json
-{
-  "idGrupo": "3",
-  "nombre": "Grupo matutino",
-  "totalEstudiantes": 1,
-  "maestros": [
-    {
-      "uid": "uid-maestro-ilustrativo",
-      "nombreCompleto": "Maestro de Prueba"
-    }
-  ]
-}
-```
-
-`totalEstudiantes` cuenta las asignaciones existentes, incluidas las de cuentas desactivadas, sin multiplicarlas por el número de maestros.
-
-### Detalle y progreso del grupo
-
-Ejemplo ilustrativo:
-
-```json
-{
-  "idGrupo": "3",
-  "nombre": "Grupo matutino",
-  "totalLeccionesPublicadas": 0,
-  "maestros": [
-    {
-      "uid": "uid-maestro-ilustrativo",
-      "nombreCompleto": "Maestro de Prueba"
-    }
-  ],
-  "estudiantes": [
-    {
-      "uid": "uid-estudiante-ilustrativo",
-      "nombreCompleto": "Estudiante de Prueba",
-      "apodo": null,
-      "activo": true,
-      "leccionesCompletadas": 0,
-      "ultimaActividad": null
-    }
-  ]
-}
-```
-
-El detalle conserva estudiantes sin actividad y estudiantes desactivados ya asignados, mostrando su estado. Los cálculos utilizan las mismas reglas de publicación y última actividad de la consulta general. El progreso pertenece al estudiante y a la lección, no se duplica por cada grupo. El contrato del maestro asignado mantiene únicamente `uid` y `nombreCompleto`, sin agregar automáticamente `activo`.
-
-### Asignación y retiro
-
-Los POST de asignación reciben un objeto JSON con un solo UID destinatario:
-
-```json
-{ "uid": "uid-del-participante" }
-```
-
-- Para nuevas asignaciones, el estudiante o maestro debe existir, tener el rol correspondiente y estar activo. No se cambia su rol para permitir la asignación.
-- Se registra al solicitante como `asignado_por`.
-- Antes de consultar la cuenta destinataria, el servicio comprueba el acceso al grupo; vuelve a validar permisos y acceso en la operación protegida.
-- Las cuentas involucradas se bloquean en orden por UID antes de bloquear el grupo, siguiendo un orden compatible con las operaciones administrativas. La existencia de estos bloqueos no acredita que la concurrencia real esté verificada.
-- La validación del rol y estado destinatarios precede al control de duplicados.
-- Solo el administrador asigna o retira maestros. No se exige conservar al menos un maestro: puede retirar la última asignación sin eliminar el grupo.
-- Se permite retirar asignaciones de cuentas desactivadas. Retirar no elimina perfiles ni progreso y no reactiva la cuenta.
-- Retirar una asignación de maestro le quita acceso a ese grupo, aunque conserve su rol y estado activo.
-
-Errores de negocio relevantes:
-
-| Situación | HTTP y código |
-|---|---|
-| UID ausente o inválido | 400 `uid_invalido` |
-| Grupo no disponible | 404 `grupo_no_encontrado` |
-| Cuenta destinataria inexistente al asignar | 404 `usuario_no_encontrado` |
-| Rol destinatario incorrecto | 400 `usuario_no_es_estudiante` o `usuario_no_es_maestro` |
-| Cuenta destinataria desactivada al asignar | 403 `cuenta_desactivada` |
-| Asignación duplicada | 409 `estudiante_ya_asignado` o `maestro_ya_asignado` |
-| Asignación inexistente al retirar | 404 `asignacion_no_encontrada` |
-
-### Eliminación de grupos y respuestas vacías
-
-No se elimina un grupo mientras tenga estudiantes asignados, activos o desactivados: la API responde `409 grupo_con_participantes`. Si no tiene estudiantes, se retiran las asignaciones de maestros y se elimina el grupo dentro de la misma transacción. No se eliminan perfiles ni progreso, y se conservan las claves foráneas con `ON DELETE RESTRICT`.
-
-La interfaz puede impedir la confirmación cuando su listado ya muestra estudiantes, pero el backend vuelve a comprobar la regla para no depender de información desactualizada del navegador.
-
-Los DELETE exitosos de grupos y participantes responden `204 No Content`, sin JSON. `solicitarApi` devuelve `undefined` antes de intentar leer el cuerpo; los consumidores no deben exigir un objeto de respuesta ni mostrar un error por su ausencia. Las respuestas no exitosas conservan el manejo de errores de la API.
 
 ## Primer administrador
 
@@ -549,6 +417,16 @@ Sustituir el marcador localmente. No guardar UID reales en scripts, documentaci�
 - El comando sin UID muestra su uso y termina con código de salida 1. Una cuenta inexistente, desactivada o sin rol de administrador se rechaza.
 - La carga no crea ni publica cursos o lecciones y no genera progreso. No ejecutar migraciones destructivas para repetirla.
 
+## Contenido inicial
+
+Después de cargar las categorías, el contenido educativo inicial (2 cursos publicados con 6 lecciones y 30 pasos) se carga desde `backend`:
+
+```powershell
+npm run cargar-contenido -- "UID_DEL_ADMINISTRADOR"
+```
+
+Se aplican las mismas precauciones que en las categorías: migraciones aplicadas, administrador activo, conexión a la base autorizada y UID sustituido localmente. La carga se registra en la base y se ejecuta en una transacción; si encuentra un título de curso repetido, se detiene y revierte sin modificar datos.
+
 ## Comprobaciones y pruebas
 
 ### Frontend
@@ -561,30 +439,11 @@ npm run build
 npm audit
 ```
 
-La compilación genera `frontend/dist`, que no debe incluirse en el repositorio. Lint y compilación se ejecutaron satisfactoriamente por el desarrollador durante la conexión del sprint 3. La salida compartida de la compilación no mostró advertencias.
+La compilación genera `frontend/dist`, que no debe incluirse en el repositorio. La última comprobación registrada (22 de noviembre de 2026, Node.js 24.18.0) reportó lint sin errores y compilación correcta, con el aviso conocido de Vite por un archivo JavaScript mayor de 500 kB (563 kB).
 
-`npm audit` es una comprobación adicional recomendada; no se reportó una ejecución nueva durante este cierre. El resultado de auditoría mencionado en la sección del override corresponde a evidencia histórica y no garantiza el estado actual de las dependencias.
+La última ejecución de `npm audit` registrada en el frontend (21 de noviembre de 2026) reportó 0 vulnerabilidades. El resultado de auditoría mencionado en la sección del override corresponde a evidencia histórica y no garantiza el estado actual de las dependencias.
 
 ### Backend
-
-Desde `backend`:
-
-```powershell
-npm test
-```
-
-La última ejecución compartida por el desarrollador durante la conexión del sprint 3 reportó 230 pruebas aprobadas, 0 fallidas, 0 omitidas y 0 canceladas. No se afirma que GitHub Actions u otro servicio haya ejecutado automáticamente esa suite ni que exista una ejecución posterior sobre cada merge.
-
-| Área | Pruebas |
-|---|---:|
-| Suite anterior y ampliación del filtro administrativo de rol | 88 |
-| Permisos y validaciones de grupos | 58 |
-| Recorridos transaccionales de gestión básica de grupos | 11 |
-| Asignación y retiro de participantes | 31 |
-| Resumen y progreso administrativo | 22 |
-| Categorías iniciales | 20 |
-| **Total** | **230** |
-
 Las pruebas utilizan Firebase y PostgreSQL simulados según el archivo; las del script de categorías inyectan un pool simulado. Comprueban validaciones, respuestas, parámetros y orden de consultas, confirmación o reversión solicitada y liberación de conexiones. No ejecutan migraciones ni la colección de Bruno y no sustituyen las pruebas con servicios reales.
 
 Un `ROLLBACK` solicitado a un cliente simulado no demuestra la reversión real de PostgreSQL. Los cambios simulados de permisos no prueban concurrencia real. Las comprobaciones sobre el texto SQL y las filas simuladas no recalculan agregados en una base real. El comando operativo completo de categorías y su entorno tampoco quedan cubiertos solo por las pruebas de su función exportada.
@@ -666,11 +525,15 @@ Organización de las solicitudes guardadas:
 | Carpeta o escenario | Numeración |
 |---|---|
 | Autenticación, perfiles y autorización | 1 a 61 |
-| Paneles, grupos y consulta de progreso / Gestión de grupos: gestión básica | 62 a 79 |
-| Gestión de grupos: detalle y estudiantes | 80 a 99 |
-| Gestión de grupos: asignación y retiro de maestros | 100 a 114 |
-| Resumen y progreso general | 115 a 137 |
-| Administración de usuarios: filtro de rol | 138 a 153 |
+| Paneles, grupos y consulta de progreso | 62 a 153 |
+| Lecciones y progreso | 154 a 201 |
+| Editor de contenido | 202 a 315 |
+| Certificados | 316 a 326 y 383 a 386 |
+| Verificación Correccion de los Grupos | 327 a 382 |
+| Validación de caracteres | 387 a 406 |
+| Permiso de edición | 407 a 438 |
+| Cambio de teléfono | 439 a 452 |
+| Foto de perfil | 453 a 480 |
 
 La numeración identifica escenarios y conserva la continuidad entre sprints; las carpetas los agrupan por propósito. Dentro de un recorrido puede ser necesario usar solicitudes anteriores para preparar o restaurar cuentas y grupos. Las consultas SQL manuales y las comprobaciones de interfaz no se cuentan como solicitudes adicionales de Bruno.
 
@@ -683,9 +546,9 @@ Configurar los valores en cada computadora sin publicar tokens ni datos personal
 | `{{baseUrl}}` | Origen local del backend, por ejemplo `http://localhost:3000`; las solicitudes de la colección agregan `/api` |
 | `{{tokenAdministrador}}` | Token vigente de la cuenta ficticia de administrador |
 | `{{tokenEstudiante}}` | Token vigente de la cuenta ficticia de estudiante |
-| `{{tokenNuevo}}` | Nombre histórico del token de la cuenta ficticia que se preparó como maestro |
+| `{{tokenMaestro}}` | Token vigente de la cuenta ficticia de maestro (antes `tokenNuevo`) |
 | `{{uidEstudiante}}` | UID de la cuenta ficticia de estudiante |
-| `{{uidNuevo}}` | Nombre histórico del UID de la cuenta ficticia preparada como maestro |
+| `{{uidMaestro}}` | UID de la cuenta ficticia de maestro (antes `uidNuevo`) |
 | `{{idGrupoAdministradorPrueba}}` | Identificador actual del grupo administrativo del escenario; en la comparación de progreso por grupos corresponde al grupo A preparado para esa prueba |
 | `{{idGrupoMaestroPrueba}}` | Identificador actual del grupo creado por el maestro en los escenarios que lo requieren |
 
@@ -744,24 +607,5 @@ Después del ajuste se reportaron:
 
 Revisar este override al actualizar Firebase. No conservarlo indefinidamente sin reevaluar su necesidad y compatibilidad.
 
-## Pendientes y limitaciones del incremento
-
-
-| Área | Pendiente o límite |
-|---|---|
-| Buscadores de participantes | Verificar varias páginas, especialmente cuando una página contiene solo candidatos maestros desactivados y existen candidatos activos después |
-| Detalle de grupo | Comprobar desde la interfaz conectada la presentación y el retiro de un estudiante desactivado; existe evidencia previa por API |
-| Progreso general | Verificar cuenta desactivada con progreso existente y el criterio de rol actual mediante un cambio de rol con historial educativo |
-| Categorías | Probar con un administrador realmente desactivado y comprobar en PostgreSQL una reversión después de una inserción previa; los mocks cubren el recorrido, no esa evidencia real |
-| Integridad y concurrencia | Verificar operaciones concurrentes y fallos o interrupciones reales, incluyendo asignaciones frente a cambios de rol o estado y eliminación de grupos |
-| Accesibilidad | Ampliar los recorridos con lector de pantalla y completar la evaluación pertinente de WCAG 2.2 AA; las comprobaciones parciales no acreditan conformidad total |
-| Autenticación web | Verificar reCAPTCHA real con el modo de prueba desactivado en un entorno autorizado |
-| Dependencias | Ejecutar una auditoría actual cuando corresponda y reevaluar el override temporal al actualizar Firebase |
-| Despliegue | Validar configuración y comportamiento en la VPS con dominio propio, HTTPS y entorno real; no se declara validado por las pruebas locales |
-| Experiencia educativa | Desarrollar el contenido, la consulta real de cursos y el guardado educativo conforme al alcance del siguiente sprint, sin confundirlos con la consulta de progreso ya implementada |
-
-La suite de 230 casos corresponde al backend y utiliza dependencias simuladas según el archivo. El frontend cuenta con lint, compilación y verificaciones manuales reportadas; no se afirma que exista una suite automatizada de interfaz o de extremo a extremo. La ausencia de errores nuevos en la consola durante una consulta concreta no acredita que todas las pantallas estén libres de errores.
-
-No incorporar certificados, QR, sistemas administrativos adicionales, infraestructura nueva o ampliaciones de alcance para resolver estos pendientes sin autorización. Mantener PostgreSQL como base de datos y Firebase Authentication como autenticación.
 
 

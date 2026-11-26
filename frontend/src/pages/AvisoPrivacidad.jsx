@@ -5,7 +5,7 @@ import PiePagina from '../components/PiePagina.jsx'
 import './AvisoPrivacidad.css'
 
 
-const ULTIMA_ACTUALIZACION = '26 de octubre de 2026'
+const ULTIMA_ACTUALIZACION = '26 de noviembre de 2026'
 
 function AvisoPrivacidad() {
   const tituloRef = useRef(null)
@@ -66,6 +66,10 @@ function AvisoPrivacidad() {
                   <strong>Tu apodo, si eliges uno.</strong> Solo se usa para saludarte.
                 </li>
                 <li>
+                  <strong>Tu foto de perfil, si eliges poner una.</strong> La pones o la quitas tú en
+                  Mi perfil. Se guarda en el servidor de Viva Tech.
+                </li>
+                <li>
                   <strong>Tu avance.</strong> Las lecciones que empiezas y terminas.
                 </li>
                 <li>
@@ -84,8 +88,23 @@ function AvisoPrivacidad() {
               <ul className="aviso__lista">
                 <li>Para que puedas entrar a la plataforma.</li>
                 <li>Para guardar tu avance y que tu maestra o maestro te acompañe.</li>
+                <li>Para que tu maestra o maestro te reconozca, si pusiste foto.</li>
                 <li>Para generar tus certificados.</li>
               </ul>
+            </section>
+
+            <section className="vt-stack vt-stack-sm" aria-labelledby="aviso-foto">
+              <h2 id="aviso-foto" className="vt-headline-sm">
+                ¿Quién puede ver tu foto?
+              </h2>
+              <p>
+                Solo tú, tu maestra o maestro de los grupos donde estás inscrito y los
+                administradores de Viva Tech. Tus compañeros ven tus iniciales, no tu foto. Tu foto
+                no aparece en los certificados.
+              </p>
+              <p>
+                Tu foto se borra cuando la quitas en Mi perfil o cuando se desactiva tu cuenta.
+              </p>
             </section>
 
             <section className="vt-stack vt-stack-sm" aria-labelledby="aviso-certificado">
@@ -105,8 +124,9 @@ function AvisoPrivacidad() {
               </h2>
               <p>
                 Tienes derecho a conocer qué datos tenemos, corregirlos, pedir que dejemos de
-                usarlos o que los eliminemos (derechos ARCO). Para hacerlo, pide apoyo a tu maestra
-                o maestro de Viva Tech.
+                usarlos o que los eliminemos (derechos ARCO). Tu nombre, tu apodo y tu foto los puedes
+                corregir o quitar tú en Mi perfil. Para todo lo demás, pide apoyo a tu maestra o
+                maestro de Viva Tech.
               </p>
             </section>
           </article>
