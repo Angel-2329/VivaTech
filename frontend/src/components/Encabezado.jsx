@@ -126,6 +126,7 @@ function Encabezado({ variante = 'acceso' }) {
           <MenuCuenta
             nombre={nombre}
             rol={usuario.rol}
+            usuario={usuario}
             saliendo={saliendo}
             errorSalida={errorSalida}
             onSalir={salir}

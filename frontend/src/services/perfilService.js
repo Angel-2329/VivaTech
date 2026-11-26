@@ -29,3 +29,7 @@ export async function guardarPerfil({ nombreCompleto, apodo }) {
     }
   }
 }
+
+export function actualizarPerfil(cambios) {
+  return solicitarApi('/perfil', { metodo: 'PATCH', datos: cambios })
+}

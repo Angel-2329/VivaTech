@@ -1,8 +1,10 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router'
+import FotoPerfil from './FotoPerfil.jsx'
 import { NOMBRE_DEL_ROL } from '../utils/formato.js'
 
 
-function MenuCuenta({ nombre, rol, saliendo, errorSalida, onSalir }) {
+function MenuCuenta({ nombre, rol, usuario, saliendo, errorSalida, onSalir }) {
   const [abierto, setAbierto] = useState(false)
   const idPanel = useId()
   const contenedor = useRef(null)
@@ -32,7 +34,6 @@ function MenuCuenta({ nombre, rol, saliendo, errorSalida, onSalir }) {
 
   
 
-  const inicial = nombre ? nombre[0].toUpperCase() : null
   const nombreVisible = nombre || 'Mi cuenta'
 
   return (
@@ -45,9 +46,12 @@ function MenuCuenta({ nombre, rol, saliendo, errorSalida, onSalir }) {
         aria-controls={idPanel}
         onClick={() => setAbierto((actual) => !actual)}
       >
-        <span className="vt-avatar" aria-hidden="true">
-          {inicial ?? <span className="vt-icon">person</span>}
-        </span>
+        <FotoPerfil
+          uid={usuario?.uid}
+          nombre={nombre}
+          tieneFoto={usuario?.tieneFoto}
+          fotoActualizada={usuario?.fotoActualizada}
+        />
         <span className="vt-cuenta__nombre">
           <span className="vt-visually-hidden">Mi cuenta: </span>
           {nombreVisible}
@@ -62,6 +66,17 @@ function MenuCuenta({ nombre, rol, saliendo, errorSalida, onSalir }) {
           <strong>{nombreVisible}</strong>
           {NOMBRE_DEL_ROL[rol] && <span className="vt-text-muted">{NOMBRE_DEL_ROL[rol]}</span>}
         </p>
+
+        <Link
+          className="vt-btn vt-btn-ghost vt-btn-sm vt-cuenta__salir"
+          to="/mi-perfil"
+          onClick={() => setAbierto(false)}
+        >
+          <span className="vt-icon" aria-hidden="true">
+            account_circle
+          </span>
+          Mi perfil
+        </Link>
 
         <button
           type="button"
