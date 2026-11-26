@@ -1,4 +1,5 @@
 import { useCallback, useId, useState } from 'react'
+import FotoPerfil from '../../components/FotoPerfil.jsx'
 import DialogoCambioTelefono from '../../components/admin/DialogoCambioTelefono.jsx'
 import DialogoConfirmacion from '../../components/panel/DialogoConfirmacion.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
@@ -251,8 +252,18 @@ function FilaCuenta({ cuenta, esPropia, onCambiarRol, onCambiarActivo, onCambiar
   return (
     <tr>
       <td data-label="Nombre">
-        <strong>{cuenta.nombreCompleto}</strong>
-        {cuenta.apodo && <span className="vt-text-muted"> ({cuenta.apodo})</span>}
+        <span className="foto-perfil-nombre">
+          <FotoPerfil
+            uid={cuenta.uid}
+            nombre={cuenta.nombreCompleto}
+            tieneFoto={cuenta.tieneFoto}
+            fotoActualizada={cuenta.fotoActualizada}
+          />
+          <span>
+            <strong>{cuenta.nombreCompleto}</strong>
+            {cuenta.apodo && <span className="vt-text-muted"> ({cuenta.apodo})</span>}
+          </span>
+        </span>
       </td>
       <td data-label="Rol">
         <span className="vt-role-tag">{NOMBRE_DEL_ROL[cuenta.rol]}</span>

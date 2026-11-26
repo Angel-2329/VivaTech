@@ -4,6 +4,7 @@ import RutaProtegida from './components/RutaProtegida.jsx'
 import AvisoSinConexion from './components/AvisoSinConexion.jsx'
 import Acceso from './pages/Acceso.jsx'
 import PrimerAcceso from './pages/PrimerAcceso.jsx'
+import MiPerfil from './pages/MiPerfil.jsx'
 import AvisoPrivacidad from './pages/AvisoPrivacidad.jsx'
 import InicioEstudiante from './pages/estudiante/InicioEstudiante.jsx'
 import CursosDisponibles from './pages/estudiante/CursosDisponibles.jsx'
@@ -71,6 +72,10 @@ function App() {
         {/* Cualquier persona que ya confirmó su código */}
         <Route element={<RutaProtegida />}>
           <Route path="/bienvenida" element={<PrimerAcceso />} />
+        </Route>
+
+        <Route element={<RutaProtegida roles={['estudiante', 'maestro', 'administrador']} />}>
+          <Route path="/mi-perfil" element={<MiPerfil />} />
         </Route>
 
         {/* Solo estudiantes */}

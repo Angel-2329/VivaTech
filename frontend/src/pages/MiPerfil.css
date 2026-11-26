@@ -1,0 +1,6 @@
+.mi-perfil__foto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--vt-space-lg, 1.5rem);
+}

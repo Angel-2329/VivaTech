@@ -1,0 +1,21 @@
+.foto-perfil {
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.foto-perfil--sm {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.foto-perfil--lg {
+  width: 8rem;
+  height: 8rem;
+  font-size: var(--vt-headline-lg, 2rem);
+}
+
+.foto-perfil-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vt-space-sm, 0.5rem);
+}

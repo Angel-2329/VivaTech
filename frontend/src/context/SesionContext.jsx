@@ -139,6 +139,10 @@ export function SesionProvider({ children }) {
     }
   }, [refrescarPerfil])
 
+  const actualizarUsuario = useCallback((cambios) => {
+    setUsuario((anterior) => (anterior ? { ...anterior, ...cambios } : anterior))
+  }, [])
+
   async function cerrarSesion() {
     await signOut(auth)
 
@@ -157,6 +161,7 @@ export function SesionProvider({ children }) {
         errorSesion,
         mensajeSesion,
         refrescarPerfil,
+        actualizarUsuario,
         cerrarSesion,
       }}
     >
