@@ -23,7 +23,7 @@ const ERRORES_FOTO = {
   foto_requerida: 'No recibimos la foto. Elígela otra vez.',
   foto_muy_grande: 'La foto es muy pesada. Elige otra foto.',
   formato_no_permitido: 'Ese tipo de imagen no se puede usar. Elige una foto en formato JPG, PNG o WebP.',
-  perfil_no_actualizado: 'Tu cuenta ya no está activa, así que no pudimos guardar la foto.',
+  perfil_no_actualizado: 'Tu perfil cambió o ya no está disponible. Vuelve a cargar la página.',
   foto_no_disponible: 'Por ahora no podemos guardar fotos. Inténtalo más tarde.',
 }
 
