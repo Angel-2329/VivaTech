@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { anioEmision, fechaLarga, urlVerificacion } from '../../utils/certificados.js'
+import { anioEmision, fechaLarga, textoDuracion, urlVerificacion } from '../../utils/certificados.js'
 import './Certificado.css'
 
 
@@ -41,6 +41,9 @@ function Certificado({ certificado }) {
           <p className="certificado__nombre">{certificado.nombreCompleto}</p>
           <p className="certificado__frase">por completar el curso</p>
           <p className="certificado__curso">{certificado.tituloCurso}</p>
+          {textoDuracion(certificado.duracionMinutos) && (
+            <p className="certificado__duracion">Duración aproximada: {textoDuracion(certificado.duracionMinutos)}</p>
+          )}
         </div>
 
         {certificado.lecciones?.length > 0 && (

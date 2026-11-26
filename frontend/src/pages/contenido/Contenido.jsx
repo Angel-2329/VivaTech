@@ -188,7 +188,7 @@ function Contenido() {
       descripcion={
         esAdmin
           ? 'Organiza las categorías y los cursos de todos los maestros.'
-          : 'Crea tus cursos y publícalos cuando estén listos. Puedes ver los de otros maestros, pero solo editar los tuyos.'
+          : 'Crea tus cursos y publícalos cuando estén listos. Puedes ver los de otros maestros, pero solo editar los tuyos y aquellos en los que un administrador te dio permiso.'
       }
       regresarA={esAdmin ? '/admin' : '/maestro'}
       textoRegresar="Regresar al inicio"

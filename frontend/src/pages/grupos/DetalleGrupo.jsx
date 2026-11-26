@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router'
 import BuscadorPersonas from '../../components/grupos/BuscadorPersonas.jsx'
+import FotoPerfil from '../../components/FotoPerfil.jsx'
 import BarraAvance from '../../components/panel/BarraAvance.jsx'
 import DialogoConfirmacion from '../../components/panel/DialogoConfirmacion.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
@@ -421,7 +422,15 @@ function TablaEstudiantes({
                       </label>
                     </td>
                     <td data-label="Estudiante">
-                      <strong>{estudiante.nombreCompleto}</strong>
+                      <span className="foto-perfil-nombre">
+                        <FotoPerfil
+                          uid={estudiante.uid}
+                          nombre={estudiante.nombreCompleto}
+                          tieneFoto={estudiante.tieneFoto}
+                          fotoActualizada={estudiante.fotoActualizada}
+                        />
+                        <strong>{estudiante.nombreCompleto}</strong>
+                      </span>
                       <span className={estudiante.activo ? 'vt-badge vt-badge-success' : 'vt-badge vt-badge-neutral'}>
                         {estudiante.activo ? 'Cuenta activa' : 'Cuenta desactivada'}
                       </span>

@@ -1,6 +1,8 @@
 import {
+  PhoneAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  updatePhoneNumber,
 } from 'firebase/auth'
 
 import { auth } from '../config/firebase.js'
@@ -41,4 +43,26 @@ export async function confirmarCodigoFirebase(confirmacion, codigo) {
   }
 
   return confirmacion.confirm(codigo)
+}
+
+export async function enviarCodigoCambioTelefono(telefono, verificador) {
+  if (typeof telefono !== 'string' || !/^\d{10}$/.test(telefono)) {
+    throw new Error('Escribe los 10 números de tu celular')
+  }
+
+  return new PhoneAuthProvider(auth).verifyPhoneNumber(`+52${telefono}`, verificador)
+}
+
+export async function confirmarCambioTelefono(idVerificacion, codigo) {
+  if (!auth.currentUser) {
+    throw new Error('Tu sesión terminó. Vuelve a entrar.')
+  }
+
+  const credencial = PhoneAuthProvider.credential(idVerificacion, codigo)
+  await updatePhoneNumber(auth.currentUser, credencial)
+  return auth.currentUser.phoneNumber
+}
+
+export function telefonoDeLaSesion() {
+  return auth.currentUser?.phoneNumber ?? null
 }
