@@ -71,6 +71,10 @@ function DialogoCambioTelefono({ cuenta, onCerrar, onCambiado }) {
       if (ERRORES_DEL_CAMPO[error.codigo]) {
         setEtapa('escribir')
         setErrorCampo(ERRORES_DEL_CAMPO[error.codigo])
+      } else if (error.estado === 503 && !error.codigo) {
+        setErrorGeneral(
+          'No pudimos confirmar el cambio. Es posible que el número sí haya cambiado; revísalo antes de intentar de nuevo.',
+        )
       } else {
         setErrorGeneral(
           ERRORES_GENERALES[error.codigo] ?? (error.message || 'No pudimos cambiar el número. Inténtalo otra vez.'),
