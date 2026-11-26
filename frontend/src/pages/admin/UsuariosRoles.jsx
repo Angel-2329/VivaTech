@@ -1,4 +1,5 @@
 import { useCallback, useId, useState } from 'react'
+import DialogoCambioTelefono from '../../components/admin/DialogoCambioTelefono.jsx'
 import DialogoConfirmacion from '../../components/panel/DialogoConfirmacion.jsx'
 import PlantillaPanel from '../../components/panel/PlantillaPanel.jsx'
 import Paginacion from '../../components/panel/Paginacion.jsx'
@@ -42,6 +43,7 @@ function UsuariosRoles() {
   const [cambio, setCambio] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [errorCambio, setErrorCambio] = useState('')
+  const [cuentaTelefono, setCuentaTelefono] = useState(null)
 
   function manejarBusqueda(evento) {
     evento.preventDefault()
@@ -55,6 +57,17 @@ function UsuariosRoles() {
     if (cargando || guardando) return
     setMensaje('')
     setPagina(nuevaPagina)
+  }
+
+  function abrirCambioTelefono(cuenta) {
+    if (guardando) return
+    setMensaje('')
+    setCuentaTelefono(cuenta)
+  }
+
+  function terminarCambioTelefono(texto) {
+    setCuentaTelefono(null)
+    setMensaje(texto)
   }
 
   function pedirConfirmacion(tipo, cuenta, valor) {
@@ -91,7 +104,7 @@ function UsuariosRoles() {
   return (
     <PlantillaPanel
       titulo="Cuentas y roles"
-      descripcion="Busca a una persona para cambiar su rol o desactivar su cuenta."
+      descripcion="Busca a una persona para cambiar su rol, su número de celular o desactivar su cuenta."
       regresarA="/admin"
       textoRegresar="Regresar al inicio"
     >
@@ -168,6 +181,7 @@ function UsuariosRoles() {
                   esPropia={cuenta.uid === usuario.uid}
                   onCambiarRol={(rol) => pedirConfirmacion('rol', cuenta, rol)}
                   onCambiarActivo={() => pedirConfirmacion('activo', cuenta, !cuenta.activo)}
+                  onCambiarTelefono={() => abrirCambioTelefono(cuenta)}
                 />
               ))}
             </tbody>
@@ -195,6 +209,15 @@ function UsuariosRoles() {
       >
         <p>{explicacionDelCambio(cambio)}</p>
       </DialogoConfirmacion>
+
+      {cuentaTelefono && (
+        <DialogoCambioTelefono
+          key={cuentaTelefono.uid}
+          cuenta={cuentaTelefono}
+          onCerrar={() => setCuentaTelefono(null)}
+          onCambiado={terminarCambioTelefono}
+        />
+      )}
     </PlantillaPanel>
   )
 }
@@ -221,7 +244,7 @@ function explicacionDelCambio(cambio) {
     : 'No podrá entrar a Viva Tech hasta que reactives su cuenta. Su avance no se borra.'
 }
 
-function FilaCuenta({ cuenta, esPropia, onCambiarRol, onCambiarActivo }) {
+function FilaCuenta({ cuenta, esPropia, onCambiarRol, onCambiarActivo, onCambiarTelefono }) {
   const [rolElegido, setRolElegido] = useState(cuenta.rol)
   const id = useId()
 
@@ -277,6 +300,13 @@ function FilaCuenta({ cuenta, esPropia, onCambiarRol, onCambiarActivo }) {
             >
               {cuenta.activo ? 'Desactivar' : 'Reactivar'}
               <span className="vt-visually-hidden"> la cuenta de {cuenta.nombreCompleto}</span>
+            </button>
+            <button type="button" className="vt-btn vt-btn-ghost vt-btn-sm" onClick={onCambiarTelefono}>
+              <span className="vt-icon" aria-hidden="true">
+                phone_iphone
+              </span>
+              Cambiar teléfono
+              <span className="vt-visually-hidden"> de {cuenta.nombreCompleto}</span>
             </button>
           </div>
         )}

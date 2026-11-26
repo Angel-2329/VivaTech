@@ -65,3 +65,10 @@ export function quitarPermisoEditor(idCurso, uid) {
     { metodo: 'DELETE' },
   )
 }
+
+export function cambiarTelefono(uid, telefono) {
+  return solicitarApi(`/admin/usuarios/${encodeURIComponent(uid)}/telefono`, {
+    metodo: 'PATCH',
+    datos: { telefono },
+  })
+}
