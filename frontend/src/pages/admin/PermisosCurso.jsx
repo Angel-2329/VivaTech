@@ -190,7 +190,7 @@ function PermisosCurso() {
               <span className="vt-icon" aria-hidden="true">
                 lock
               </span>
-              <p className="vt-alert__content">Este curso fue retirado: ya no se pueden dar permisos nuevos.</p>
+              <p className="vt-alert__content">Este curso fue retirado: ya no se pueden dar permisos nuevos, pero sí puedes quitar los que tenga.</p>
             </div>
           ) : (
             <section className="vt-card vt-stack" aria-labelledby="titulo-dar-permiso">
