@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import FotoPerfil from '../components/FotoPerfil.jsx'
+import CambioTelefonoPropio from '../components/perfil/CambioTelefonoPropio.jsx'
 import DialogoConfirmacion from '../components/panel/DialogoConfirmacion.jsx'
 import PlantillaPanel from '../components/panel/PlantillaPanel.jsx'
 import { MensajeExito } from '../components/panel/EstadosCarga.jsx'
@@ -25,6 +26,8 @@ const ERRORES_FOTO = {
   perfil_no_actualizado: 'Tu cuenta ya no está activa, así que no pudimos guardar la foto.',
   foto_no_disponible: 'Por ahora no podemos guardar fotos. Inténtalo más tarde.',
 }
+
+const CAMBIO_TELEFONO_ACTIVO = import.meta.env.VITE_CAMBIO_TELEFONO !== 'false'
 
 const CAMPO_DEL_ERROR = {
   nombre_completo_invalido: 'nombre',
@@ -53,7 +56,11 @@ function MiPerfil() {
   return (
     <PlantillaPanel
       titulo="Mi perfil"
-      descripcion="Aquí puedes poner tu foto y corregir tu nombre o tu apodo."
+      descripcion={
+        CAMBIO_TELEFONO_ACTIVO
+          ? 'Aquí puedes poner tu foto, corregir tu nombre o tu apodo y cambiar tu número de celular.'
+          : 'Aquí puedes poner tu foto y corregir tu nombre o tu apodo.'
+      }
       regresarA={rutaDeInicio(usuario)}
       textoRegresar="Regresar al inicio"
     >
@@ -77,6 +84,10 @@ function MiPerfil() {
         }}
         onLimpiarMensaje={() => setMensaje('')}
       />
+
+      {CAMBIO_TELEFONO_ACTIVO && (
+        <CambioTelefonoPropio onCambiado={avisar} onLimpiarMensaje={() => setMensaje('')} />
+      )}
     </PlantillaPanel>
   )
 }
@@ -368,8 +379,10 @@ function SeccionDatos({ usuario, onGuardado, onLimpiarMensaje }) {
         Tus datos
       </h2>
       <p className="vt-text-muted">
-        Rol: {NOMBRE_DEL_ROL[usuario.rol]}. Tu número de celular no se puede cambiar desde aquí; si cambiaste de número,
-        pide apoyo a un administrador.
+        Rol: {NOMBRE_DEL_ROL[usuario.rol]}.
+        {CAMBIO_TELEFONO_ACTIVO
+          ? ' Tu número de celular se cambia más abajo.'
+          : ' Si cambiaste de número de celular, pide apoyo a un administrador.'}
       </p>
 
       <form className="vt-stack" onSubmit={manejarEnvio} noValidate>
