@@ -50,6 +50,18 @@ function TarjetaCursoEditor({ curso, usuario, categorias, bloqueado, onPedirAcci
         </p>
       )}
 
+      {retirado && esAdmin && (
+        <div>
+          <Link className="vt-btn vt-btn-ghost vt-btn-sm" to={`${rutaEditor}/permisos`}>
+            <span className="vt-icon" aria-hidden="true">
+              group_add
+            </span>
+            Permisos de edición
+            <span className="vt-visually-hidden"> de {curso.titulo}</span>
+          </Link>
+        </div>
+      )}
+
       {!retirado && !curso.puedeEditar && (
         <div className="vt-stack vt-stack-sm">
           <p className="vt-body-sm vt-text-muted">
