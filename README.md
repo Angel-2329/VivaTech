@@ -2,7 +2,7 @@
 
 Plataforma educativa para la alfabetización digital de personas adultas, con enfoque en simplicidad, seguridad y accesibilidad.
 
-El proyecto se desarrolla con Scrum, un modelo de prototipos, cinco integrantes, nueve semanas operativas y cuatro sprints.
+El proyecto se desarrolla con Scrum, un modelo de prototipos, dos integrantes, ocho semanas operativas y cuatro sprints.
 
 ## Estado del prototipo
 
@@ -39,10 +39,11 @@ Incorporado en el sprint 4:
 - Nombres de grupo únicos en el sistema y títulos de curso únicos por categoría.
 - Validación de caracteres en nombres de grupo, nombre completo y apodo.
 - Cambio del número de teléfono de una cuenta por el administrador, con registro de quién hizo el cambio.
+- Cambio del número de teléfono por la propia persona desde «Mi perfil», con código SMS al número nuevo; el UID de la cuenta no cambia.
 - Foto de perfil guardada en el servidor, visible solo para la persona, el administrador y sus maestros.
 - PWA mínima: manifiesto, íconos, instalación y aviso sin conexión, sin service worker ni datos privados guardados en el dispositivo.
 
-Las pantallas de permiso de edición, cambio de teléfono y foto de perfil, y el cambio de teléfono por la propia persona, se incorporan solo si llegan a `integracion` antes de la congelación del 26 de noviembre de 2026; la API correspondiente ya está integrada.
+Las pantallas de permiso de edición, cambio de teléfono por el administrador y por la propia persona, y foto de perfil se integraron en `integracion` el 26 de noviembre de 2026, junto con su API. El cambio de teléfono por la propia persona solo se ha probado con números de prueba de Firebase; si la prueba con SMS real falla, la opción se oculta con `VITE_CAMBIO_TELEFONO=false`.
 
 El prototipo cuenta con verificaciones locales y limitaciones explícitas; no está validado como listo para producción ni acredita conformidad completa con WCAG 2.2 AA. El merge a `integracion` no sustituye las pruebas conjuntas ni la aceptación formal del incremento.
 
@@ -171,11 +172,14 @@ VITE_FIREBASE_AUTH_TESTING=true
 VITE_API_URL=http://localhost:3000/api
 
 VITE_URL_PUBLICA=
+
+VITE_CAMBIO_TELEFONO=true
 ```
 
 Los valores de Firebase deben pertenecer a la aplicación web del proyecto utilizado por el backend.
 
 - `VITE_URL_PUBLICA` es el origen HTTPS público del frontend, sin `/` final (por ejemplo `https://tu-dominio`). Se usa para el QR y el enlace de LinkedIn del certificado. Si está vacía o apunta a `localhost` o a una IP privada, el certificado no muestra el QR ni el enlace.
+- `VITE_CAMBIO_TELEFONO` controla la opción «Cambiar mi número» de «Mi perfil». Con `false` la opción se oculta; con cualquier otro valor, o si falta, se muestra. Después de cambiarla hay que volver a generar el build.
 
 - Vite carga `.env.local`.
 - Las variables `VITE_*` pueden quedar expuestas en el código del navegador: no colocar claves privadas ni credenciales de Firebase Admin.
