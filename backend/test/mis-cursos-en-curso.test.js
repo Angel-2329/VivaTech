@@ -313,14 +313,10 @@ test('GET mis-cursos/en-curso: datos inconsistentes devuelven 503', async (t) =>
   assert.equal((await respuesta.json()).codigo, 'mis_cursos_no_disponible');
 });
 
-test('GET mis-cursos: la ruta vieja (22.5) sigue respondiendo con su forma', async (t) => {
-  t.mock.timers.enable({ apis: ['Date'], now: AHORA });
-  simular(t, { filas: [{ ...enCurso('10', '2026-11-08T10:00:00.000Z') }] });
+test('GET mis-cursos: la ruta vieja (22.5) ya no existe y responde 404 sin consultar', async (t) => {
+  const { verificar, consulta } = simular(t, { filas: [{ ...enCurso('10', '2026-11-08T10:00:00.000Z') }] });
   const respuesta = await fetch(base, { headers: { Authorization: 'Bearer token-prueba' } });
-  assert.equal(respuesta.status, 200);
-  const cuerpo = await respuesta.json();
-  assert.deepEqual(Object.keys(cuerpo[0]), ['idCategoria', 'nombre', 'cursos']);
-  assert.deepEqual(Object.keys(cuerpo[0].cursos[0]), [
-    'idCurso', 'titulo', 'descripcion', 'estadoCurso', 'fechaCierre', 'cursoCompletado', 'certificado', 'lecciones'
-  ]);
+  assert.equal(respuesta.status, 404);
+  assert.equal(verificar.mock.callCount(), 0);
+  assert.equal(consulta.mock.callCount(), 0);
 });
