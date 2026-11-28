@@ -554,5 +554,1621 @@
         ]
       }
     ]
+  },
+  {
+    "claveCarga": "banca-movil-segura",
+    "categoria": "Banca móvil",
+    "orden": 20,
+    "titulo": "Tu banco en el celular, sin miedo",
+    "descripcion": "Acompaña a Doña Rosa a usar la aplicación de su banco: entrar de forma segura, revisar su dinero y descubrir mensajes falsos antes de que la engañen.",
+    "lecciones": [
+      {
+        "orden": 1,
+        "titulo": "Doña Rosa estrena su aplicación del banco",
+        "duracionEstimadaMinutos": 10,
+        "objetivo": "Instalar la aplicación verdadera del banco, entrar de forma segura y elegir una conexión de confianza.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Te presentamos a Doña Rosa. Su hija le dijo que ya puede ver su sueldo desde el celular, sin hacer fila. Hoy la vas a ayudar a empezar con el pie derecho.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "waving_hand",
+                "alt": "Saludo de Doña Rosa"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Vas a instalar la aplicación correcta.",
+                  "Vas a entrar sin compartir tu contraseña con nadie.",
+                  "Vas a elegir una conexión segura."
+                ]
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Dato real: según el Buró de Entidades Financieras de la Condusef, en el primer semestre de 2026 hubo 2.52 millones de reclamaciones por posibles fraudes en bancos."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "A Doña Rosa le llega este SMS: \"BANCO EJEMPLO: descarga nuestra nueva app aquí y gana $500: be-app.invalid\".",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "sms",
+                "alt": "Mensaje de texto"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué le recomiendas?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Que toque el enlace para ganar los $500"
+                },
+                {
+                  "id": "b",
+                  "texto": "Que busque la aplicación en la tienda oficial de su celular"
+                },
+                {
+                  "id": "c",
+                  "texto": "Que reenvíe el mensaje a sus amigas"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Los premios rápidos y los enlaces en mensajes son la trampa más común.",
+              "mensajeAcierto": "¡Exacto! Las aplicaciones del banco se instalan solo desde Play Store o App Store."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Doña Rosa abrió la tienda de aplicaciones y escribió \"Banco Ejemplo\". Salen tres resultados parecidos. Toca el que sí es del banco.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Tienda de aplicaciones",
+                "subtitulo": "Resultados para: Banco Ejemplo"
+              },
+              "opciones": [
+                {
+                  "id": "falsa1",
+                  "texto": "Banco Ejemplo PLUS · Bonos gratis MX",
+                  "icono": "redeem"
+                },
+                {
+                  "id": "oficial",
+                  "texto": "Banco Ejemplo · Creador: Banco Ejemplo S.A.",
+                  "icono": "verified"
+                },
+                {
+                  "id": "falsa2",
+                  "texto": "Banco Ejemplo Préstamos YA · Apps Rápidas",
+                  "icono": "bolt"
+                }
+              ],
+              "correcta": "oficial",
+              "pista": "Fíjate en el creador: debe ser el mismo banco. Desconfía de \"gratis\", \"bonos\" o \"YA\".",
+              "mensajeAcierto": "¡Muy bien! El creador es el propio banco: esa es la aplicación verdadera."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Para entrar, la aplicación pide tu huella, tu cara o una contraseña. Esa llave es solo tuya, como la de tu casa.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "key",
+                "alt": "Llave"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "No le digas tu contraseña a nadie, ni a familiares.",
+                  "No la anotes en un papel junto al celular.",
+                  "Si alguien la vio, cámbiala desde la aplicación."
+                ]
+              },
+              {
+                "tipo": "aviso",
+                "texto": "El banco nunca te pide tu contraseña, tu NIP ni tus códigos por llamada, mensaje o correo."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Doña Rosa ya instaló la aplicación verdadera. Ayúdala a entrar con su huella.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Bienvenida, Rosa",
+                "subtitulo": "¿Cómo quieres entrar?"
+              },
+              "opciones": [
+                {
+                  "id": "huella",
+                  "texto": "Entrar con huella",
+                  "icono": "fingerprint"
+                },
+                {
+                  "id": "olvide",
+                  "texto": "Olvidé mi contraseña",
+                  "icono": "help"
+                },
+                {
+                  "id": "nueva",
+                  "texto": "Abrir una cuenta nueva",
+                  "icono": "person_add"
+                }
+              ],
+              "correcta": "huella",
+              "pista": "Busca el dibujo de la huella digital.",
+              "mensajeAcierto": "¡Adentro! Entrar con tu huella es rápido y nadie más puede usarla."
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Doña Rosa está en la plaza. Su celular le ofrece \"WiFi_Gratis_Plaza\" y quiere revisar si ya le llegó su sueldo.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "wifi_off",
+                "alt": "Wifi público inseguro"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué es lo más seguro?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Conectarse al wifi gratis de la plaza"
+                },
+                {
+                  "id": "b",
+                  "texto": "Usar sus datos móviles o esperar al internet de su casa"
+                },
+                {
+                  "id": "c",
+                  "texto": "Pedirle el celular a un desconocido"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Una red pública puede ser falsa y alguien podría ver lo que haces.",
+              "mensajeAcierto": "¡Correcto! Para tu banco, usa tus datos o el internet de tu casa."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 2,
+        "titulo": "¿Dónde está mi dinero? Saldo y movimientos",
+        "duracionEstimadaMinutos": 12,
+        "objetivo": "Consultar el saldo, leer la lista de movimientos y actuar ante un cargo que no reconoces.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Doña Rosa quiere saber si ya le depositaron su sueldo. Para eso existen dos palabras clave: saldo y movimientos.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "account_balance_wallet",
+                "alt": "Cartera"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Saldo: el dinero que tienes hoy.",
+                  "Movimientos: la lista de lo que entró (+) y lo que salió (−).",
+                  "Lo más reciente siempre aparece hasta arriba."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Estás en el inicio de la aplicación de Doña Rosa. Toca el botón para ver cuánto dinero tiene.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Inicio",
+                "subtitulo": "Hola, Rosa. ¿Qué quieres hacer hoy?"
+              },
+              "opciones": [
+                {
+                  "id": "saldo",
+                  "texto": "Consultar saldo",
+                  "icono": "account_balance_wallet"
+                },
+                {
+                  "id": "transferir",
+                  "texto": "Transferir",
+                  "icono": "swap_horiz"
+                },
+                {
+                  "id": "pagar",
+                  "texto": "Pagar servicios",
+                  "icono": "receipt_long"
+                },
+                {
+                  "id": "ayuda",
+                  "texto": "Ayuda",
+                  "icono": "help"
+                }
+              ],
+              "correcta": "saldo",
+              "pista": "Busca la palabra \"saldo\" o el dibujo de la cartera.",
+              "mensajeAcierto": "¡Muy bien! Su saldo es de $4,830.00."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Ahora Doña Rosa quiere confirmar que llegó su sueldo. Toca el movimiento que es el depósito.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Movimientos",
+                "subtitulo": "Saldo disponible: $4,830.00"
+              },
+              "opciones": [
+                {
+                  "id": "sueldo",
+                  "texto": "+ $3,500.00 · Depósito de sueldo · Hoy",
+                  "icono": "arrow_downward"
+                },
+                {
+                  "id": "farmacia",
+                  "texto": "− $214.50 · Farmacia del Centro · Ayer",
+                  "icono": "arrow_upward"
+                },
+                {
+                  "id": "luz",
+                  "texto": "− $486.00 · Pago Luz del Valle · 18 nov",
+                  "icono": "arrow_upward"
+                }
+              ],
+              "correcta": "sueldo",
+              "pista": "El dinero que entra lleva el signo de más (+).",
+              "mensajeAcierto": "¡Exacto! El signo + indica que el dinero entró a la cuenta."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Doña Rosa revisa con calma y algo no le cuadra. Toca el cargo que ella NO hizo.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Movimientos",
+                "subtitulo": "Revisa cada cargo con calma"
+              },
+              "opciones": [
+                {
+                  "id": "farmacia",
+                  "texto": "− $214.50 · Farmacia del Centro · Ayer",
+                  "icono": "local_pharmacy"
+                },
+                {
+                  "id": "tienda",
+                  "texto": "− $1,899.00 · TIENDA ONLINE XZ · Ayer 3:12 a. m.",
+                  "icono": "warning"
+                },
+                {
+                  "id": "luz",
+                  "texto": "− $486.00 · Pago Luz del Valle · 18 nov",
+                  "icono": "bolt"
+                }
+              ],
+              "correcta": "tienda",
+              "pista": "Ella no compra en internet y menos a las 3 de la mañana.",
+              "mensajeAcierto": "¡Bien visto! Un cargo que no reconoces puede ser un fraude. Hay que actuar ya."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Para que no le cobren más, ayúdala a bloquear su tarjeta desde la aplicación.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Mi tarjeta",
+                "subtitulo": "Tarjeta de débito terminación 4417"
+              },
+              "opciones": [
+                {
+                  "id": "bloquear",
+                  "texto": "Bloquear tarjeta",
+                  "icono": "credit_card_off"
+                },
+                {
+                  "id": "limite",
+                  "texto": "Cambiar límite de compras",
+                  "icono": "tune"
+                },
+                {
+                  "id": "puntos",
+                  "texto": "Ver mis puntos",
+                  "icono": "stars"
+                }
+              ],
+              "correcta": "bloquear",
+              "pista": "Busca la tarjeta con una raya encima.",
+              "mensajeAcierto": "¡Listo! Con la tarjeta bloqueada nadie puede hacer más compras con ella."
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "La tarjeta ya está bloqueada.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "support_agent",
+                "alt": "Atención del banco"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué más debe hacer Doña Rosa?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Nada, ya está segura"
+                },
+                {
+                  "id": "b",
+                  "texto": "Reportar el cargo al banco hoy y guardar el folio del reporte"
+                },
+                {
+                  "id": "c",
+                  "texto": "Publicarlo en sus redes sociales"
+                }
+              ],
+              "correcta": "b",
+              "pista": "El banco tiene un tiempo para revisar el cargo, pero tú debes avisarle.",
+              "mensajeAcierto": "¡Correcto! Reportar pronto y guardar el folio ayuda a que te devuelvan tu dinero."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 3,
+        "titulo": "¿Real o fraude? Mensajes falsos del banco",
+        "duracionEstimadaMinutos": 15,
+        "objetivo": "Reconocer las señales de mensajes y llamadas falsas a nombre del banco y saber qué hacer.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Los estafadores se disfrazan de banco. Escriben con prisa, con miedo o con premios para que no pienses. Con estas tres señales Doña Rosa ya no cae.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "detective",
+                "alt": "Detective"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Prisa o amenaza: \"tu cuenta será bloqueada HOY\".",
+                  "Te piden contraseña, NIP o el código que te llegó por SMS.",
+                  "Traen un enlace raro o con faltas de ortografía."
+                ]
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Ningún banco te pide datos confidenciales por mensaje, llamada o correo. Si te los piden, es fraude."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Juego: a Doña Rosa le llegaron tres mensajes. Solo uno es falso.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "sms",
+                "alt": "Mensajes de texto"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Cuál es el mensaje falso?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Banco Ejemplo: Recibiste un depósito de $3,500.00. No compartas tus claves."
+                },
+                {
+                  "id": "b",
+                  "texto": "BANC0 EJEMPLO: Tu cuenta fue bloqueada. Actívala YA en be-seguro.invalid"
+                },
+                {
+                  "id": "c",
+                  "texto": "Banco Ejemplo: Tu pago a Luz del Valle por $486.00 se realizó."
+                }
+              ],
+              "correcta": "b",
+              "pista": "Mira bien cómo escriben \"BANCO\" y qué te piden hacer.",
+              "mensajeAcierto": "¡Detective! Tenía un cero en vez de O, prisa y un enlace raro."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Segunda ronda, más difícil. Los tres parecen del banco.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Cuál es el mensaje falso?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Banco Ejemplo: Hiciste una compra de $214.50 en Farmacia del Centro."
+                },
+                {
+                  "id": "b",
+                  "texto": "Banco Ejemplo: Para cancelar un cargo de $9,800 responde con el código que te enviamos."
+                },
+                {
+                  "id": "c",
+                  "texto": "Banco Ejemplo: Tu estado de cuenta ya está disponible en la aplicación."
+                }
+              ],
+              "correcta": "b",
+              "pista": "¿Cuál te pide un código? El código es como tu firma.",
+              "mensajeAcierto": "¡Excelente! Pedir el código es la señal más clara de fraude."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Suena el teléfono: \"Hola, le hablo del área de seguridad de Banco Ejemplo. Para proteger su cuenta, díctame el código que le acaba de llegar\".",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "call",
+                "alt": "Llamada"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué hace Doña Rosa?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Le dicta el código porque suena amable"
+                },
+                {
+                  "id": "b",
+                  "texto": "Cuelga y llama ella al número que viene atrás de su tarjeta"
+                },
+                {
+                  "id": "c",
+                  "texto": "Le da su NIP para que la ayude más rápido"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Un empleado del banco nunca necesita tu código ni tu NIP.",
+              "mensajeAcierto": "¡Exacto! Colgar y llamar tú al número oficial te protege."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Doña Rosa quiere avisarle al banco del mensaje falso. Toca la opción correcta.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Ayuda",
+                "subtitulo": "¿En qué te podemos ayudar?"
+              },
+              "opciones": [
+                {
+                  "id": "reportar",
+                  "texto": "Reportar un fraude o mensaje falso",
+                  "icono": "report"
+                },
+                {
+                  "id": "preguntas",
+                  "texto": "Preguntas frecuentes",
+                  "icono": "help"
+                },
+                {
+                  "id": "sucursal",
+                  "texto": "Buscar sucursal",
+                  "icono": "location_on"
+                }
+              ],
+              "correcta": "reportar",
+              "pista": "Busca la opción que habla de fraude.",
+              "mensajeAcierto": "¡Muy bien! Al reportarlo también ayudas a proteger a otras personas."
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Doña Rosa ya sabe la regla de oro: si un mensaje te mete prisa o te pide datos, detente, no toques nada y verifica tú por un canal oficial.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "verified_user",
+                "alt": "Escudo de seguridad"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "No toques enlaces de mensajes inesperados.",
+                  "No compartas contraseña, NIP ni códigos.",
+                  "Llama tú al número de tu tarjeta.",
+                  "Cuéntaselo a tu familia: así también los cuidas."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          }
+        ]
+      },
+      {
+        "orden": 4,
+        "titulo": "Reto final: Doña Rosa contra el estafador",
+        "duracionEstimadaMinutos": 10,
+        "objetivo": "Aplicar todo lo aprendido en una situación completa, de la alerta falsa al bloqueo de la tarjeta.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Es domingo en la noche. A Doña Rosa le llega un mensaje alarmante. Ahora tú tomas todas las decisiones. ¿Te animas?",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "emoji_events",
+                "alt": "Trofeo"
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Todo es una práctica: nadie usa dinero real."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "El mensaje dice: \"Banco Ejemplo: detectamos una compra de $7,450. Si no fuiste tú entra YA a be-ayuda.invalid\".",
+            "recursos": [],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Cuál es el primer paso correcto?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Entrar al enlace para cancelar la compra"
+                },
+                {
+                  "id": "b",
+                  "texto": "No tocar el enlace y abrir la aplicación oficial del banco"
+                },
+                {
+                  "id": "c",
+                  "texto": "Responder el mensaje con sus datos"
+                }
+              ],
+              "correcta": "b",
+              "pista": "El enlace es la trampa. Revisa tú desde la aplicación verdadera.",
+              "mensajeAcierto": "¡Bien! Nunca uses el enlace: entra tú a la aplicación oficial."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Doña Rosa abrió la aplicación oficial. Toca la opción para revisar si de verdad hubo esa compra.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Inicio",
+                "subtitulo": "Hola, Rosa"
+              },
+              "opciones": [
+                {
+                  "id": "movimientos",
+                  "texto": "Ver movimientos",
+                  "icono": "list_alt"
+                },
+                {
+                  "id": "transferir",
+                  "texto": "Transferir",
+                  "icono": "swap_horiz"
+                },
+                {
+                  "id": "promos",
+                  "texto": "Promociones",
+                  "icono": "sell"
+                }
+              ],
+              "correcta": "movimientos",
+              "pista": "Las compras aparecen en la lista de movimientos.",
+              "mensajeAcierto": "¡Correcto! Siempre verifica dentro de la aplicación."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "En sus movimientos no hay ninguna compra de $7,450. Toca la frase que lo confirma.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Movimientos",
+                "subtitulo": "Últimos movimientos"
+              },
+              "opciones": [
+                {
+                  "id": "sueldo",
+                  "texto": "+ $3,500.00 · Depósito de sueldo · Viernes",
+                  "icono": "arrow_downward"
+                },
+                {
+                  "id": "nada",
+                  "texto": "No hay compras nuevas desde el viernes",
+                  "icono": "check_circle"
+                },
+                {
+                  "id": "luz",
+                  "texto": "− $486.00 · Pago Luz del Valle · 18 nov",
+                  "icono": "bolt"
+                }
+              ],
+              "correcta": "nada",
+              "pista": "Busca la frase que dice que no hubo compras nuevas.",
+              "mensajeAcierto": "¡Exacto! La compra no existe: el mensaje era falso."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Media hora después le llaman \"del banco\" para \"ayudarla con la compra\" y le piden el código de su SMS.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué hace Doña Rosa?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Cuelga. Ya sabe que es parte del mismo fraude"
+                },
+                {
+                  "id": "b",
+                  "texto": "Le da el código para que cancelen la compra"
+                },
+                {
+                  "id": "c",
+                  "texto": "Le da su contraseña para que revisen su cuenta"
+                }
+              ],
+              "correcta": "a",
+              "pista": "Primero el mensaje, luego la llamada: así trabajan los estafadores.",
+              "mensajeAcierto": "¡Así se hace! Colgar a tiempo protege tu dinero."
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Por último, Doña Rosa avisa al banco del intento de fraude. Toca la opción correcta.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Ayuda",
+                "subtitulo": "¿En qué te podemos ayudar?"
+              },
+              "opciones": [
+                {
+                  "id": "reportar",
+                  "texto": "Reportar un fraude o mensaje falso",
+                  "icono": "report"
+                },
+                {
+                  "id": "tarjeta",
+                  "texto": "Pedir una tarjeta nueva",
+                  "icono": "credit_card"
+                },
+                {
+                  "id": "preguntas",
+                  "texto": "Preguntas frecuentes",
+                  "icono": "help"
+                }
+              ],
+              "correcta": "reportar",
+              "pista": "Busca la palabra fraude.",
+              "mensajeAcierto": "¡Reto superado! Doña Rosa le ganó al estafador gracias a ti."
+            }
+          },
+          {
+            "orden": 7,
+            "instruccion": "¡Felicidades! Ya sabes instalar la aplicación verdadera, entrar sin compartir tus claves, revisar tu dinero y detectar mensajes falsos. Termina el curso para obtener tu certificado.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "celebration",
+                "alt": "Celebración"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Aplicación solo de la tienda oficial.",
+                  "Tus claves y códigos no se comparten.",
+                  "Revisa tus movimientos cada semana.",
+                  "Ante la duda: cuelga, no toques y verifica."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "claveCarga": "pagos-desde-casa",
+    "categoria": "Pagos digitales",
+    "orden": 20,
+    "titulo": "Paga la luz y el agua desde tu celular",
+    "descripcion": "Doña Rosa ya no quiere hacer fila para pagar sus recibos. Practica con ella a leer el recibo, pagar desde la aplicación, guardar el comprobante y evitar pagos falsos.",
+    "lecciones": [
+      {
+        "orden": 1,
+        "titulo": "Lee tu recibo sin perderte",
+        "duracionEstimadaMinutos": 8,
+        "objetivo": "Encontrar en el recibo el total, la fecha límite y la referencia de pago.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "A Doña Rosa le llegó su recibo de luz. Antes de pagar, necesita encontrar tres datos. Hoy aprendes a leerlos en segundos.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "receipt",
+                "alt": "Recibo"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Total a pagar: cuánto debes.",
+                  "Fecha límite: el último día para pagar sin recargos.",
+                  "Referencia: el número que identifica tu servicio."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Este es el recibo de Luz del Valle de Doña Rosa. Toca la fecha límite de pago.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Luz del Valle",
+                "subtitulo": "Recibo de energía eléctrica"
+              },
+              "opciones": [
+                {
+                  "id": "total",
+                  "texto": "Total a pagar: $486.00",
+                  "icono": "payments"
+                },
+                {
+                  "id": "fecha",
+                  "texto": "Pagar antes del: 20 de noviembre",
+                  "icono": "event"
+                },
+                {
+                  "id": "periodo",
+                  "texto": "Periodo: 15 sep al 15 nov",
+                  "icono": "date_range"
+                },
+                {
+                  "id": "referencia",
+                  "texto": "Referencia: 0123 4567 8901",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "fecha",
+              "pista": "Busca la fecha que dice \"Pagar antes del\".",
+              "mensajeAcierto": "¡Muy bien! Esa es la fecha límite."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "En el mismo recibo, toca el total que tiene que pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Luz del Valle",
+                "subtitulo": "Recibo de energía eléctrica"
+              },
+              "opciones": [
+                {
+                  "id": "total",
+                  "texto": "Total a pagar: $486.00",
+                  "icono": "payments"
+                },
+                {
+                  "id": "fecha",
+                  "texto": "Pagar antes del: 20 de noviembre",
+                  "icono": "event"
+                },
+                {
+                  "id": "periodo",
+                  "texto": "Periodo: 15 sep al 15 nov",
+                  "icono": "date_range"
+                },
+                {
+                  "id": "referencia",
+                  "texto": "Referencia: 0123 4567 8901",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "total",
+              "pista": "Busca la cantidad con el signo de pesos ($).",
+              "mensajeAcierto": "¡Exacto! Son $486.00."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Ahora toca la referencia: es el número que vas a escribir en la aplicación.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Luz del Valle",
+                "subtitulo": "Recibo de energía eléctrica"
+              },
+              "opciones": [
+                {
+                  "id": "total",
+                  "texto": "Total a pagar: $486.00",
+                  "icono": "payments"
+                },
+                {
+                  "id": "fecha",
+                  "texto": "Pagar antes del: 20 de noviembre",
+                  "icono": "event"
+                },
+                {
+                  "id": "periodo",
+                  "texto": "Periodo: 15 sep al 15 nov",
+                  "icono": "date_range"
+                },
+                {
+                  "id": "referencia",
+                  "texto": "Referencia: 0123 4567 8901",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "referencia",
+              "pista": "Es un número largo separado en grupos.",
+              "mensajeAcierto": "¡Excelente! Ya encontraste los tres datos del recibo."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Hoy es 22 de noviembre y el recibo decía \"Pagar antes del: 20 de noviembre\".",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "event_busy",
+                "alt": "Fecha vencida"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué puede pasar?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Nada, se paga cuando uno quiera"
+                },
+                {
+                  "id": "b",
+                  "texto": "Le pueden cobrar un recargo o cortarle la luz"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Piensa para qué sirve la fecha límite.",
+              "mensajeAcierto": "¡Correcto! Por eso conviene pagar unos días antes."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 2,
+        "titulo": "Paga tu recibo sin salir de casa",
+        "duracionEstimadaMinutos": 12,
+        "objetivo": "Pagar un servicio desde la aplicación del banco escribiendo la referencia sin errores.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Sin fila, sin pasajes y sin horario: Doña Rosa va a pagar su luz desde el sillón de su casa. Solo necesita su recibo y la aplicación del banco.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "chair",
+                "alt": "Sillón"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Copia la referencia número por número.",
+                  "Revisa que no falte ni sobre ningún número.",
+                  "Antes de confirmar, compara todo con tu recibo."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Doña Rosa abrió su aplicación. Toca la opción para pagar su recibo.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Inicio",
+                "subtitulo": "Hola, Rosa. ¿Qué quieres hacer hoy?"
+              },
+              "opciones": [
+                {
+                  "id": "saldo",
+                  "texto": "Consultar saldo",
+                  "icono": "account_balance_wallet"
+                },
+                {
+                  "id": "transferir",
+                  "texto": "Transferir",
+                  "icono": "swap_horiz"
+                },
+                {
+                  "id": "pagar",
+                  "texto": "Pagar servicios",
+                  "icono": "receipt_long"
+                }
+              ],
+              "correcta": "pagar",
+              "pista": "La luz es un servicio. Busca el dibujo del recibo.",
+              "mensajeAcierto": "¡Muy bien! Ahí se pagan la luz, el agua y el teléfono."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Elige el servicio que va a pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Pagar servicios",
+                "subtitulo": "Elige el servicio"
+              },
+              "opciones": [
+                {
+                  "id": "luz",
+                  "texto": "Luz del Valle",
+                  "icono": "bolt"
+                },
+                {
+                  "id": "agua",
+                  "texto": "Agua Clara",
+                  "icono": "water_drop"
+                },
+                {
+                  "id": "telefono",
+                  "texto": "Telefonía Sol",
+                  "icono": "call"
+                },
+                {
+                  "id": "gas",
+                  "texto": "Gas Seguro",
+                  "icono": "local_fire_department"
+                }
+              ],
+              "correcta": "luz",
+              "pista": "Su recibo es de luz: busca el rayo.",
+              "mensajeAcierto": "¡Correcto! Elegiste el servicio de su recibo."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "La aplicación muestra referencias guardadas. El recibo dice 0123 4567 8901. Toca la que es exactamente igual.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Luz del Valle",
+                "subtitulo": "Elige o escribe la referencia"
+              },
+              "opciones": [
+                {
+                  "id": "r1",
+                  "texto": "0123 4567 891",
+                  "icono": "pin"
+                },
+                {
+                  "id": "r2",
+                  "texto": "0123 4567 8901",
+                  "icono": "pin"
+                },
+                {
+                  "id": "r3",
+                  "texto": "0132 4567 8901",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "r2",
+              "pista": "Compara número por número. A una le falta uno y otra tiene dos cambiados.",
+              "mensajeAcierto": "¡Buen ojo! Un solo número mal y el pago no llega a tu recibo."
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Antes de pagar, la aplicación muestra un resumen. Este es el momento de revisar con calma: después ya no se puede deshacer.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "fact_check",
+                "alt": "Revisar datos"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Servicio: Luz del Valle.",
+                  "Referencia: 0123 4567 8901.",
+                  "Cantidad: $486.00."
+                ]
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Si algo no coincide con tu recibo, regresa y corrígelo antes de pagar."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "Todo coincide con el recibo. Toca el botón para pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Confirma tu pago",
+                "subtitulo": "Luz del Valle · $486.00"
+              },
+              "opciones": [
+                {
+                  "id": "confirmar",
+                  "texto": "Confirmar pago",
+                  "icono": "check_circle"
+                },
+                {
+                  "id": "corregir",
+                  "texto": "Corregir datos",
+                  "icono": "edit"
+                },
+                {
+                  "id": "cancelar",
+                  "texto": "Cancelar",
+                  "icono": "cancel"
+                }
+              ],
+              "correcta": "confirmar",
+              "pista": "Si todo coincide, ya puedes confirmar.",
+              "mensajeAcierto": "¡Pagado! Doña Rosa se ahorró la fila y el pasaje."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 3,
+        "titulo": "Tu comprobante, tu prueba",
+        "duracionEstimadaMinutos": 8,
+        "objetivo": "Guardar el comprobante de pago y saber usarlo si hay un problema.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Al terminar, la aplicación da un comprobante. Es la prueba de que Doña Rosa pagó, como el ticket de la tienda.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "receipt_long",
+                "alt": "Comprobante"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Folio o número de operación.",
+                  "Fecha y hora del pago.",
+                  "Servicio, referencia y cantidad."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "El pago se hizo. Toca la opción para guardar el comprobante en el celular.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Pago realizado",
+                "subtitulo": "Folio de operación 458921"
+              },
+              "opciones": [
+                {
+                  "id": "guardar",
+                  "texto": "Guardar comprobante",
+                  "icono": "download"
+                },
+                {
+                  "id": "compartir",
+                  "texto": "Compartir",
+                  "icono": "share"
+                },
+                {
+                  "id": "inicio",
+                  "texto": "Volver al inicio",
+                  "icono": "home"
+                }
+              ],
+              "correcta": "guardar",
+              "pista": "Busca la palabra \"Guardar\" y la flecha hacia abajo.",
+              "mensajeAcierto": "¡Listo! El comprobante quedó en su celular."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Una semana después, Luz del Valle dice que no le llegó el pago. Toca el dato del comprobante que lo demuestra.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Comprobante",
+                "subtitulo": "Pago a Luz del Valle"
+              },
+              "opciones": [
+                {
+                  "id": "folio",
+                  "texto": "Folio de operación: 458921",
+                  "icono": "tag"
+                },
+                {
+                  "id": "banco",
+                  "texto": "Banco Ejemplo",
+                  "icono": "account_balance"
+                },
+                {
+                  "id": "gracias",
+                  "texto": "¡Gracias por tu pago!",
+                  "icono": "favorite"
+                }
+              ],
+              "correcta": "folio",
+              "pista": "El dato que identifica tu pago es un número de operación.",
+              "mensajeAcierto": "¡Exacto! Con el folio, la empresa puede encontrar su pago."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Doña Rosa guarda sus comprobantes hasta ver el pago reflejado en su siguiente recibo.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "folder",
+                "alt": "Carpeta"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Guárdalo en tu celular o mándatelo por correo.",
+                  "No lo publiques: tiene datos de tu cuenta.",
+                  "Revisa que el pago aparezca en tu siguiente recibo."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          }
+        ]
+      },
+      {
+        "orden": 4,
+        "titulo": "Cuidado con los cobros falsos",
+        "duracionEstimadaMinutos": 10,
+        "objetivo": "Reconocer mensajes y páginas que se hacen pasar por la empresa de luz o de agua.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "Los estafadores también se disfrazan de empresa de luz o de agua. Asustan con un corte o prometen descuentos para que pagues en el lugar equivocado.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "gpp_maybe",
+                "alt": "Alerta de seguridad"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "\"Te cortamos la luz HOY si no pagas aquí\".",
+                  "\"50% de descuento si pagas por este enlace\".",
+                  "Te piden transferir a una cuenta de una persona."
+                ]
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Paga solo desde la aplicación de tu banco, la página oficial de la empresa o en tiendas autorizadas."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "A Doña Rosa le llega por WhatsApp: \"LUZ DEL VALLE: tienes adeudo. Paga HOY con 50% de descuento en luzvalle-pagos.invalid o cortamos tu servicio\".",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "chat",
+                "alt": "Mensaje de WhatsApp"
+              }
+            ],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "¿Qué hace?",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Aprovecha el descuento y paga en el enlace"
+                },
+                {
+                  "id": "b",
+                  "texto": "No toca el enlace y revisa su recibo y su aplicación del banco"
+                },
+                {
+                  "id": "c",
+                  "texto": "Manda el mensaje a sus vecinas para que también paguen"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Descuento, prisa y amenaza de corte, todo junto: tres señales.",
+              "mensajeAcierto": "¡Muy bien! Si fuera real, el adeudo aparecería en su recibo."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Juego: ¿cuál de estas formas de pagar NO es segura?",
+            "recursos": [],
+            "actividad": {
+              "tipo": "opcion",
+              "pregunta": "Elige la forma insegura",
+              "opciones": [
+                {
+                  "id": "a",
+                  "texto": "Desde Pagar servicios en la aplicación de mi banco"
+                },
+                {
+                  "id": "b",
+                  "texto": "Transferir a la cuenta de \"Juan Pérez, cobrador de la luz\""
+                },
+                {
+                  "id": "c",
+                  "texto": "En una tienda de conveniencia con mi recibo"
+                }
+              ],
+              "correcta": "b",
+              "pista": "Las empresas no cobran en cuentas de personas.",
+              "mensajeAcierto": "¡Correcto! Nunca pagues un servicio en la cuenta de una persona."
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "En la aplicación del banco, Doña Rosa revisa si de verdad tiene adeudo. Toca la opción correcta.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Pagar servicios",
+                "subtitulo": "Luz del Valle"
+              },
+              "opciones": [
+                {
+                  "id": "consultar",
+                  "texto": "Consultar saldo del recibo",
+                  "icono": "search"
+                },
+                {
+                  "id": "transferir",
+                  "texto": "Transferir a otra cuenta",
+                  "icono": "swap_horiz"
+                },
+                {
+                  "id": "promos",
+                  "texto": "Promociones",
+                  "icono": "sell"
+                }
+              ],
+              "correcta": "consultar",
+              "pista": "Lo que quiere saber es cuánto debe de verdad.",
+              "mensajeAcierto": "¡Exacto! Su saldo es $0.00: el mensaje era falso."
+            }
+          }
+        ]
+      },
+      {
+        "orden": 5,
+        "titulo": "Reto final: paga el agua sin ayuda",
+        "duracionEstimadaMinutos": 12,
+        "objetivo": "Completar un pago de principio a fin sin ayuda: leer el recibo, pagar y guardar el comprobante.",
+        "pasos": [
+          {
+            "orden": 1,
+            "instruccion": "¡Último reto! Ahora llegó el recibo de Agua Clara. Esta vez nadie te dice qué tocar: usa todo lo que aprendiste.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "emoji_events",
+                "alt": "Trofeo"
+              },
+              {
+                "tipo": "aviso",
+                "texto": "Todo es una práctica: nadie usa dinero real."
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          },
+          {
+            "orden": 2,
+            "instruccion": "Primero, en el recibo, toca el número que vas a necesitar para pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Agua Clara",
+                "subtitulo": "Recibo de agua"
+              },
+              "opciones": [
+                {
+                  "id": "total",
+                  "texto": "Total a pagar: $312.00",
+                  "icono": "payments"
+                },
+                {
+                  "id": "fecha",
+                  "texto": "Pagar antes del: 5 de diciembre",
+                  "icono": "event"
+                },
+                {
+                  "id": "referencia",
+                  "texto": "Número de cuenta: 7788 1020 3344",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "referencia",
+              "pista": "Es el número largo que identifica tu servicio.",
+              "mensajeAcierto": "¡Bien! Ese número se escribe en la aplicación."
+            }
+          },
+          {
+            "orden": 3,
+            "instruccion": "Ya en la aplicación, toca la opción para pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Inicio",
+                "subtitulo": "Hola, Rosa. ¿Qué quieres hacer hoy?"
+              },
+              "opciones": [
+                {
+                  "id": "saldo",
+                  "texto": "Consultar saldo",
+                  "icono": "account_balance_wallet"
+                },
+                {
+                  "id": "pagar",
+                  "texto": "Pagar servicios",
+                  "icono": "receipt_long"
+                },
+                {
+                  "id": "transferir",
+                  "texto": "Transferir",
+                  "icono": "swap_horiz"
+                }
+              ],
+              "correcta": "pagar",
+              "pista": "El agua es un servicio.",
+              "mensajeAcierto": "¡Correcto!"
+            }
+          },
+          {
+            "orden": 4,
+            "instruccion": "Elige el servicio.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Pagar servicios",
+                "subtitulo": "Elige el servicio"
+              },
+              "opciones": [
+                {
+                  "id": "luz",
+                  "texto": "Luz del Valle",
+                  "icono": "bolt"
+                },
+                {
+                  "id": "agua",
+                  "texto": "Agua Clara",
+                  "icono": "water_drop"
+                },
+                {
+                  "id": "telefono",
+                  "texto": "Telefonía Sol",
+                  "icono": "call"
+                }
+              ],
+              "correcta": "agua",
+              "pista": "Busca la gota.",
+              "mensajeAcierto": "¡Muy bien!"
+            }
+          },
+          {
+            "orden": 5,
+            "instruccion": "Toca el número de cuenta igual al del recibo: 7788 1020 3344.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Agua Clara",
+                "subtitulo": "Elige o escribe el número de cuenta"
+              },
+              "opciones": [
+                {
+                  "id": "c1",
+                  "texto": "7788 1020 3344",
+                  "icono": "pin"
+                },
+                {
+                  "id": "c2",
+                  "texto": "7788 1200 3344",
+                  "icono": "pin"
+                },
+                {
+                  "id": "c3",
+                  "texto": "7788 1020 344",
+                  "icono": "pin"
+                }
+              ],
+              "correcta": "c1",
+              "pista": "Compara grupo por grupo.",
+              "mensajeAcierto": "¡Buen ojo otra vez!"
+            }
+          },
+          {
+            "orden": 6,
+            "instruccion": "El resumen dice: Agua Clara · 7788 1020 3344 · $312.00. Todo coincide. Toca el botón para pagar.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Confirma tu pago",
+                "subtitulo": "Agua Clara · $312.00"
+              },
+              "opciones": [
+                {
+                  "id": "cancelar",
+                  "texto": "Cancelar",
+                  "icono": "cancel"
+                },
+                {
+                  "id": "confirmar",
+                  "texto": "Confirmar pago",
+                  "icono": "check_circle"
+                },
+                {
+                  "id": "corregir",
+                  "texto": "Corregir datos",
+                  "icono": "edit"
+                }
+              ],
+              "correcta": "confirmar",
+              "pista": "Si todo coincide, confirma.",
+              "mensajeAcierto": "¡Pagado!"
+            }
+          },
+          {
+            "orden": 7,
+            "instruccion": "Último paso: no te olvides de tu prueba de pago.",
+            "recursos": [],
+            "actividad": {
+              "tipo": "toque",
+              "pantalla": {
+                "titulo": "Pago realizado",
+                "subtitulo": "Folio de operación 772305"
+              },
+              "opciones": [
+                {
+                  "id": "inicio",
+                  "texto": "Volver al inicio",
+                  "icono": "home"
+                },
+                {
+                  "id": "guardar",
+                  "texto": "Guardar comprobante",
+                  "icono": "download"
+                },
+                {
+                  "id": "compartir",
+                  "texto": "Compartir",
+                  "icono": "share"
+                }
+              ],
+              "correcta": "guardar",
+              "pista": "Tu prueba de pago se guarda.",
+              "mensajeAcierto": "¡Reto superado! Pagaste tu recibo de principio a fin sin ayuda."
+            }
+          },
+          {
+            "orden": 8,
+            "instruccion": "¡Felicidades! Ya sabes leer tu recibo, pagar desde tu celular, guardar tu comprobante y evitar cobros falsos. Termina el curso para obtener tu certificado.",
+            "recursos": [
+              {
+                "tipo": "icono",
+                "nombre": "celebration",
+                "alt": "Celebración"
+              },
+              {
+                "tipo": "lista",
+                "elementos": [
+                  "Revisa total, fecha límite y referencia.",
+                  "Copia la referencia número por número.",
+                  "Guarda tu comprobante con su folio.",
+                  "Paga solo por canales oficiales."
+                ]
+              }
+            ],
+            "actividad": {
+              "tipo": "lectura"
+            }
+          }
+        ]
+      }
+    ]
   }
 ]

@@ -7,10 +7,10 @@ const contenidoReal = require('../data/contenido-inicial.json');
 const UID = 'uid-administrador-prueba';
 
 function crearContenido() {
-  return ['uso-seguro-banco', 'pago-servicios'].map((claveCarga, indice) => ({
+  return ['uso-seguro-banco', 'pago-servicios', 'banca-movil-segura', 'pagos-desde-casa'].map((claveCarga, indice) => ({
     claveCarga,
-    categoria: indice === 0 ? 'Banca móvil' : 'Pagos digitales',
-    orden: 1,
+    categoria: indice % 2 === 0 ? 'Banca móvil' : 'Pagos digitales',
+    orden: indice < 2 ? 1 : 20,
     titulo: `Curso ficticio ${indice + 1}`,
     descripcion: 'Descripción ficticia.',
     lecciones: [{
@@ -128,7 +128,7 @@ for (const uid of [undefined, null, '', '   ', 123, {}, 'u'.repeat(129)]) {
   });
 }
 
-for (const contenido of [null, {}, [], [crearContenido()[0]]]) {
+for (const contenido of [null, {}, [], [crearContenido()[0]], crearContenido().slice(0, 2), [...crearContenido(), crearContenido()[0]]]) {
   test(`Carga contenido: rechaza raíz inválida ${JSON.stringify(contenido)?.slice(0, 30)} sin conectar`, async (t) => {
     const pool = { connect: t.mock.fn(async () => assert.fail('No debe conectar')) };
     await assert.rejects(cargarContenido(pool, UID, contenido), codigoEsperado('contenido_invalido'));
@@ -179,12 +179,12 @@ for (const usuario of [null, { rol: 'maestro', activo: true }, { rol: 'administr
   });
 }
 
-test('Carga contenido: crea ambos cursos publicados, registra al final y mantiene IDs BIGINT como cadenas', async (t) => {
+test('Carga contenido: crea los cuatro cursos publicados, registra al final y mantiene IDs BIGINT como cadenas', async (t) => {
   const contenido = crearContenido();
   const pasos = prepararPlan(contenido);
   const simulacion = simularPool(t, pasos);
   assert.deepEqual(await cargarContenido(simulacion.pool, ` ${UID} `, contenido), {
-    cursosCreados: 2, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 0, leccionesCreadas: 2, pasosCreados: 6
+    cursosCreados: 4, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 0, leccionesCreadas: 4, pasosCreados: 12
   });
   comprobarFinal(simulacion, pasos);
   for (const llamada of simulacion.cliente.query.mock.calls) {
@@ -192,13 +192,26 @@ test('Carga contenido: crea ambos cursos publicados, registra al final y mantien
   }
 });
 
-test('Carga contenido: el archivo real produce dos cursos, seis lecciones y treinta pasos', async (t) => {
+test('Carga contenido: el archivo real produce cuatro cursos, quince lecciones y ochenta y dos pasos', async (t) => {
   const pasos = prepararPlan(contenidoReal);
   const simulacion = simularPool(t, pasos);
   assert.deepEqual(await cargarContenido(simulacion.pool, UID, contenidoReal), {
-    cursosCreados: 2, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 0, leccionesCreadas: 6, pasosCreados: 30
+    cursosCreados: 4, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 0, leccionesCreadas: 15, pasosCreados: 82
   });
   comprobarFinal(simulacion, pasos);
+});
+
+test('Carga contenido: con los dos cursos anteriores registrados, el archivo real crea solo los dos nuevos', async (t) => {
+  const pasos = prepararPlan(contenidoReal, { 'uso-seguro-banco': '3', 'pago-servicios': '4' });
+  const simulacion = simularPool(t, pasos);
+  assert.deepEqual(await cargarContenido(simulacion.pool, UID, contenidoReal), {
+    cursosCreados: 2, cursosYaRegistrados: 2, cursosEliminadosPreviamente: 0, leccionesCreadas: 9, pasosCreados: 52
+  });
+  comprobarFinal(simulacion, pasos);
+  const cursosInsertados = simulacion.cliente.query.mock.calls
+    .filter((llamada) => /INSERT INTO cursos/.test(llamada.arguments[0]))
+    .map((llamada) => llamada.arguments[1][1]);
+  assert.deepEqual(cursosInsertados, ['Tu banco en el celular, sin miedo', 'Paga la luz y el agua desde tu celular']);
 });
 
 test('Carga contenido: normaliza textos y JSON en copias sin alterar la fuente', async (t) => {
@@ -219,10 +232,12 @@ test('Carga contenido: normaliza textos y JSON en copias sin alterar la fuente',
 
 test('Carga contenido: claves ya cargadas se omiten sin buscar categorías ni tocar cursos o hijos', async (t) => {
   const contenido = crearContenido();
-  const pasos = prepararPlan(contenido, { 'uso-seguro-banco': '77', 'pago-servicios': '88' });
+  const pasos = prepararPlan(contenido, {
+    'uso-seguro-banco': '77', 'pago-servicios': '88', 'banca-movil-segura': '99', 'pagos-desde-casa': '100'
+  });
   const simulacion = simularPool(t, pasos);
   assert.deepEqual(await cargarContenido(simulacion.pool, UID, contenido), {
-    cursosCreados: 0, cursosYaRegistrados: 2, cursosEliminadosPreviamente: 0, leccionesCreadas: 0, pasosCreados: 0
+    cursosCreados: 0, cursosYaRegistrados: 4, cursosEliminadosPreviamente: 0, leccionesCreadas: 0, pasosCreados: 0
   });
   comprobarFinal(simulacion, pasos);
   assert.ok(simulacion.cliente.query.mock.calls.every((llamada) => !/\b(?:INSERT|UPDATE|DELETE)\b/.test(llamada.arguments[0])));
@@ -230,35 +245,37 @@ test('Carga contenido: claves ya cargadas se omiten sin buscar categorías ni to
 
 test('Carga contenido: no recrea cursos eliminados físicamente ni reconstruye hijos', async (t) => {
   const contenido = crearContenido();
-  const pasos = prepararPlan(contenido, { 'uso-seguro-banco': null, 'pago-servicios': null });
+  const pasos = prepararPlan(contenido, {
+    'uso-seguro-banco': null, 'pago-servicios': null, 'banca-movil-segura': null, 'pagos-desde-casa': null
+  });
   const simulacion = simularPool(t, pasos);
   assert.deepEqual(await cargarContenido(simulacion.pool, UID, contenido), {
-    cursosCreados: 0, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 2, leccionesCreadas: 0, pasosCreados: 0
+    cursosCreados: 0, cursosYaRegistrados: 0, cursosEliminadosPreviamente: 4, leccionesCreadas: 0, pasosCreados: 0
   });
   comprobarFinal(simulacion, pasos);
 });
 
-test('Carga contenido: conserva un registro existente y crea solo el curso faltante', async (t) => {
+test('Carga contenido: conserva los registros existentes y crea solo los cursos faltantes', async (t) => {
   const contenido = crearContenido();
-  const pasos = prepararPlan(contenido, { 'uso-seguro-banco': '77' });
+  const pasos = prepararPlan(contenido, { 'uso-seguro-banco': '77', 'pago-servicios': '88' });
   const simulacion = simularPool(t, pasos);
   assert.deepEqual(await cargarContenido(simulacion.pool, UID, contenido), {
-    cursosCreados: 1, cursosYaRegistrados: 1, cursosEliminadosPreviamente: 0, leccionesCreadas: 1, pasosCreados: 3
+    cursosCreados: 2, cursosYaRegistrados: 2, cursosEliminadosPreviamente: 0, leccionesCreadas: 2, pasosCreados: 6
   });
   comprobarFinal(simulacion, pasos);
 });
 
-test('Carga contenido: conserva una eliminación previa y crea solo el otro curso', async (t) => {
+test('Carga contenido: conserva una eliminación previa y crea solo los otros cursos', async (t) => {
   const contenido = crearContenido();
   const pasos = prepararPlan(contenido, { 'uso-seguro-banco': null });
   const simulacion = simularPool(t, pasos);
   const resultado = await cargarContenido(simulacion.pool, UID, contenido);
-  assert.equal(resultado.cursosCreados, 1);
+  assert.equal(resultado.cursosCreados, 3);
   assert.equal(resultado.cursosEliminadosPreviamente, 1);
   comprobarFinal(simulacion, pasos);
 });
 
-for (const posicion of [0, 1]) {
+for (const posicion of [0, 1, 2, 3]) {
   test(`Carga contenido: categoría ausente del curso ${posicion + 1} revierte la carga`, async (t) => {
     const contenido = crearContenido();
     const plan = prepararPlan(contenido);
@@ -271,7 +288,7 @@ for (const posicion of [0, 1]) {
   });
 }
 
-for (const posicion of [0, 1]) {
+for (const posicion of [0, 1, 2, 3]) {
   test(`Carga contenido: conflicto sin registro del curso ${posicion + 1} no adopta ni sobrescribe`, async (t) => {
     const contenido = crearContenido();
     const plan = prepararPlan(contenido);
@@ -366,7 +383,7 @@ test('Comando cargar contenido: lee la ruta del repositorio, informa y cierra po
     informar: (m) => mensajes.push(m), informarError: () => assert.fail('No debe fallar')
   });
   assert.equal(codigo, 0);
-  assert.match(mensajes[0], /Cursos creados: 2/);
+  assert.match(mensajes[0], /Cursos creados: 4/);
   comprobarFinal(simulacion, pasos);
   assert.equal(simulacion.pool.end.mock.callCount(), 1);
 });
