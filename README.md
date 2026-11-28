@@ -423,7 +423,7 @@ Sustituir el marcador localmente. No guardar UID reales en scripts, documentaci�
 
 ## Contenido inicial
 
-Después de cargar las categorías, el contenido educativo inicial (2 cursos publicados con 6 lecciones y 30 pasos) se carga desde `backend`:
+Después de cargar las categorías, el contenido educativo inicial (4 cursos publicados con 15 lecciones y 82 pasos) se carga desde `backend`:
 
 ```powershell
 npm run cargar-contenido -- "UID_DEL_ADMINISTRADOR"
