@@ -330,7 +330,7 @@ El frontend obtiene el token desde Firebase Authentication; no se almacena manua
 | Cursos | `POST /api/cursos`; `PATCH` y `DELETE /api/cursos/:idCurso`; `POST /api/cursos/:idCurso/lecciones`; `PUT /api/cursos/:idCurso/orden-lecciones` | Maestro autor, maestro con permiso de edición o administrador |
 | Lecciones y pasos (editor) | `PATCH` y `DELETE /api/lecciones/:idLeccion`; `POST /api/lecciones/:idLeccion/pasos`; `PUT /api/lecciones/:idLeccion/orden-pasos`; `PATCH` y `DELETE /api/pasos/:idPaso` | Maestro autor, maestro con permiso de edición o administrador |
 
-`GET /api/mis-cursos` se conserva por compatibilidad, pero quedó obsoleta: el frontend usa `/api/cursos-disponibles`, `/api/mis-cursos/en-curso` y `/api/mis-cursos/terminados`.
+`GET /api/mis-cursos` se quitó porque había quedado obsoleta y responde 404: el frontend usa `/api/cursos-disponibles`, `/api/mis-cursos/en-curso` y `/api/mis-cursos/terminados`.
 
 ### Reglas principales
 
@@ -530,8 +530,8 @@ Organización de las solicitudes guardadas:
 |---|---|
 | Autenticación, perfiles y autorización | 1 a 61 |
 | Paneles, grupos y consulta de progreso | 62 a 153 |
-| Lecciones y progreso | 154 a 201 |
-| Editor de contenido | 202 a 315 |
+| Lecciones y progreso | 160 a 201 |
+| Editor de contenido | 202 a 315 (sin 305) |
 | Certificados | 316 a 326 y 383 a 386 |
 | Verificación Correccion de los Grupos | 327 a 382 |
 | Validación de caracteres | 387 a 406 |
