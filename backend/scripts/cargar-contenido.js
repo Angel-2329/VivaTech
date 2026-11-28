@@ -29,8 +29,8 @@ function normalizarTextos(valor) {
 }
 
 function prepararContenido(contenido) {
-  if (!Array.isArray(contenido) || contenido.length !== 2) {
-    throw new ErrorCargaContenido('contenido_invalido', 'El archivo debe contener los dos cursos iniciales.');
+  if (!Array.isArray(contenido) || contenido.length !== 4) {
+    throw new ErrorCargaContenido('contenido_invalido', 'El archivo debe contener los cuatro cursos iniciales.');
   }
 
   const claves = new Set();
